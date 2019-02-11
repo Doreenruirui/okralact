@@ -2,12 +2,11 @@
 <title>File Manager</title>
 <h1>File Manager</h1>
 <a href="{{ url_for('upload_file') }}">Upload</a> /
-<a href="{{ url_for('manage_file') }}">Manage</a>
+<a href="{{ url_for('manage_file') }}">Files</a> /
+<a href="{{ url_for('manage_job') }}">Jobs</a>
 <hr>
 
 {% for data in files_list %}
     - {{ data }}
-    <a href="{{ url_for('train_model', filename=data) }}">run</a>
-    <a href="{{ url_for('stop_training', filename=data) }}">stop</a>
     <a href="{{ url_for('delete_file', filename=data) }}">del</a><br>
 {% endfor %}
