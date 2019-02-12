@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% for data in files_list %}
+    - {{ data }}
+    <a href="{{ url_for('delete_file', filename=data) }}">del</a><br>
+{% endfor %}
+
+{% endblock %}
