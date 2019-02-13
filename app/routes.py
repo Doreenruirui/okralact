@@ -8,8 +8,10 @@ from app import app
 import os,shutil
 import time, hashlib
 import tarfile
+from app.lib.process_file import rename_file
 
 job_id = None
+
 
 class UploadForm(FlaskForm):
     archive = FileField( validators=[FileAllowed(set(['tar.gz'])), FileRequired(u'Choose a file!')])
@@ -23,8 +25,7 @@ def upload_file():
     if form.validate_on_submit():
         filename = secure_filename(f.filename)
         files_list = os.listdir(app.config['UPLOAD_FOLDER'])
-        if filename in files_list:
-            filename = '.'.join(filename.split('.')[:-2]) + '_1.tar.gz'
+        filename = rename_file(filename, files_list)
         f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         success = True
     else:
@@ -43,7 +44,7 @@ def manage_file():
 @app.route('/delete/<filename>')
 def delete_file(filename):
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    shutil.rmtree(file_path)
+    os.remove(file_path)
     return redirect(url_for('manage_file'))
 
 
@@ -53,6 +54,7 @@ def manage_job():
     global job_id
     files_list = os.listdir(app.config['UPLOAD_FOLDER'])
     return render_template('jobs.html', files_list=files_list, job_id=job_id)
+
 
 #Run jobs
 @app.route('/run/<filename>')
@@ -71,3 +73,4 @@ def stop_train(filename):
     files_list = os.listdir(app.config['UPLOAD_FOLDER'])
     # return redirect(url_for('manage_job', files_list=files_list, job_id=job_id))
     return render_template('jobs.html', files_list=files_list, job_id=job_id)
+
