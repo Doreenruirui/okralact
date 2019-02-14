@@ -10,7 +10,15 @@ import time, hashlib
 import tarfile
 from app.lib.process_file import rename_file
 
-job_id = None
+import os,sys
+parentdir = os.getcwd().rsplit('/', 1)[0]
+print(parentdir)
+sys.path.insert(0, parentdir)
+import engines
+
+
+job_name = None
+job_id = -1
 
 
 class UploadForm(FlaskForm):
@@ -51,26 +59,32 @@ def delete_file(filename):
 #Manage jobs
 @app.route('/jobs')
 def manage_job():
-    global job_id
+    global job_name
     files_list = os.listdir(app.config['UPLOAD_FOLDER'])
-    return render_template('jobs.html', files_list=files_list, job_id=job_id)
+    return render_template('jobs.html', files_list=files_list, job_name=job_name)
 
 
 #Run jobs
 @app.route('/run/<filename>')
 def train_model(filename):
-    global job_id
-    job_id = filename
+    global job_name, job_id
+    job_name = filename
+    prefix = job_name.rsplit('.', 2)[0].split('_')[0]
+    job = app.task_queue.enqueue('train.train_from_file', os.path.join(parentdir, 'OCRD/engines', prefix, 'config.txt'))
+    print(job.get_id())
+    job_id = job.get_id()
     files_list = os.listdir(app.config['UPLOAD_FOLDER'])
-    return render_template('jobs.html', files_list=files_list, job_id=job_id)
+    return render_template('jobs.html', files_list=files_list, job_name=job_name)
 
 
 #Stop Jobs
 @app.route('/stop/<filename>')
 def stop_train(filename):
-    global job_id
+    global job_name, job_id
+    job_name = None
     job_id = None
+    app.task_queue.empty()
     files_list = os.listdir(app.config['UPLOAD_FOLDER'])
-    # return redirect(url_for('manage_job', files_list=files_list, job_id=job_id))
-    return render_template('jobs.html', files_list=files_list, job_id=job_id)
+    # return redirect(url_for('manage_job', files_list=files_list, job_name=job_name))
+    return render_template('jobs.html', files_list=files_list, job_name=job_name)
 
