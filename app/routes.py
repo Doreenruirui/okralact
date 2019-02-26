@@ -74,6 +74,8 @@ def manage_file():
 
 @app.route('/delete/<filename>')
 def delete_file(filename):
+    if filename in app.job_file2id:
+        app.job_file2id.pop(filename, None)
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     os.remove(file_path)
     prefix = filename.rsplit('.', 2)[0]

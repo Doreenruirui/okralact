@@ -24,20 +24,21 @@ class ENGINE(object):
         cmd_list = []
         cmd_list.append('source activate kraken')
         cmd_list.append('ketos train ./data/*.png -o %s -N %d' % (model_prefix, self.paras.nepoch))
-        cmd_list.append('source deactivate')
+        # cmd_list.append('source deactivate')
         print(cmd_list)
         cur_cmd = '\n'.join(cmd_list)
         subprocess.run(cur_cmd, shell=True)
 
     def ocropus(self):
         model_prefix = pjoin(self.paras.model_dir, self.paras.prefix)
+        print(model_prefix)
         print('loading ocropus ...')
         nfiles = int(subprocess.check_output('ls data/*.png | wc -l', shell=True).strip())
         print(nfiles)
         cmd_list = []
         cmd_list.append('source activate ocropus_env')
         cmd_list.append('ocropus-rtrain ./data/*.png -o %s -N %d' % (model_prefix, self.paras.nepoch * nfiles))
-        cmd_list.append('source deactivate')
+        # cmd_list.append('source deactivate')
         print(cmd_list)
         cur_cmd = '\n'.join(cmd_list)
         subprocess.run(cur_cmd, shell=True)
@@ -53,7 +54,7 @@ class ENGINE(object):
         cmd_list = []
         cmd_list.append('source activate calamari')
         cmd_list.append('calamari-train --files ./data/*.png --output_model_prefix %s --batch_size 1 --max_iters %d' % (model_prefix, self.paras.nepoch * nfiles))
-        cmd_list.append('source deactivate')
+        # cmd_list.append('source deactivate')
         print(cmd_list)
         cur_cmd = '\n'.join(cmd_list)
         subprocess.run(cur_cmd, shell=True)
@@ -134,6 +135,7 @@ def train_from_file(filename):
     if not os.path.exists(configs.model_dir):
         os.makedirs(configs.model_dir)
     configs.data_dir = data_folder
+    configs.nepoch = 1
     train(configs)
 
 if __name__ == "__main__":
