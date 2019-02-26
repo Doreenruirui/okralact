@@ -1,13 +1,18 @@
+
 {% extends "base.html" %}
 {% block content %}
-
-{% for data in files_list %}
+    {% for data in files_list %}
     - {{ data }}
-    {% if job_id != data %}
+        {%  if dict_status[data] == "no" %}
         <a href="{{ url_for('train_model', filename=data) }}">run</a><br>
-    {% else %}
-        <a href="{{ url_for('stop_train', filename=data) }}">stop</a>
-    {% endif %}
-{% endfor %}
-
+        {% elif dict_status[data] == "started" %}
+            running <br>
+        {%  elif dict_status[data] == "queued" %}
+            waiting <br>
+        {%  elif dict_status[data] == "finished" %}
+            <a href="{{ url_for('download', filename=data) }}">download</a><br>
+        {% else %}
+            {{ dict_status[data] }} <br>
+        {% endif %}
+    {% endfor %}
 {% endblock %}
