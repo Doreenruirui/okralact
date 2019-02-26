@@ -11,6 +11,7 @@ from app.lib.process_file import rename_file
 from rq import get_current_job
 from rq.job import Job
 import tarfile
+import shutil
 
 
 import os, sys
@@ -68,7 +69,6 @@ def upload_file():
 def manage_file():
     # print(app.config)
     files_list = os.listdir(app.config['UPLOAD_FOLDER'])
-    status_list = get_file_status(files_list)
     return render_template('files.html', files_list=files_list)
 
 
@@ -76,6 +76,13 @@ def manage_file():
 def delete_file(filename):
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     os.remove(file_path)
+    prefix = filename.rsplit('.', 2)[0]
+    model_file = os.path.join(os.getcwd(), 'engines/model', 'model_%s' % filename)
+    if os.path.exists(model_file):
+        os.remove(model_file)
+    model_folder = os.path.join(os.getcwd(), 'engines/model', prefix)
+    if os.path.exists(model_folder):
+        shutil.rmtree(model_folder, ignore_errors=True)
     return redirect(url_for('manage_file'))
 
 

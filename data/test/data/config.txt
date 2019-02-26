@@ -1,1 +1,0 @@
-{"engine": "kraken", "data_dir": "data", "model_dir": "model", "prefix": "calamari_model", "nepoch":10}
