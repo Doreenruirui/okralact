@@ -1,1 +1,1 @@
-{"engine": "ocropus", "prefix": "ocropus_model", "nepoch":2}
+{"engine": "ocropus", "prefix": "ocropus_model", "nepoch":2, "savefreq":20}

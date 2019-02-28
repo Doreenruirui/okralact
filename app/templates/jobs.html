@@ -6,13 +6,13 @@
         {%  if dict_status[data] == "no" %}
         <a href="{{ url_for('train_model', filename=data) }}">run</a><br>
         {% elif dict_status[data] == "started" %}
-            running <br>
+            <font color="red">running </font><br>
         {%  elif dict_status[data] == "queued" %}
-            waiting <br>
+            <font color="red">waiting</font> <br>
         {%  elif dict_status[data] == "finished" %}
             <a href="{{ url_for('download', filename=data) }}">download</a><br>
         {% else %}
-            {{ dict_status[data] }} <br>
+           <font color="red"> {{ dict_status[data] }} </font><br>
         {% endif %}
     {% endfor %}
 {% endblock %}

@@ -32,12 +32,13 @@ class ENGINE(object):
     def ocropus(self):
         model_prefix = pjoin(self.paras.model_dir, self.paras.prefix)
         print(model_prefix)
+        # self.paras.nepoch=1
         print('loading ocropus ...')
         nfiles = int(subprocess.check_output('ls data/*.png | wc -l', shell=True).strip())
         print(nfiles)
         cmd_list = []
         cmd_list.append('source activate ocropus_env')
-        cmd_list.append('ocropus-rtrain ./data/*.png -o %s -N %d' % (model_prefix, self.paras.nepoch * nfiles))
+        cmd_list.append('ocropus-rtrain ./data/*.png -o %s -N %d  --savefreq %s' % (model_prefix, self.paras.nepoch * nfiles, self.paras.savefreq))
         # cmd_list.append('source deactivate')
         print(cmd_list)
         cur_cmd = '\n'.join(cmd_list)
@@ -48,6 +49,7 @@ class ENGINE(object):
 
     def calamari(self):
         model_prefix = pjoin(self.paras.model_dir, self.paras.prefix + '_')
+        print(model_prefix)
         print('loading ocropus ...')
         nfiles = int(subprocess.check_output('ls data/*.png | wc -l', shell=True).strip())
         print(nfiles)

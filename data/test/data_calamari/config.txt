@@ -1,1 +1,1 @@
-{"engine": "calamari", "prefix": "calamari_model", "nepoch":2}
+{"engine": "calamari", "prefix": "calamari_model", "nepoch":2, "savefreq":20}
