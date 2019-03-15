@@ -1,0 +1,2 @@
+model_checkpoint_path: "/Users/ruidong/Documents/Experiment/OCRD/engines/model/data_calamari/calamari_model_00000050.ckpt"
+all_model_checkpoint_paths: "/Users/ruidong/Documents/Experiment/OCRD/engines/model/data_calamari/calamari_model_00000050.ckpt"

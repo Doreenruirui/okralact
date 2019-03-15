@@ -64,7 +64,7 @@ def upload_file():
     return render_template('index.html', success=success, form=form)
 
 
-#Manage Files
+# Manage Files
 @app.route('/files')
 def manage_file():
     # print(app.config)
@@ -88,7 +88,7 @@ def delete_file(filename):
     return redirect(url_for('manage_file'))
 
 
-#Manage jobs
+# Manage jobs
 @app.route('/jobs')
 def manage_job():
     files_list = os.listdir(app.config['UPLOAD_FOLDER'])
@@ -98,7 +98,7 @@ def manage_job():
     return render_template('jobs.html', files_list=files_list, dict_status=dict_status)
 
 
-#Run jobs
+# Run jobs
 @app.route('/run/<filename>')
 def train_model(filename):
     if filename not in app.job_file2id:
@@ -111,7 +111,7 @@ def train_model(filename):
     return render_template('jobs.html', files_list=files_list, dict_status=dict_status)
 
 
-#download models
+# download models
 @app.route('/download/<filename>')
 def download(filename):
     prefix = filename.rsplit('.', 2)[0]
@@ -126,4 +126,9 @@ def download(filename):
             _tar.addfile(tarfile.TarInfo('model/%s' % fn), open(new_fn))
     return send_file(outfile, mimetype='text/tar', attachment_filename='model.tar.gz', as_attachment=True)
 
+
+# Manual of Using OCR Engines
+@app.route('/manual')
+def manual():
+    return render_template('manual.html')
 
