@@ -1,6 +1,7 @@
 ### Todo: Show all the help info
 
-# from parameters import configs
+from parameters import get_parser
+from parameters_translator import Translator
 from config import Config
 import subprocess
 from os.path import join as pjoin
@@ -68,14 +69,32 @@ def clear_data():
         subprocess.run('rm -r ./data/*', shell=True)
 
 
-def train(paras):
-    engine = paras.engine
-    # print('tar -zvcf ../static/data/%s' % filename)
-    # subprocess.run('tar -zvxf ../static/data/%s' % filename, shell=True)
-    print('You have chosen engine %s' % engine)
-    engine = ENGINE(engine, paras)
-    engine.run()
+def train(configs, engine):
+    print(configs)
+    translator = Translator(configs, engine)
+    new_configs = translator.new_configs
+    print(new_configs)
     clear_data()
+    extract_file(configs.data_file)
+    file_prefix = configs.data_file.rsplit('/', 1)[1].rsplit('.', 2)[0]
+    err = check_data('./data')
+    if not err:
+        data_folder = './data'
+        config_file = os.path.join(data_folder, 'config.txt')
+    cur_folder = os.getcwd()
+    configs.model_dir = pjoin(cur_folder, 'model', file_prefix)
+    if not os.path.exists(configs.model_dir):
+        os.makedirs(configs.model_dir)
+    configs.data_dir = data_folder
+    configs.nepoch = 1
+    train(configs)
+    # engine = paras.engine
+    # # print('tar -zvcf ../static/data/%s' % filename)
+    # # subprocess.run('tar -zvxf ../static/data/%s' % filename, shell=True)
+    # print('You have chosen engine %s' % engine)
+    # engine = ENGINE(engine, paras)
+    # engine.run()
+    # clear_data()
 
 
 # def train_from_file(config_file):
@@ -140,10 +159,16 @@ def train_from_file(filename):
     configs.nepoch = 1
     train(configs)
 
+
 if __name__ == "__main__":
     # print(sys.argv[1])
     # configs = Config(sys.argv[1])
     # print(configs.model_dir)
     # train(configs)
-    train_from_file(sys.argv[1])
+    # train_from_file(sys.argv[1])
+    configs = get_parser()
+    engine = sys.argv[1]
+    train(configs, engine)
+
+
 

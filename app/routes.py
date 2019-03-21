@@ -13,7 +13,6 @@ from rq.job import Job
 import tarfile
 import shutil
 
-
 import os, sys
 parentdir = os.getcwd().rsplit('/', 1)[0]
 print(parentdir)
@@ -57,7 +56,9 @@ def upload_file():
         filename = secure_filename(f.filename)
         files_list = os.listdir(app.config['UPLOAD_FOLDER'])
         filename = rename_file(filename, files_list)
-        f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        print(filename)
+        f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename, filename + '.tar.gz'))
         success = True
     else:
         success = False
@@ -86,6 +87,14 @@ def delete_file(filename):
     if os.path.exists(model_folder):
         shutil.rmtree(model_folder, ignore_errors=True)
     return redirect(url_for('manage_file'))
+
+
+# List Files
+@app.route('/files/<filename>')
+def list_file(filename):
+    # print(app.config)
+    files_list = os.listdir(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    return render_template('files_folder.html', files_list=files_list)
 
 
 # Manage jobs

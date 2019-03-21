@@ -1,0 +1,1 @@
+{"engine": "kraken", "data_dir": "data", "model_dir": "model", "model_prefix": "kraken_model", "nepoch":10, "learning_rate": 0.001, "model_spec": "'[1,48,0,1 Cr3,3,32 Do0.1,2 Mp2,2 Lbx100 Do]'" }
