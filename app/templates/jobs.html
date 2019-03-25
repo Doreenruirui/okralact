@@ -1,18 +1,51 @@
 
 {% extends "base.html" %}
 {% block content %}
-    {% for data in files_list %}
-    - {{ data }}
-        {%  if dict_status[data] == "no" %}
-        <a href="{{ url_for('train_model', filename=data) }}">run</a><br>
-        {% elif dict_status[data] == "started" %}
-            <font color="red">running </font><br>
-        {%  elif dict_status[data] == "queued" %}
-            <font color="red">waiting</font> <br>
-        {%  elif dict_status[data] == "finished" %}
-            <a href="{{ url_for('download', filename=data) }}">download</a><br>
-        {% else %}
-           <font color="red"> {{ dict_status[data] }} </font><br>
-        {% endif %}
-    {% endfor %}
+    <table border=0>
+        <tr>
+               <th  align="left" width="150"> Dataset </th>
+               <th  align="left" width="150"> Configuration </th>
+               <th  align="left" width="150"> Status</th>
+        </tr>
+         {% for data in dict_status %}
+            <tr>
+               <td> {{ data[0] }} </td>
+               <td> {{ data[1] }} </td>
+                {% if dict_status[data] == "finished" %}
+                    <td>
+                        <a href="{{ url_for('download', filename=data[0], config=data[1]) }}">download</a>
+                    </td>
+                {%  else %}
+                    <td> {{ dict_status[data] }}</td>
+                {% endif %}
+            </tr>
+         {% endfor %}
+      </table>
+{#    {% for data in dict_status %}#}
+{#         -{{ data[0] }}     {{ data[1] }}     {{ dict_status[data]}} <br>#}
+            {# <a href="{{ url_for('train_model', filename=data) }}">run</a><br>#}
+{#        {% if dict_status[data] == "started" %}#}
+{#            - {{ data }}#}
+{#            <font color="red">running </font><br>#}
+{#        {%  elif dict_status[data] == "queued" %}#}
+{#            - {{ data }}#}
+{#            <font color="red">waiting</font> <br>#}
+{#        {%  elif dict_status[data] == "finished" %}#}
+{#            - {{ data }}#}
+{#            <a href="{{ url_for('download', filename=data) }}">download</a><br>#}
+{#        {% else %}#}
+{#           <font color="red"> {{ dict_status[data] }} </font><br>#}
+{#        {% endif %}#}
+{#    {% endfor %}#}
+    <br>
+    <br>
+
+
+
+    <form method=post enctype=multipart/form-data>
+    {{ form.hidden_tag() }}
+        {{ form.select_data() }} {{ form.select_config()}} {{ form.submit() }}<br>
+
+    </form>
+
 {% endblock %}

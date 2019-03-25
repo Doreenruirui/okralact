@@ -1,13 +1,13 @@
 import tarfile
 
 
-def rename_file(filename, files_list):
-    if filename in files_list:
+def rename_file(filename, postfix, files_list):
+    if filename + postfix in files_list:
         i = 0
-        newname = '.'.join(filename.split('.')[:-2]) + '_%d' % i
+        newname = filename + '_%d%s' % (i, postfix)
         while newname in files_list:
             i += 1
-            newname = '.'.join(filename.split('.')[:-2]) + '_%d' % i
+            newname = filename + '_%d%s' % (i, postfix)
         filename = newname
     return filename
 
