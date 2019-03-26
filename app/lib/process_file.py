@@ -9,5 +9,7 @@ def rename_file(filename, postfix, files_list):
             i += 1
             newname = filename + '_%d%s' % (i, postfix)
         filename = newname
+    else:
+        filename = filename + postfix
     return filename
 

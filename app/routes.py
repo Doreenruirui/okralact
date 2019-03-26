@@ -1,19 +1,17 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, send_file
-from flask_uploads import UploadSet, configure_uploads, ARCHIVES, IMAGES, patch_request_class
+from flask import render_template, redirect, url_for, request, send_file
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import SubmitField, SelectField
 from werkzeug.utils import secure_filename
 from app import app
-import os,shutil
-import time, hashlib
 from app.lib.process_file import rename_file
-from rq import get_current_job
 from rq.job import Job
 import tarfile
 import shutil
 import os
 import sys
+from engines.validate_parameters import valiadte_string
+
 
 parentdir = os.getcwd().rsplit('/', 1)[0]
 print(parentdir)
@@ -28,6 +26,10 @@ def get_files():
 def get_configs():
     configs_list = os.listdir(app.config['CONFIG_FOLDER'])
     return configs_list
+
+
+def get_engines():
+    return ["kraken", "ocropus", "tesseract", "calamari"]
 
 
 def get_options(file_list):
@@ -53,7 +55,7 @@ class UploadDataForm(FlaskForm):
 
 
 class UploadConfigForm(FlaskForm):
-    archive = FileField(validators=[FileAllowed(set(['txt'])), FileRequired(u'Choose a file!')])
+    archive = FileField(validators=[FileAllowed(set(['json'])), FileRequired(u'Choose a file!')])
     submit = SubmitField(u'upload')
 
 
@@ -63,27 +65,6 @@ class SelectConfigForm(FlaskForm):
     data_choices = get_options(get_files())
     select_data = SelectField(u'data', choices=data_choices)
     submit = SubmitField(u'run')
-
-
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    form = UploadDataForm()
-    f = form.archive.data
-    FILE_CHOICES = [('1', 'configuration'), ('2', 'dataset')]
-    if form.validate_on_submit():
-        filename = secure_filename(f.filename)
-        files_list = get_files()
-        filename = rename_file(filename, files_list)
-        file_type = dict(FILE_CHOICES).get(form.select.data)
-        # print(file_type)
-        if file_type == 'configuration':
-            f.save(os.path.join(app.config['CONFIG_FOLDER'], filename))
-        else:
-            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        success = True
-    else:
-        success = False
-    return render_template('index.html', success=success, form=form)
 
 
 # Manage Files
@@ -102,21 +83,32 @@ def manage_data():
 
 
 # Manage Files
-@app.route('/configs', methods=['GET', 'POST'])
-def manage_configs():
+@app.route('/configs', methods=['GET', 'POST'], defaults={'error_message': ''})
+@app.route('/configs/<error_message>', methods=['GET', 'POST'])
+def manage_configs(error_message):
     configs_list = get_configs()
     form = UploadConfigForm()
     f = form.archive.data
+    errors = error_message.split('\n')
+    print(errors)
+    print(error_message)
     if form.validate_on_submit():
-        filename = secure_filename(f.filename)
-        prefix = filename.rsplit('.')[0]
-        filename = rename_file(prefix, '.txt', configs_list)
-        f.save(os.path.join(app.config['CONFIG_FOLDER'], filename))
-        return redirect(url_for('manage_configs'))
-    return render_template('data.html', form=form, files_list=configs_list)
+        content = f.read()
+        errors = valiadte_string(content)
+        print(errors)
+        if len(errors) > 0:
+            print('print_error')
+            return redirect(url_for('manage_configs', error_message='\n'.join(errors)))
+        else:
+            filename = secure_filename(f.filename)
+            prefix = filename.rsplit('.')[0]
+            filename = rename_file(prefix, '.json', configs_list)
+            f.save(os.path.join(app.config['CONFIG_FOLDER'], filename))
+            return redirect(url_for('manage_configs'))
+    return render_template('configs.html', errors=errors, form=form, files_list=configs_list)
 
 
-@app.route('/delete/<filename>')
+@app.route('/delete_data/<filename>')
 def delete_data(filename):
     if filename in app.job_file2id:
         app.job_file2id.pop(filename, None)
@@ -132,7 +124,7 @@ def delete_data(filename):
     return redirect(url_for('manage_data'))
 
 
-@app.route('/delete/<filename>')
+@app.route('/delete_config/<filename>')
 def delete_config(filename):
     if filename in app.job_file2id:
         app.job_file2id.pop(filename, None)
@@ -144,7 +136,6 @@ def delete_config(filename):
 # Manage jobs
 @app.route('/jobs', methods=['GET', 'POST'])
 def manage_job():
-    files_list = get_files()
     dict_status = get_file_status()
     print(app.job_file2id)
     print(dict_status)
@@ -167,6 +158,7 @@ def train_model():
     print('train_model')
     filename = request.args.get('filename', None)
     config = request.args.get('config', None)
+
     print(filename, config)
     # form = SelectConfigForm()
     if (filename, config) not in app.job_file2id:

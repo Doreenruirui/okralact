@@ -125,8 +125,11 @@ def get_parser():
     return args
 
 
-#
-# args = get_parser()
+try:
+    args = get_parser()
+except argparse.ArgumentError:
+    print(argparse.ArgumentError)
+
 # print(args)
 #     # parser.add_argument('--partition', type=float, default=0.9, help='Ratio of the training and test data')
 #     # parser.add_argument('--validation', type=str, default=None, help='Path to the validation files.')

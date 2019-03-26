@@ -21,26 +21,8 @@
             </tr>
          {% endfor %}
       </table>
-{#    {% for data in dict_status %}#}
-{#         -{{ data[0] }}     {{ data[1] }}     {{ dict_status[data]}} <br>#}
-            {# <a href="{{ url_for('train_model', filename=data) }}">run</a><br>#}
-{#        {% if dict_status[data] == "started" %}#}
-{#            - {{ data }}#}
-{#            <font color="red">running </font><br>#}
-{#        {%  elif dict_status[data] == "queued" %}#}
-{#            - {{ data }}#}
-{#            <font color="red">waiting</font> <br>#}
-{#        {%  elif dict_status[data] == "finished" %}#}
-{#            - {{ data }}#}
-{#            <a href="{{ url_for('download', filename=data) }}">download</a><br>#}
-{#        {% else %}#}
-{#           <font color="red"> {{ dict_status[data] }} </font><br>#}
-{#        {% endif %}#}
-{#    {% endfor %}#}
     <br>
     <br>
-
-
 
     <form method=post enctype=multipart/form-data>
     {{ form.hidden_tag() }}
