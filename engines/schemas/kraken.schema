@@ -3,9 +3,9 @@
  "properties": {
         "engine": {
             "type": "string",
-            "const": "kraken",
             "default": "kraken",
-            "description" : "Engine Name, one from kraken/ocropus/calamari/tesseract"
+            "description" : "Engine Name, one from kraken/ocropus/calamari/tesseract",
+            "enum": ["ocropus"]
         },
         "model_prefix" : {
              "type" : "string",
@@ -15,7 +15,7 @@
         "nepoch" : {
             "type" : "number",
             "format" : "integer",
-            "default" : 2,
+            "default" : -1,
             "description" : "Number of epoches to train before stopping."
             },
         "partition" : {

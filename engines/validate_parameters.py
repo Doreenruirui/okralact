@@ -33,7 +33,8 @@ def valiadte_file(config_file):
         return errors
     else:
         engine = config["engine"]
-        engine_schema = read_json('./schemas/%s.schema' % engine)
+        # print('engines/schemas/%s.schema' % engine)
+        engine_schema = read_json('engines/schemas/%s.schema' % engine)
         errors = validate(engine_schema, config)
         return errors
 
@@ -81,13 +82,13 @@ def read_parameters(config_file):
     return new_configs
 
 
-# read_parameters('./schemas/sample.json')
-# print(read_help_information('kraken'))
-# errors = valiadte_parameter('./schemas/sample.json')
-# for error in errors:
-#     print(error)
+# read_parameters('engines/schemas/sample.json')
+# print(read_help_information('calamari'))
+errors = valiadte_file('engines/schemas/sample.json')
+for error in errors:
+    print(error)
 # import validate
-# with open("schemas/sample.schema") as f_:
+# with open("./schemas/calamari.schema") as f_:
 #     schema_data = f_.read()
 # schema = json.loads(schema_data)
 #

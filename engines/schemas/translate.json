@@ -1,0 +1,42 @@
+{
+  "kraken":
+{
+  "model_prefix": "-o",
+  "nepoch": "-N",
+  "continue_from": "-i",
+  "append": "-a",
+  "learning_rate" : "-r",
+  "early_stop": "-q",
+  "early_stop_min_improve": "--min-delta",
+  "early_stop_nbest": "--lag",
+  "device": "-d",
+  "model_spec": "-s",
+  "momentum": "-m",
+  "weight_decay": "-w",
+  "optimizer": "--optimizer",
+  "partition": "-p",
+  "save_freq": "--savefreq"
+},
+  "ocropus":
+  {
+    "model_prefix": "-o",
+    "nline": "-N",
+    "save_freq": "--savefreq",
+    "start": "--start",
+    "learning_rate": "-r"
+  },
+  "calamari":
+  {
+    "model_prefix": "--output_model_prefix",
+    "niter": "--max_iters",
+    "continue_from": "--weights",
+    "early_stop_freq": "--early_stopping_frequency",
+    "early_stop_nbest": "--early_stopping_nbest",
+    "model_spec": "--network",
+    "optimizer": "--optimizer",
+    "partition": "-p",
+    "save_freq": "--checkpoint_frequency",
+    "preload": "--train_data_on_the_fly",
+    "preload_test": "--validation_data_on_the_fly"
+  }
+}
