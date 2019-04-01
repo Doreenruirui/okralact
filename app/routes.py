@@ -14,6 +14,7 @@ from engines.validate_parameters import valiadte_string
 import engines
 import json
 import base64
+from lib.file_operation import get_model_dir, list_model_dir
 
 parentdir = os.getcwd().rsplit('/', 1)[0]
 print(parentdir)
@@ -146,6 +147,7 @@ def manage_job():
     if request.method == 'POST':
         data_choices = dict(get_options(get_files()))
         config_choices = dict(get_options(get_configs()))
+        print(get_configs())
         select_config = config_choices.get(form.select_config.data)
         select_data = data_choices.get(form.select_data.data)
     #     redirect(url_for('manage_job'))
@@ -153,6 +155,17 @@ def manage_job():
         print('config:', select_config)
         return redirect(url_for('train_model', filename=select_data, config=select_config))
     return render_template('jobs.html', form=form, dict_status=dict_status)
+
+
+# Manage jobs
+@app.route('/models', methods=['GET', 'POST'])
+def manage_model():
+    model_dict = list_model_dir()
+    for ele in model_dict:
+        if not os.listdir(os.path.join(os.getcwd(), 'static/model', model_dict[ele])):
+            del model_dict[ele]
+    print(model_dict)
+    return render_template('models.html', dict_model=model_dict)
 
 
 # Run jobs
@@ -174,19 +187,30 @@ def train_model():
     return redirect(url_for('manage_job'))
 
 
+def tardir(path, tar_name):
+    with tarfile.open(tar_name, "w:gz") as tar_handle:
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                tar_handle.add(os.path.join(root, file))
+
+
 # download model
-@app.route('/download/<filename>')
+@app.route('/download/<filename>', methods=['GET', 'POST'])
 def download(filename):
-    prefix = filename.rsplit('.', 2)[0]
-    model_dir = os.path.join(os.getcwd(), 'engines/model/')
-    model_files = os.listdir(os.path.join(model_dir, prefix))
-    outfile = os.path.join(model_dir, 'model_%s.tar.gz' % prefix)
+    root_dir = os.getcwd()
+    model_dir = 'static/model/'
+    # model_files = os.listdir(os.path.join(model_dir, filename))
+    # print(model_files)
+    outfile = os.path.join(root_dir, model_dir, 'model_%s.tar.gz' % filename)
     if os.path.exists(outfile):
         os.remove(outfile)
-    with tarfile.open(outfile, "w:gz") as _tar:
-        for fn in model_files:
-            new_fn = os.path.join(model_dir, prefix, fn)
-            _tar.addfile(tarfile.TarInfo('model/%s' % fn), open(new_fn))
+    tardir(os.path.join(root_dir, model_dir, filename), outfile)
+    # with tarfile.open(outfile, "w:gz") as _tar:
+    #     for fn in model_files:
+    #         new_fn = os.path.join(model_dir, filename, fn)
+    #         print(new_fn)
+    #         _tar.add('model/%s' % fn, new_fn)
+    #         # _tar.add(tarfile.TarInfo('model/%s' % fn), open(new_fn))
     return send_file(outfile, mimetype='text/tar', attachment_filename='model.tar.gz', as_attachment=True)
 
 

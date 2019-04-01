@@ -8,17 +8,8 @@ from os.path import join as pjoin
 import os
 import uuid
 import tarfile
-
-
-class ENGINE(object):
-    def __init__(self, engine_name, paras, cmd_list):
-        self.name = engine_name
-        self.paras = paras
-        self.cmd_list = cmd_list
-
-    # def run(self):
-    #     cmd = '\n'.join(self.cmd_list)
-    #     subprocess.run(cmd, shell=True)
+import shutil
+from lib.file_operation import list_model_dir
 
 
 def clear_data():
@@ -75,13 +66,7 @@ def extract_file(filename):
 def add_model(file_data, file_config):
     root_dir = os.getcwd()
     model_file = pjoin(root_dir, 'static/model', 'model_list')
-    model_dict = {}
-    if os.path.exists(model_file):
-        with open(model_file) as f_:
-            for line in f_:
-                items = line.strip().split('\t')
-                model_dict[(items[0], items[1])] = items[2]
-
+    model_dict = list_model_dir()
     key = (file_data, file_config)
     if key not in model_dict:
         uni_model_dir = uuid.uuid4().hex
@@ -89,18 +74,23 @@ def add_model(file_data, file_config):
         model_dir = pjoin(root_dir, 'static/model/', uni_model_dir)
         if not os.path.exists(model_dir):
             os.makedirs(model_dir)
-        with open(model_file, 'a') as f_:
-            f_.write('%s\t%s\t%s\n' % (file_data, file_config, uni_model_dir))
+        with open(model_file, 'w') as f_:
+            for ele in model_dict:
+                f_.write('%s\t%s\t%s\n' % (ele[0], ele[1], model_dict[ele]))
     else:
         model_dir = pjoin(root_dir, 'static/model/', model_dict[key])
-        os.removedirs(model_dir)
+        if os.listdir(model_dir):
+            shutil.rmtree(model_dir)
+        else:
+            os.removedirs(model_dir)
         uni_model_dir = uuid.uuid4().hex
         model_dict[key] = uni_model_dir
         model_dir = pjoin(root_dir, 'static/model/', uni_model_dir)
         if not os.path.exists(model_dir):
             os.makedirs(model_dir)
-        with open(model_file, 'a') as f_:
-            f_.write('%s\t%s\t%s\n' % (file_data, file_config, uni_model_dir))
+        with open(model_file, 'w') as f_:
+            for ele in model_dict:
+                f_.write('%s\t%s\t%s\n' % (ele[0], ele[1], model_dict[ele]))
     return model_dir
 
 

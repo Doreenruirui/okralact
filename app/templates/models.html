@@ -1,0 +1,23 @@
+
+{% extends "base.html" %}
+{% block content %}
+    <table border=0>
+        <tr>
+               <th  align="left" width="150"> Dataset </th>
+               <th  align="left" width="150"> Configuration </th>
+               <th  align="left" width="150"> Status</th>
+        </tr>
+         {% for data in dict_model %}
+            <tr>
+                <td> {{ data[0] }} </td>
+                <td> {{ data[1] }} </td>
+                <td>
+                    <a href="{{ url_for('download', filename=dict_model[data]) }}">download</a>
+                </td>
+            </tr>
+         {% endfor %}
+      </table>
+    <br>
+    <br>
+
+{% endblock %}

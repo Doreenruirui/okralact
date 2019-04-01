@@ -17,29 +17,32 @@ class Translate:
 
     def kraken(self):
         cmd = 'ketos train engines/data/*.png '
+        if 'model_prefix' in self.configs:
+            model_prefix = self.configs['model_prefix']
+        else:
+            model_prefix = self.engine
+        cmd += self.translator['model_prefix'] + ' ' + pjoin(self.model_dir, model_prefix) + ' '
         for para in self.configs:
-            if para not in self.translator:
-                print(para)
-                if para == "preload":
-                    if self.configs[para]:
-                        cmd += '--preload '
-                    else:
-                        cmd += '--no-preload '
-            else:
-                if para == 'model_prefix':
-                    cmd += self.translator[para] + ' ' + pjoin(self.model_dir, self.configs[para]) + ' '
-                elif para == 'early_stop':
-                    cmd += self.translator[para] + ' early '
-                elif para == 'continue_from':
-                    if len(self.configs[para]) > 0:
-                        cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
-                elif para == 'append':
-                    if "continues_from" in self.configs and len(self.configs["continue_from"]) > 0:
-                        cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
-                elif para == 'model_spec':
-                    cmd += ('%s \"%s\" ' % (self.translator[para], self.configs[para]))
+            if para == 'engine':
+                continue
+            if para == "preload":
+                if self.configs[para]:
+                    cmd += '--preload '
                 else:
+                    cmd += '--no-preload '
+            elif para == 'early_stop':
+                cmd += self.translator[para] + ' early '
+            elif para == 'continue_from':
+                if len(self.configs[para]) > 0:
                     cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
+            elif para == 'append':
+                if "continues_from" in self.configs and len(self.configs["continue_from"]) > 0:
+                    cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
+            elif para == 'model_spec':
+                cmd += ('%s \"%s\" ' % (self.translator[para], self.configs[para]))
+            else:
+                cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
+
         print(cmd)
         self.cmd_list = ['source activate kraken', cmd, 'conda deactivate']
 
