@@ -14,6 +14,11 @@ def read_json(json_file):
     return data
 
 
+def write_json(dict_res, json_file):
+    with open(json_file, 'w') as f_:
+        json.dump(dict_res, f_)
+
+
 def validate(schema, config):
     validator = Draft4Validator(schema)
     error_message = []
@@ -84,9 +89,9 @@ def read_parameters(config_file):
 
 # read_parameters('engines/schemas/sample.json')
 # print(read_help_information('calamari'))
-errors = valiadte_file('engines/schemas/sample.json')
-for error in errors:
-    print(error)
+# errors = valiadte_file('engines/schemas/sample.json')
+# for error in errors:
+#     print(error)
 # import validate
 # with open("./schemas/calamari.schema") as f_:
 #     schema_data = f_.read()

@@ -1,100 +1,30 @@
 ### Todo: Show all the help info
 
-from parameters import get_parser
-from parameters_translator import Translator
-from config import Config
+# from parameters import get_parser
+from engines.validate_parameters import read_json
+from engines.parameters_translator import Translate
 import subprocess
 from os.path import join as pjoin
 import os
-import sys
+import uuid
 import tarfile
 
 
 class ENGINE(object):
-    def __init__(self, engine_name, paras):
+    def __init__(self, engine_name, paras, cmd_list):
         self.name = engine_name
         self.paras = paras
+        self.cmd_list = cmd_list
 
-    def run(self):
-        method = getattr(self, self.name, lambda:"Invalid Engine")
-        return method()
-
-    def kraken(self):
-        model_prefix = pjoin(self.paras.model_dir, self.paras.prefix)
-        print('loading kraken ...')
-        cmd_list = []
-        cmd_list.append('source activate kraken')
-        cmd_list.append('ketos train ./data/*.png -o %s -N %d' % (model_prefix, self.paras.nepoch))
-        # cmd_list.append('source deactivate')
-        print(cmd_list)
-        cur_cmd = '\n'.join(cmd_list)
-        subprocess.run(cur_cmd, shell=True)
-
-    def ocropus(self):
-        model_prefix = pjoin(self.paras.model_dir, self.paras.prefix)
-        print(model_prefix)
-        # self.paras.nepoch=1
-        print('loading ocropus ...')
-        nfiles = int(subprocess.check_output('ls data/*.png | wc -l', shell=True).strip())
-        print(nfiles)
-        cmd_list = []
-        cmd_list.append('source activate ocropus_env')
-        cmd_list.append('ocropus-rtrain ./data/*.png -o %s -N %d  --savefreq %s' % (model_prefix, self.paras.nepoch * nfiles, self.paras.savefreq))
-        # cmd_list.append('source deactivate')
-        print(cmd_list)
-        cur_cmd = '\n'.join(cmd_list)
-        subprocess.run(cur_cmd, shell=True)
-
-    def tesseract(self):
-        return 'loading tesseract ...'
-
-    def calamari(self):
-        model_prefix = pjoin(self.paras.model_dir, self.paras.prefix + '_')
-        print(model_prefix)
-        print('loading ocropus ...')
-        nfiles = int(subprocess.check_output('ls data/*.png | wc -l', shell=True).strip())
-        print(nfiles)
-        cmd_list = []
-        cmd_list.append('source activate calamari')
-        cmd_list.append('calamari-train --files ./data/*.png --output_model_prefix %s --batch_size 1 --max_iters %d' % (model_prefix, self.paras.nepoch * nfiles))
-        # cmd_list.append('source deactivate')
-        print(cmd_list)
-        cur_cmd = '\n'.join(cmd_list)
-        subprocess.run(cur_cmd, shell=True)
+    # def run(self):
+    #     cmd = '\n'.join(self.cmd_list)
+    #     subprocess.run(cmd, shell=True)
 
 
 def clear_data():
-    list_files = os.listdir(os.path.join(os.getcwd(), 'data'))
+    list_files = os.listdir(pjoin(os.getcwd(), 'data'))
     if len(list_files) != 0:
-        subprocess.run('rm -r ./data/*', shell=True)
-
-
-def train(configs, engine):
-    print(configs)
-    translator = Translator(configs, engine)
-    new_configs = translator.new_configs
-    print(new_configs)
-    clear_data()
-    extract_file(configs.data_file)
-    file_prefix = configs.data_file.rsplit('/', 1)[1].rsplit('.', 2)[0]
-    err = check_data('./data')
-    if not err:
-        data_folder = './data'
-        config_file = os.path.join(data_folder, 'config.txt')
-    cur_folder = os.getcwd()
-    configs.model_dir = pjoin(cur_folder, 'model', file_prefix)
-    if not os.path.exists(configs.model_dir):
-        os.makedirs(configs.model_dir)
-    configs.data_dir = data_folder
-    configs.nepoch = 1
-    train(configs)
-    # engine = paras.engine
-    # # print('tar -zvcf ../static/data/%s' % filename)
-    # # subprocess.run('tar -zvxf ../static/data/%s' % filename, shell=True)
-    # print('You have chosen engine %s' % engine)
-    # engine = ENGINE(engine, paras)
-    # engine.run()
-    # clear_data()
+        subprocess.run('rm -r engines/data/*', shell=True)
 
 
 # def train_from_file(config_file):
@@ -118,13 +48,13 @@ def check_data(data_folder):
     for fn in list_file:
         if fn.endswith('.png'):
             prefix = fn.rsplit('.', 1)[0]
-            if not os.path.exists(os.path.join(data_folder, prefix + '.gt.txt')):
+            if not os.path.exists(pjoin(data_folder, prefix + '.gt.txt')):
                 return 1
             if flag_empty:
                 flag_empty = 0
     if flag_empty:
         return 2
-    if not os.path.exists(os.path.join(data_folder, 'config.txt')):
+    if not os.path.exists(pjoin(data_folder, 'config.txt')):
         return 3
     return 0
 
@@ -139,36 +69,60 @@ def extract_file(filename):
                 continue
             if fn.endswith('.png') or tarinfo.name.endswith('.txt'):
                 tarinfo.name = fn
-                _tar.extract(tarinfo, './data')
+                _tar.extract(tarinfo, 'engines/data')
 
 
-def train_from_file(filename):
+def add_model(file_data, file_config):
+    root_dir = os.getcwd()
+    model_file = pjoin(root_dir, 'static/model', 'model_list')
+    model_dict = {}
+    if os.path.exists(model_file):
+        with open(model_file) as f_:
+            for line in f_:
+                items = line.strip().split('\t')
+                model_dict[(items[0], items[1])] = items[2]
+
+    key = (file_data, file_config)
+    if key not in model_dict:
+        uni_model_dir = uuid.uuid4().hex
+        model_dict[key] = uni_model_dir
+        model_dir = pjoin(root_dir, 'static/model/', uni_model_dir)
+        if not os.path.exists(model_dir):
+            os.makedirs(model_dir)
+        with open(model_file, 'a') as f_:
+            f_.write('%s\t%s\t%s\n' % (file_data, file_config, uni_model_dir))
+    else:
+        model_dir = pjoin(root_dir, 'static/model/', model_dict[key])
+        os.removedirs(model_dir)
+        uni_model_dir = uuid.uuid4().hex
+        model_dict[key] = uni_model_dir
+        model_dir = pjoin(root_dir, 'static/model/', uni_model_dir)
+        if not os.path.exists(model_dir):
+            os.makedirs(model_dir)
+        with open(model_file, 'a') as f_:
+            f_.write('%s\t%s\t%s\n' % (file_data, file_config, uni_model_dir))
+    return model_dir
+
+
+def train_from_file(file_data, file_config):
     clear_data()
-    extract_file(filename)
-    file_prefix = filename.rsplit('/', 1)[1].rsplit('.', 2)[0]
-    err = check_data('./data')
+    root_dir = os.getcwd()
+    print(root_dir)
+    extract_file(pjoin(root_dir, 'static/data', file_data))
+    err = check_data(pjoin(root_dir, 'engines/data'))
+    print(err)
     if not err:
-        data_folder = './data'
-        config_file = os.path.join(data_folder, 'config.txt')
-    configs = Config(config_file)
-    cur_folder = os.getcwd()
-    configs.model_dir = pjoin(cur_folder, 'model', file_prefix)
-    if not os.path.exists(configs.model_dir):
-        os.makedirs(configs.model_dir)
-    configs.data_dir = data_folder
-    configs.nepoch = 1
-    train(configs)
+        configs = read_json(pjoin(root_dir, 'static/configs', file_config))
+        print(configs)
+        model_dir = add_model(file_data, file_config)
+        translator = Translate(configs, model_dir)
+        cmd_list = translator.cmd_list
+        cmd = '\n'.join(cmd_list)
+        print(cmd)
+        subprocess.run(cmd, shell=True)
 
 
-if __name__ == "__main__":
-    # print(sys.argv[1])
-    # configs = Config(sys.argv[1])
-    # print(configs.model_dir)
-    # train(configs)
-    # train_from_file(sys.argv[1])
-    configs = get_parser()
-    engine = sys.argv[1]
-    train(configs, engine)
+# train_from_file((sys.argv[1], sys.argv[2]))
 
 
 

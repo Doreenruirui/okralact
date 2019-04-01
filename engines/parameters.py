@@ -115,7 +115,7 @@ def get_parser():
                                                                                       'frequency has the unit of an epoch '
                                                                                       '(relative to number of training data'
                                                                                       '.')
-    calamari.add_argument('--early_stopp_nbest', type=int, default=5, help='The number of models that must be worse '
+    calamari.add_argument('--early_stopp_nbest', type=int, default=5, help='The number of model that must be worse '
                                                                               'than')
     calamari.add_argument('--early_stop_model_prefix', type=str, default=None, help='The prefix of the best model using'
                                                                                         ' early stopping.')

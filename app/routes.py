@@ -11,7 +11,9 @@ import shutil
 import os
 import sys
 from engines.validate_parameters import valiadte_string
-
+import engines
+import json
+import base64
 
 parentdir = os.getcwd().rsplit('/', 1)[0]
 print(parentdir)
@@ -103,7 +105,8 @@ def manage_configs(error_message):
             filename = secure_filename(f.filename)
             prefix = filename.rsplit('.')[0]
             filename = rename_file(prefix, '.json', configs_list)
-            f.save(os.path.join(app.config['CONFIG_FOLDER'], filename))
+            with open(os.path.join(app.config['CONFIG_FOLDER'], filename), 'w', encoding='utf-8') as f_:
+                json.dump(json.loads(content.decode('ascii')), f_)
             return redirect(url_for('manage_configs'))
     return render_template('configs.html', errors=errors, form=form, files_list=configs_list)
 
@@ -162,7 +165,7 @@ def train_model():
     print(filename, config)
     # form = SelectConfigForm()
     if (filename, config) not in app.job_file2id:
-        job = app.task_queue.enqueue('train.train_from_file', '../static/data/%s' % filename)
+        job = app.task_queue.enqueue('engines.train.train_from_file', filename, config)
         job_id = job.get_id()
         app.job_file2id[(filename, config)] = job_id
         app.job_id2file[job_id] = (filename, config)
@@ -171,7 +174,7 @@ def train_model():
     return redirect(url_for('manage_job'))
 
 
-# download models
+# download model
 @app.route('/download/<filename>')
 def download(filename):
     prefix = filename.rsplit('.', 2)[0]

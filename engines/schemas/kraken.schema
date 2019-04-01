@@ -5,7 +5,7 @@
             "type": "string",
             "default": "kraken",
             "description" : "Engine Name, one from kraken/ocropus/calamari/tesseract",
-            "enum": ["ocropus"]
+            "enum": ["kraken"]
         },
         "model_prefix" : {
              "type" : "string",

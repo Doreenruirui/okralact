@@ -32,6 +32,7 @@
     "continue_from": "--weights",
     "early_stop_freq": "--early_stopping_frequency",
     "early_stop_nbest": "--early_stopping_nbest",
+    "early_stop_model_prefix": "--early_stopping_best_model_prefix",
     "model_spec": "--network",
     "optimizer": "--optimizer",
     "partition": "-p",
