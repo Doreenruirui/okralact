@@ -15,3 +15,5 @@ app.job_file2id = {}
 app.job_id2err = {}
 
 from app import routes
+from app.api import bp as api_bp
+app.register_blueprint(api_bp, url_prefix='/api')

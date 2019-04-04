@@ -13,7 +13,7 @@ from lib.file_operation import list_model_dir
 
 
 def clear_data():
-    list_files = os.listdir(pjoin(os.getcwd(), 'data'))
+    list_files = os.listdir(pjoin(os.getcwd(), 'engines/data'))
     if len(list_files) != 0:
         subprocess.run('rm -r engines/data/*', shell=True)
 

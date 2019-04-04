@@ -26,3 +26,31 @@ def get_model_dir(file_data, file_config):
         return 'model not found'
     else:
         return model_dict[key]
+
+
+def get_files():
+    files_list = os.listdir(data_dir)
+    return files_list
+
+
+def get_configs():
+    configs_list = os.listdir(config_dir)
+    return configs_list
+
+
+def get_engines():
+    return ["kraken", "ocropus", "tesseract", "calamari"]
+
+
+def rename_file(filename, postfix, files_list):
+    if filename + postfix in files_list:
+        i = 0
+        newname = filename + '_%d%s' % (i, postfix)
+        while newname in files_list:
+            i += 1
+            newname = filename + '_%d%s' % (i, postfix)
+        filename = newname
+    else:
+        filename = filename + postfix
+    return filename
+

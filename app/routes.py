@@ -1,10 +1,7 @@
 from flask import render_template, redirect, url_for, request, send_file
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import SubmitField, SelectField
 from werkzeug.utils import secure_filename
 from app import app
-from app.lib.process_file import rename_file
+from lib.file_operation import rename_file
 from rq.job import Job
 import tarfile
 import shutil
@@ -14,33 +11,14 @@ from engines.validate_parameters import valiadte_string
 import engines
 import json
 import base64
-from lib.file_operation import get_model_dir, list_model_dir
-
-parentdir = os.getcwd().rsplit('/', 1)[0]
-print(parentdir)
-sys.path.insert(0, parentdir)
+from lib.file_operation import list_model_dir, get_engines, get_configs, get_files
+from app.lib.forms import SelectEngineForm, UploadConfigForm, UploadDataForm, SelectConfigForm, get_options
+from engines.validate_parameters import read_help_information_html
 
 
-def get_files():
-    files_list = os.listdir(app.config['UPLOAD_FOLDER'])
-    return files_list
-
-
-def get_configs():
-    configs_list = os.listdir(app.config['CONFIG_FOLDER'])
-    return configs_list
-
-
-def get_engines():
-    return ["kraken", "ocropus", "tesseract", "calamari"]
-
-
-def get_options(file_list):
-    nconfig = len(file_list)
-    choices = []
-    for i in range(nconfig):
-        choices.append((str(i), file_list[i]))
-    return choices
+# parentdir = os.getcwd().rsplit('/', 1)[0]
+# print(parentdir)
+# sys.path.insert(0, parentdir)
 
 
 def get_file_status():
@@ -50,24 +28,6 @@ def get_file_status():
         filename, config = app.job_id2file[job_id]
         dict_status[(filename, config)] = job.status
     return dict_status
-
-
-class UploadDataForm(FlaskForm):
-    archive = FileField(validators=[FileAllowed(set(['tar.gz'])), FileRequired(u'Choose a file!')])
-    submit = SubmitField(u'upload')
-
-
-class UploadConfigForm(FlaskForm):
-    archive = FileField(validators=[FileAllowed(set(['json'])), FileRequired(u'Choose a file!')])
-    submit = SubmitField(u'upload')
-
-
-class SelectConfigForm(FlaskForm):
-    config_choices = get_options(get_configs())
-    select_config = SelectField(u'config', choices=config_choices)
-    data_choices = get_options(get_files())
-    select_data = SelectField(u'data', choices=data_choices)
-    submit = SubmitField(u'run')
 
 
 # Manage Files
@@ -215,7 +175,18 @@ def download(filename):
 
 
 # Manual of Using OCR Engines
-@app.route('/manual')
-def manual():
-    return render_template('manual.html')
+@app.route('/', methods=['GET', 'POST'], defaults={'engine': 'kraken'})
+@app.route('/<engine>',  methods=['GET', 'POST'])
+def manual(engine):
+    # Manage jobs
+    print(engine)
+    help_info = read_help_information_html(engine)
+    form = SelectEngineForm()
+    if request.method == 'POST':
+        engine_choices = dict(get_options(get_engines()))
+        select_engine = engine_choices.get(form.select_engine.data)
+        #     redirect(url_for('manage_job'))
+        print('engine', select_engine)
+        return redirect(url_for('manual', engine=select_engine))
+    return render_template('manual.html', form=form, engine=engine, help_info=help_info)
 

@@ -2,8 +2,25 @@
 
 {% block content %}
 
-Parameters:<br>
-    --input: <br>
-    --output:<br>
+    <form method=post enctype=multipart/form-data>
+    {{ form.hidden_tag() }}
+        {{ form.select_engine()}} {{ form.submit() }}<br>
+    </form>
+
+    <table border=0>
+        <tr>
+               <th  align="left" width="150"> Parameter </th>
+               <th  align="left" width="150"> Default </th>
+               <th  align="left" width="150"> Description</th>
+        </tr>
+         {% for info in help_info %}
+            <tr>
+                <td> {{ info[0] }} </td>
+                <td> {{ info[1] }} </td>
+                <td> {{ info[2] }}</td>
+            </tr>
+         {% endfor %}
+      </table>
+
 
 {% endblock %}

@@ -75,6 +75,15 @@ def read_help_information(engine):
     return help_info
 
 
+def read_help_information_html(engine):
+    schema = read_json('engines/schemas/%s.schema' % engine)
+    attrs = schema['properties']
+    help_info = []
+    for k in attrs:
+        help_info.append([k, str(attrs[k]["default"]), attrs[k]["description"]])
+    return help_info
+
+
 def read_parameters(config_file):
     configs = read_json(config_file)
     engine = configs["engine"]
