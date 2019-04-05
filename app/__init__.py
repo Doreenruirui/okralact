@@ -10,9 +10,15 @@ app.config.from_object(Config)
 app.redis = Redis.from_url('redis://')
 app.task_queue = rq.Queue('ocr-tasks', connection=app.redis, default_timeout=43200)
 app.task_queue.empty()
+app.eval_queue = rq.Queue('ocr-evals', connection=app.redis, default_timeout=43200)
+app.eval_queue.empty()
 app.job_id2file = {}
 app.job_file2id = {}
 app.job_id2err = {}
+
+app.eval_id2file = {}
+app.eval_file2id = {}
+app.eval_id2err = {}
 
 from app import routes
 from app.api import bp as api_bp

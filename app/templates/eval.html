@@ -1,0 +1,35 @@
+
+{% extends "base.html" %}
+{% block content %}
+    <table border=0>
+        <tr>
+               <th  align="left" width="150"> Test </th>
+               <th  align="left" width="150"> Train </th>
+               <th  align="left" width="150"> Config </th>
+               <th  align="left" width="150"> Status</th>
+        </tr>
+         {% for data in dict_status %}
+            <tr>
+               <td> {{ data[0] }} </td>
+               <td> {{ data[1] }} </td>
+               <td> {{ data[2] }} </td>
+{#                {% if dict_status[data] == "finished" %}#}
+{#                    <td>#}
+{#                        <a href="{{ url_for('download', filename=data[0], config=data[1]) }}">download</a>#}
+{#                    </td>#}
+{#                {%  else %}#}
+                    <td> {{ dict_status[data] }}</td>
+{#                {% endif %}#}
+            </tr>
+         {% endfor %}
+      </table>
+    <br>
+    <br>
+
+    <form method=post enctype=multipart/form-data>
+    {{ form.hidden_tag() }}
+        {{ form.select_test() }}{{ form.select_train()}} {{ form.select_config()}} {{ form.submit() }}<br>
+
+    </form>
+
+{% endblock %}

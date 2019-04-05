@@ -12,7 +12,7 @@ import engines
 import json
 import base64
 from lib.file_operation import list_model_dir, get_engines, get_configs, get_files
-from app.lib.forms import SelectEngineForm, UploadConfigForm, UploadDataForm, SelectConfigForm, get_options
+from app.lib.forms import SelectEngineForm, UploadConfigForm, UploadDataForm, SelectConfigForm, SelectModelForm, get_options
 from engines.validate_parameters import read_help_information_html
 
 
@@ -29,6 +29,13 @@ def get_file_status():
         dict_status[(filename, config)] = job.status
     return dict_status
 
+def get_eval_status():
+    dict_status = {}
+    for job_id in app.eval_id2file:
+        job = Job.fetch(job_id, app.redis)
+        trainname,testname, config = app.eval_id2file[job_id]
+        dict_status[(trainname,testname, config)] = job.status
+    return dict_status
 
 # Manage Files
 @app.route('/data', methods=['GET', 'POST'])
@@ -117,7 +124,8 @@ def manage_job():
     return render_template('jobs.html', form=form, dict_status=dict_status)
 
 
-# Manage jobs
+
+# Manage Models
 @app.route('/models', methods=['GET', 'POST'])
 def manage_model():
     model_dict = list_model_dir()
@@ -127,6 +135,28 @@ def manage_model():
     print(model_dict)
     return render_template('models.html', dict_model=model_dict)
 
+# Manage Evals
+@app.route('/evaluation', methods=['GET', 'POST'])
+def manage_eval():
+    dict_status = get_eval_status()
+    print(app.eval_file2id)
+    print(dict_status)
+    form = SelectModelForm()
+    if request.method == 'POST':
+        train_choices = dict(get_options(get_files()))
+        test_choices = dict(get_options(get_files()))
+        config_choices = dict(get_options(get_configs()))
+        print(get_configs())
+        select_config = config_choices.get(form.select_config.data)
+        select_test = train_choices.get(form.select_test.data)
+        select_train = test_choices.get(form.select_train.data)
+    #     redirect(url_for('manage_job'))
+        print('train', select_train)
+        print('test', select_test)
+        print('config:', select_config)
+        return redirect(url_for('eval_model', testname=select_test, trainname=select_train, config=select_config))
+    return render_template('eval.html', form=form, dict_status=dict_status)
+
 
 # Run jobs
 @app.route('/run', methods=['POST', 'GET'])
@@ -134,7 +164,6 @@ def train_model():
     print('train_model')
     filename = request.args.get('filename', None)
     config = request.args.get('config', None)
-
     print(filename, config)
     # form = SelectConfigForm()
     if (filename, config) not in app.job_file2id:
@@ -146,6 +175,21 @@ def train_model():
     # files_list = os.listdir(app.config['UPLOAD_FOLDER'])
     return redirect(url_for('manage_job'))
 
+# Run jobs
+@app.route('/eval', methods=['POST', 'GET'])
+def eval_model():
+    print('train_model')
+    trainname = request.args.get('trainname', None)
+    testname = request.args.get('testname', None)
+    config = request.args.get('config', None)
+    print(trainname, testname, config)
+    if (trainname,  testname, config) not in app.eval_file2id:
+        job = app.task_queue.enqueue('engines.train.eval_from_file', trainname,  testname, config)
+        job_id = job.get_id()
+        app.eval_file2id[(trainname, testname, config)] = job_id
+        app.eval_id2file[job_id] = (trainname,  testname, config)
+    print(app.eval_id2file)
+    return redirect(url_for('manage_eval'))
 
 def tardir(path, tar_name):
     with tarfile.open(tar_name, "w:gz") as tar_handle:

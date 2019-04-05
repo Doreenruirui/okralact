@@ -9,7 +9,7 @@ import os
 import uuid
 import tarfile
 import shutil
-from lib.file_operation import list_model_dir
+from lib.file_operation import list_model_dir, get_model_dir
 
 
 def clear_data():
@@ -111,7 +111,22 @@ def train_from_file(file_data, file_config):
         print(cmd)
         subprocess.run(cmd, shell=True)
 
-
+def eval_from_file(file_test, file_train, file_config):
+    clear_data()
+    root_dir = os.getcwd()
+    print(root_dir)
+    extract_file(pjoin(root_dir, 'static/data', file_test))
+    configs = read_json(pjoin(root_dir, 'static/configs', file_config))
+    print(configs)
+    model_dir = get_model_dir(file_train, file_config)
+    # noinspection PyInterpreter
+    if  configs["engine"] == 'kraken':
+        cmd_list = ['source activate kraken']
+        cmd_list.append('ketos test -m static/model/%s/kraken_best.mlmodel static/data/*.png' %  model_dir)
+        cmd_list.append('conda deactivate')
+        cmd = '\n'.join(cmd_list)
+        print(cmd)
+    # subprocess.run(cmd, shell=True)
 # train_from_file((sys.argv[1], sys.argv[2]))
 
 

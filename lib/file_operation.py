@@ -18,7 +18,6 @@ def list_model_dir():
                 model_dict[(items[0], items[1])] = items[2]
     return model_dict
 
-
 def get_model_dir(file_data, file_config):
     model_dict = list_model_dir()
     key = (file_data, file_config)
@@ -27,6 +26,9 @@ def get_model_dir(file_data, file_config):
     else:
         return model_dict[key]
 
+def get_models():
+    model_dict = list_model_dir()
+    return [model_dict[ele] for  ele  in  model_dict]
 
 def get_files():
     files_list = os.listdir(data_dir)
