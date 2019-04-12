@@ -26,15 +26,16 @@ def get_file_status():
     for job_id in app.job_id2file:
         job = Job.fetch(job_id, app.redis)
         filename, config = app.job_id2file[job_id]
-        dict_status[(filename, config)] = job.status
+        dict_status[(filename, config)] = job.get_status()
     return dict_status
 
 def get_eval_status():
     dict_status = {}
     for job_id in app.eval_id2file:
         job = Job.fetch(job_id, app.redis)
-        trainname,testname, config = app.eval_id2file[job_id]
-        dict_status[(trainname,testname, config)] = job.status
+        trainname, testname, config = app.eval_id2file[job_id]
+        print({'job': job, 'trainname': trainname, 'testname': testname, 'config': config})
+        dict_status[(trainname, testname, config)] = job.get_status()
     return dict_status
 
 # Manage Files
