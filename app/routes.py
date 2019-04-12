@@ -136,12 +136,15 @@ def manage_model():
     return render_template('models.html', dict_model=model_dict)
 
 # Manage Evals
-@app.route('/evaluation', methods=['GET', 'POST'])
-def manage_eval():
+@app.route('/evaluation', methods=['GET', 'POST'], defaults={'error_message': ''})
+@app.route('/evaluation/<error_message>', methods=['GET', 'POST'])
+def manage_eval(error_message):
+    print('evaluation error', error_message)
     dict_status = get_eval_status()
     print(app.eval_file2id)
     print(dict_status)
     form = SelectModelForm()
+    errors = error_message.split('\n')
     if request.method == 'POST':
         train_choices = dict(get_options(get_files()))
         test_choices = dict(get_options(get_files()))
@@ -155,7 +158,7 @@ def manage_eval():
         print('test', select_test)
         print('config:', select_config)
         return redirect(url_for('eval_model', testname=select_test, trainname=select_train, config=select_config))
-    return render_template('eval.html', form=form, dict_status=dict_status)
+    return render_template('eval.html', errors=errors, form=form, dict_status=dict_status)
 
 
 # Run jobs
@@ -184,7 +187,7 @@ def eval_model():
     config = request.args.get('config', None)
     print(trainname, testname, config)
     if (trainname,  testname, config) not in app.eval_file2id:
-        job = app.task_queue.enqueue('engines.train.eval_from_file', trainname,  testname, config)
+        job = app.eval_queue.enqueue('engines.train.eval_from_file', trainname,  testname, config)
         job_id = job.get_id()
         app.eval_file2id[(trainname, testname, config)] = job_id
         app.eval_id2file[job_id] = (trainname,  testname, config)
@@ -234,3 +237,19 @@ def manual(engine):
         return redirect(url_for('manual', engine=select_engine))
     return render_template('manual.html', form=form, engine=engine, help_info=help_info)
 
+@app.route("/results", methods=['GET'])
+def get_results():
+    testname = request.args.get('testname', None)
+    configname = request.args.get('configname', None)
+    trainname = request.args.get('trainname', None)
+    print(testname,  trainname, configname)
+    print(app.eval_file2id)
+    job_id = app.eval_file2id[(trainname, testname, configname)]
+    print(job_id)
+    job = Job.fetch(job_id, connection=app.redis)
+    if job.is_finished:
+        errors =  str(job.result)
+    else:
+        errors  = 'Error'
+    print(job.result.decode("utf-8"))
+    return redirect(url_for('manage_eval', error_message=errors))

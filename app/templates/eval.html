@@ -13,13 +13,13 @@
                <td> {{ data[0] }} </td>
                <td> {{ data[1] }} </td>
                <td> {{ data[2] }} </td>
-{#                {% if dict_status[data] == "finished" %}#}
-{#                    <td>#}
-{#                        <a href="{{ url_for('download', filename=data[0], config=data[1]) }}">download</a>#}
-{#                    </td>#}
-{#                {%  else %}#}
+                {% if dict_status[data] == "finished" %}
+                    <td>
+                      <a href="{{ url_for('get_results', testname=data[0], trainname=data[1], configname=data[2]) }}">download</a>
+                    </td>
+                  {%  else %}
                     <td> {{ dict_status[data] }}</td>
-{#                {% endif %}#}
+                  {% endif %}
             </tr>
          {% endfor %}
       </table>
@@ -31,5 +31,7 @@
         {{ form.select_test() }}{{ form.select_train()}} {{ form.select_config()}} {{ form.submit() }}<br>
 
     </form>
-
+    {% for error in errors %}
+    {{ error }} <br>
+    {% endfor %}
 {% endblock %}

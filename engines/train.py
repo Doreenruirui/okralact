@@ -4,6 +4,7 @@
 from engines.validate_parameters import read_json
 from engines.parameters_translator import Translate
 import subprocess
+from subprocess  import check_output
 from os.path import join as pjoin
 import os
 import uuid
@@ -122,11 +123,15 @@ def eval_from_file(file_test, file_train, file_config):
     # noinspection PyInterpreter
     if  configs["engine"] == 'kraken':
         cmd_list = ['source activate kraken']
-        cmd_list.append('ketos test -m static/model/%s/kraken_best.mlmodel static/data/*.png' %  model_dir)
+        cmd_list.append('ketos test -m static/model/%s/kraken_best.mlmodel engines/data/*.png' %  model_dir)
         cmd_list.append('conda deactivate')
         cmd = '\n'.join(cmd_list)
         print(cmd)
-    # subprocess.run(cmd, shell=True)
+        res_str=  check_output(cmd, shell=True)
+        res_str = res_str.split(b'\n')[-2]
+        print(res_str)
+        return res_str
+
 # train_from_file((sys.argv[1], sys.argv[2]))
 
 
