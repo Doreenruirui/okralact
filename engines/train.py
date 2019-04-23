@@ -11,6 +11,7 @@ import uuid
 import tarfile
 import shutil
 from lib.file_operation import list_model_dir, get_model_dir
+from evaluate.levenshtein import align
 
 
 def clear_data():
@@ -112,6 +113,28 @@ def train_from_file(file_data, file_config):
         print(cmd)
         subprocess.run(cmd, shell=True)
 
+
+def evl_pair():
+    gt_files = [ele for ele in os.listdir('engine/data/') if ele.endswith('gt.txt')]
+    pred_files = [ele for ele in os.listdir('engine/data/') if ele.endswith('.txt') and '.gt.' not in ele]
+    gt_lines = []
+    for fn in gt_files:
+        with open('engine/data/%s' % fn) as f_:
+            line = f_.readlines()[0]
+            gt_lines.append(line)
+    pred_lines = []
+    for fn in pred_files:
+        with open('engine/data/%s' % fn) as f_:
+            line = f_.readlines()[0]
+            pred_lines.append(line)
+    sum_dis = 0
+    sum_len = 0
+    for pdl, gtl in zip(pred_lines, gt_lines):
+        sum_dis += align(pdl, gtl)
+        sum_len = len(gtl)
+    return sum_dis * 1. / sum_len
+
+
 def eval_from_file(file_test, file_train, file_config):
     clear_data()
     root_dir = os.getcwd()
@@ -121,18 +144,49 @@ def eval_from_file(file_test, file_train, file_config):
     print(configs)
     model_dir = get_model_dir(file_train, file_config)
     # noinspection PyInterpreter
-    if  configs["engine"] == 'kraken':
+    if configs["engine"] == 'kraken':
         cmd_list = ['source activate kraken']
-        cmd_list.append('ketos test -m static/model/%s/kraken_best.mlmodel engines/data/*.png' %  model_dir)
+        cmd_list.append('ketos test -m static/model/%s/kraken_best.mlmodel engines/data/*.png' % model_dir)
         cmd_list.append('conda deactivate')
         cmd = '\n'.join(cmd_list)
         print(cmd)
-        res_str=  check_output(cmd, shell=True)
+        res_str = check_output(cmd, shell=True)
         res_str = res_str.split(b'\n')[-2]
         print(res_str)
         return res_str
+    elif configs["engine"] == 'calamari':
+        cmd_list = ['source activate calamari']
+        ckpt_file = 'static/model/%s/checkpoint' % model_dir
+        with open(ckpt_file) as f_:
+            model_file = f_.readlines()[0].split('"')[1]
+        cmd_list.append('calamari-predict --checkpoint %s --files engines/data/*.png' % model_file)
+        cmd_list.append('conda deactivate')
+        cmd = '\n'.join(cmd_list)
+        print(cmd)
+        subprocess.run(cmd, shell=True)
+        res_str = str(evl_pair())
+        return res_str
+    elif configs["engine"] == 'ocropus':
+        cmd_list = ['source activate ocropus']
+        list_model = [ele.split('.')[0].split('-')[1] for ele in os.listdir('static/model/%s' % model_dir) if ele.endswith('.pyrnn.gz')]
+        newest_model = max(list_model)
+        for ele in os.listdir('static/model/%s' % model_dir):
+            if ele.endswith('.pyrnn.gz'):
+                prefix = ele.split('.')[-3].split('-')
+        model_file = 'static/model/%s-%s.pyrnn.gz' % (newest_model, prefix)
+        cmd_list.append('calamari-predict --checkpoint %s --files engines/data/*.png' % model_file)
+        cmd_list.append('conda deactivate')
+        cmd = '\n'.join(cmd_list)
+        print(cmd)
+        subprocess.run(cmd, shell=True)
+        res_str = str(evl_pair())
+        return res_str
+
+
+
+
+
+
 
 # train_from_file((sys.argv[1], sys.argv[2]))
-
-
 
