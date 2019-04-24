@@ -20,7 +20,7 @@
   "ocropus":
   {
     "model_prefix": "-o",
-    "nline": "-N",
+    "nepoch": "-N",
     "save_freq": "--savefreq",
     "start": "--start",
     "learning_rate": "-r"

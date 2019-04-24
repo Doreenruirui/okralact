@@ -188,7 +188,7 @@ def eval_model():
     config = request.args.get('config', None)
     print(trainname, testname, config)
     if (trainname,  testname, config) not in app.eval_file2id:
-        job = app.eval_queue.enqueue('engines.train.eval_from_file', trainname,  testname, config)
+        job = app.eval_queue.enqueue('engines.eval.eval_from_file', trainname,  testname, config)
         job_id = job.get_id()
         app.eval_file2id[(trainname, testname, config)] = job_id
         app.eval_id2file[job_id] = (trainname,  testname, config)
@@ -252,5 +252,5 @@ def get_results():
         errors =  str(job.result)
     else:
         errors  = 'Error'
-    print(job.result.decode("utf-8"))
+    # print(job.result.decode("utf-8"))
     return redirect(url_for('manage_eval', error_message=errors))

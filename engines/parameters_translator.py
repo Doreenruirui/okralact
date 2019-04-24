@@ -48,6 +48,16 @@ class Translate:
 
     def ocropus(self):
         cmd = 'ocropus-rtrain engines/data/*.png '
+        if 'model_prefix' in self.configs:
+            model_prefix = self.configs['model_prefix']
+        else:
+            model_prefix = self.engine
+        cmd += self.translator['model_prefix'] + ' ' + pjoin(self.model_dir, model_prefix) + ' '
+        if 'save_freq' in self.configs:
+            save_freq = self.configs['save_freq']
+        else:
+            save_freq = 50
+        cmd += self.translator['save_freq'] + ' ' + str(save_freq) + ' '
         for para in self.configs:
             if para not in self.translator:
                 if para == "engine":
