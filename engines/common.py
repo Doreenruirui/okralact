@@ -21,3 +21,5 @@ def clear_data(foldername):
     list_files = os.listdir(pjoin(os.getcwd(), 'engines/' + foldername))
     if len(list_files) != 0:
         subprocess.run('rm -r engines/%s/*' % foldername, shell=True)
+
+
