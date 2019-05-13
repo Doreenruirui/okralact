@@ -44,9 +44,7 @@
   {
     "model_prefix": "--model_output",
     "niter": "--max_iterations",
-    "continue_from": "--weights",
-    "early_stop_min_error": "--early_stopping_best_model_prefix",
-    "optimizer": "--net_mode",
     "model_spec": "--net_spec",
+    "learning_rate": "--learning_rate"
   }
 }

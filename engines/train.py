@@ -27,6 +27,7 @@ from engines.common import extract_file, clear_data
 #             2 -- no image in the folder
 #             3 -- configure file not found
 #             4 -- configure file not valid
+
 def check_data(data_folder):
     list_file = os.listdir(data_folder)
     flag_empty = 1
@@ -48,6 +49,7 @@ def add_model(file_data, file_config):
     root_dir = os.getcwd()
     model_file = pjoin(root_dir, 'static/model', 'model_list')
     model_dict = list_model_dir()
+    print(model_dict)
     key = (file_data, file_config)
     if key not in model_dict:
         uni_model_dir = uuid.uuid4().hex
@@ -93,5 +95,5 @@ def train_from_file(file_data, file_config):
         subprocess.run(cmd, shell=True)
 
 
-# train_from_file((sys.argv[1], sys.argv[2]))
+# train_from_file('data_kraken.tar.gz', 'sample_tess.json')
 

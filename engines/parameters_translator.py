@@ -1,6 +1,15 @@
 from os.path import join as pjoin
 import json
 from engines.validate_parameters import read_json, read_parameters
+from engines.train_tesseract import *
+
+
+class Folders:
+    def __init__(self, model_dir):
+        self.tmp_folder = 'engines/tmp'
+        self.data_folder = 'engines/data'
+        self.model_folder = model_dir
+        self.checkpoint_folder = pjoin(model_dir, 'checkpoint')
 
 
 class Translate:
@@ -14,6 +23,43 @@ class Translate:
     def translate(self):
         method = getattr(self, self.engine, lambda: "Invalid Engine")
         return method()
+
+    def tesseract(self):
+        if 'model_prefix' in self.configs:
+            model_prefix = self.configs['model_prefix']
+        else:
+            model_prefix = self.engine
+        folders = Folders(self.model_dir)
+        preprocess(folders, model_prefix)
+        if 'partition' in self.configs:
+            partition = self.configs['partition']
+        else:
+            partition = 0.9
+        split_train_test(folders, train_ratio=partition)
+        cmd = 'lstmtraining --traineddata %s --train_listfile %s --eval_listfile %s --learning_rate 0.001 ' %\
+              (pjoin(folders.model_folder, model_prefix, model_prefix + '.traineddata'),
+               pjoin(folders.tmp_folder, 'list.train'),
+               pjoin(folders.tmp_folder, 'list.eval'))
+        cmd += self.translator['model_prefix'] + ' ' + pjoin(folders.checkpoint_folder, model_prefix) + ' '
+        voc_size = get_numofchar(folders)
+        for para in self.configs:
+            if para in ['engine', 'partition']:
+                continue
+            # elif para == 'continue_from':
+            #   cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
+            elif para == 'append':
+                cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
+            elif para == 'model_spec':
+                if para.split(' ')[-1].startswith('O'):
+                    model_spec = self.configs[para].rsplit(' ', 1)[0] + ' O1c' + str(voc_size) + ']'
+                    print(model_spec)
+                else:
+                    model_spec = self.configs[para]
+                cmd += ('%s \"%s\" ' % (self.translator[para], model_spec))
+            else:
+                cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
+        print(cmd)
+        self.cmd_list = [cmd]
 
     def kraken(self):
         cmd = 'ketos train engines/data/*.png '

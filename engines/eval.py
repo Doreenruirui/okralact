@@ -86,6 +86,7 @@ def eval_from_file(file_test, file_train, file_config):
         cmd_list.append('ocropus-rpred -m %s \'engines/eval/*.png\'' % model_file)
         cmd_list.append('conda deactivate')
         cmd = '\n'.join(cmd_list)
+
     print(cmd)
     subprocess.run(cmd, shell=True)
     res_str = str(evl_pair())

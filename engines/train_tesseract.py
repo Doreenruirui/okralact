@@ -1,4 +1,5 @@
 import subprocess
+from shutil import copyfile, rmtree
 import os
 from os.path import join as pjoin
 from PIL import Image
@@ -8,34 +9,27 @@ import random
 import numpy as np
 
 
-data_folder = 'engines/data'
-tmp_folder = 'engines/tmp'
-model_folder = 'engines/tmp/model'
-checkpoint_folder = 'engines/tmp/model/checkpoints'
-
-
-def get_all_files(postfix='.png'):
+def get_all_files(data_folder, postfix='.png'):
     return [ele.rsplit('.', 1)[0] for ele in os.listdir(data_folder) if ele.endswith(postfix)]
 
 
-def covert_image():
+def covert_image(folders):
     # convert image to tif
-    for fn in get_all_files():
-        im = Image.open(pjoin(data_folder, fn + '.png'))
-        im.save(pjoin(data_folder, fn + '.tif'))
-        os.remove(pjoin(data_folder, fn + '.png'))
+    for fn in get_all_files(folders.data_folder):
+        im = Image.open(pjoin(folders.data_folder, fn + '.png'))
+        im.save(pjoin(folders.data_folder, fn + '.tif'))
+        os.remove(pjoin(folders.data_folder, fn + '.png'))
 
 
-def generate_box():
+def generate_box(folders):
     # load image
-
-    with open(pjoin(tmp_folder, 'all-boxes'), 'w') as f_all:
-        for fn in get_all_files('.tif'):
-            with open(pjoin(data_folder, fn + '.tif'), "rb") as f:
+    with open(pjoin(folders.tmp_folder, 'all-boxes'), 'w') as f_all:
+        for fn in get_all_files(folders.data_folder, '.tif'):
+            with open(pjoin(folders.data_folder, fn + '.tif'), "rb") as f:
                 width, height = Image.open(f).size
 
             # load gt
-            with io.open(pjoin(data_folder, fn + '.gt.txt'), "r", encoding='utf-8') as f:
+            with io.open(pjoin(folders.data_folder, fn + '.gt.txt'), "r", encoding='utf-8') as f:
                 lines = f.read().strip().split('\n')
 
             box_str = ''
@@ -51,86 +45,89 @@ def generate_box():
                     if not unicodedata.combining(line[-1]):
                         box_str += u"%s %d %d %d %d 0\n" % (line[-1].encode('utf-8'), 0, 0, width, height)
                     box_str += "%s %d %d %d %d 0\n" % ("\t", width, height, width + 1, height + 1)
-            with open(pjoin(data_folder, fn + '.box'), 'w') as f_:
+            with open(pjoin(folders.data_folder, fn + '.box'), 'w') as f_:
                 f_.write(box_str)
             f_all.write(box_str)
 
 
-def generate_unicharset():
+def generate_unicharset(folders):
     subprocess.run('unicharset_extractor --output_unicharset "%s" --norm_mode 1 "%s"'
-                   % (pjoin(tmp_folder, "unicharset"), pjoin(tmp_folder, "all-boxes")),
+                   % (pjoin(folders.tmp_folder, "unicharset"), pjoin(folders.tmp_folder, "all-boxes")),
                    shell=True)
 
 
-def generate_lstmf():
-    for fn in get_all_files('.tif'):
+def generate_lstmf(folders):
+    for fn in get_all_files(folders.data_folder, '.tif'):
         subprocess.run('tesseract %s.tif %s --psm 7 lstm.train' %
-                       (pjoin(data_folder, fn), pjoin(data_folder, fn)), shell=True)
-    with open(pjoin(tmp_folder, 'all-lstmf'), 'w') as f_:
-        lstmf_files = get_all_files('.lstmf')
+                       (pjoin(folders.data_folder, fn), pjoin(folders.data_folder, fn)), shell=True)
+    with open(pjoin(folders.tmp_folder, 'all-lstmf'), 'w') as f_:
+        lstmf_files = get_all_files(folders.data_folder, '.lstmf')
         random.shuffle(lstmf_files)
         for fn in lstmf_files:
-            f_.write(pjoin(data_folder, fn + '.lstmf'))
+            f_.write(pjoin(folders.data_folder, fn + '.lstmf'))
             f_.write('\n')
 
 
-def split_train_test(train_ratio=0.9):
-    with open(pjoin(tmp_folder, 'all-lstmf')) as f_:
+def split_train_test(folders, train_ratio=0.9):
+    with open(pjoin(folders.tmp_folder, 'all-lstmf')) as f_:
         lines = f_.readlines()
     nline = len(lines)
     ntrain = int(np.round(nline * train_ratio))
-    with open(pjoin(tmp_folder, 'list.train'), 'w') as f_:
+    with open(pjoin(folders.tmp_folder, 'list.train'), 'w') as f_:
         for i in range(ntrain):
             f_.write(lines[i])
-    with open(pjoin(tmp_folder, 'list.eval'), 'w') as f_:
+    with open(pjoin(folders.tmp_folder, 'list.eval'), 'w') as f_:
         for i in range(ntrain, nline):
             f_.write(lines[i])
 
 
-def generate_protomodel():
-    subprocess.run('wget -O %s https://github.com/tesseract-ocr/langdata_lstm/raw/master/radical-stroke.txt'
-                   % (pjoin(tmp_folder, 'radical-stroke.txt')), shell=True)
-    subprocess.run('wget -O %s https://github.com/tesseract-ocr/langdata/raw/master/Latin.unicharset'
-                   % (pjoin(tmp_folder, 'Latin.unicharset')), shell=True)
-    subprocess.run('mkdir %s' % model_folder, shell=True)
-    subprocess.run('combine_lang_model --input_unicharset %s --script_dir %s --output_dir %s --lang model'
-                   % (pjoin(tmp_folder, 'unicharset'), tmp_folder, tmp_folder), shell=True)
-
-
-def train_model(model_name='model'):
-    if not os.path.exists(checkpoint_folder):
-        os.makedirs(checkpoint_folder)
-    with open(pjoin(tmp_folder, 'unicharset')) as f_:
-        nchar = f_.readlines()[0].strip()
-    cmd = 'lstmtraining ' \
-          '--traineddata %s ' \
-          '--net_spec "[1,36,0,1 Ct3,3,16 Mp3,3 Lfys48 Lfx96 Lrx96 Lfx256 O1c%s]" ' \
-          '--model_output %s ' \
-          '--learning_rate 20e-4 ' \
-          '--train_listfile %s ' \
-          '--eval_listfile %s ' \
-          '--max_iterations 10000' % (pjoin(model_folder, 'model.traineddata'),
-                                      nchar,
-                                      pjoin(checkpoint_folder, model_name),
-                                      pjoin(tmp_folder, 'list.train'),
-                                      pjoin(tmp_folder, 'list.eval'))
+def generate_protomodel(folders, model_prefix):
+    copyfile('static/docs/radical-stroke.txt', pjoin(folders.tmp_folder, 'radical-stroke.txt'))
+    copyfile('static/docs/Latin.unicharset', pjoin(folders.tmp_folder, 'Latin.unicharset'))
+    if not os.path.exists(folders.model_folder):
+        os.makedirs(folders.model_folder)
+    cmd = 'combine_lang_model --input_unicharset %s --script_dir %s --output_dir %s --lang %s' %\
+          (pjoin(folders.tmp_folder, 'unicharset'), folders.tmp_folder, folders.model_folder, model_prefix)
     print(cmd)
     subprocess.run(cmd, shell=True)
 
 
-def main():
-    if not os.path.exists(tmp_folder):
-        os.makedirs(tmp_folder)
-    covert_image()
-    generate_box()
-    generate_unicharset()
-    generate_lstmf()
-    split_train_test()
-    generate_protomodel()
-    train_model()
+def get_numofchar(folders):
+    with open(pjoin(folders.tmp_folder, 'unicharset')) as f_:
+        nchar = f_.readlines()[0].strip()
+    return nchar
 
 
-main()
+def preprocess(folders, model_prefix):
+    if os.path.exists(folders.tmp_folder):
+        rmtree(folders.tmp_folder)
+    os.makedirs(folders.tmp_folder)
+    if os.path.exists(folders.model_folder):
+        rmtree(folders.model_folder)
+    os.makedirs(folders.model_folder)
+    if os.path.exists(folders.checkpoint_folder):
+        rmtree(folders.checkpoint_folder)
+    os.makedirs(folders.checkpoint_folder)
+    covert_image(folders)
+    generate_box(folders)
+    generate_unicharset(folders)
+    generate_lstmf(folders)
+    generate_protomodel(folders, model_prefix)
+
+
+# def train():
+#     if not os.path.exists(tmp_folder):
+#         os.makedirs(tmp_folder)
+#     # covert_image()
+#     # generate_box()
+#     # generate_unicharset()
+#     generate_lstmf()
+#     split_train_test()
+#     generate_protomodel()
+#     train_model()
+#
+# train()
+
 
 
 
