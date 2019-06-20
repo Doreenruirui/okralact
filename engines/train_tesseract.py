@@ -13,12 +13,12 @@ def get_all_files(data_folder, postfix='.png'):
     return [ele.rsplit('.', 1)[0] for ele in os.listdir(data_folder) if ele.endswith(postfix)]
 
 
-def covert_image(folders):
+def convert_image(data_folder):
     # convert image to tif
-    for fn in get_all_files(folders.data_folder):
-        im = Image.open(pjoin(folders.data_folder, fn + '.png'))
-        im.save(pjoin(folders.data_folder, fn + '.tif'))
-        os.remove(pjoin(folders.data_folder, fn + '.png'))
+    for fn in get_all_files(data_folder):
+        im = Image.open(pjoin(data_folder, fn + '.png'))
+        im.save(pjoin(data_folder, fn + '.tif'))
+        os.remove(pjoin(data_folder, fn + '.png'))
 
 
 def generate_box(folders):
@@ -108,7 +108,7 @@ def preprocess(folders, model_prefix):
     if os.path.exists(folders.checkpoint_folder):
         rmtree(folders.checkpoint_folder)
     os.makedirs(folders.checkpoint_folder)
-    covert_image(folders)
+    convert_image(folders.data_folder)
     generate_box(folders)
     generate_unicharset(folders)
     generate_lstmf(folders)

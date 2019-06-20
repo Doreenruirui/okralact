@@ -7,6 +7,8 @@ import os
 from lib.file_operation import get_model_dir
 from evaluate.levenshtein import align
 from engines.common import clear_data, extract_file
+from engines.train_tesseract import convert_image, get_all_files
+from evaluate.evaluation import evaluate
 
 
 def evl_pair():
@@ -53,12 +55,12 @@ def eval_from_file(file_test, file_train, file_config):
     # noinspection PyInterpreter
     if configs["engine"] == 'kraken':
         cmd_list = ['source activate kraken']
-        image_files = [ele for ele in os.listdir('engines/eval/') if ele.endswith('.png')]
-        out_files = [ele.strip('.png') + '.txt' for ele in image_files]
-        pairs = ''
-        for imf, outf in zip(image_files, out_files):
-            pairs +=  '-i engines/eval/%s engines/eval/%s ' % (imf, outf)
-        cmd_list.append('kraken %s ocr -m static/model/%s/kraken_best.mlmodel -s' % (pairs,  model_dir))
+        # image_files = [ele for ele in os.listdir('engines/eval/') if ele.endswith('.png')]
+        # out_files = [ele.strip('.png') + '.txt' for ele in image_files]
+        # pairs = ''
+        # for imf, outf in zip(image_files, out_files):
+        #     pairs += '-i engines/eval/%s engines/eval/%s ' % (imf, outf)
+        cmd_list.append('kraken -I \'%s\' -o .txt ocr -m static/model/%s/kraken_best.mlmodel -s' % ('engines/eval/*.png',  model_dir))
         cmd_list.append('conda deactivate')
         cmd = '\n'.join(cmd_list)
         print(cmd)
@@ -86,10 +88,25 @@ def eval_from_file(file_test, file_train, file_config):
         cmd_list.append('ocropus-rpred -m %s \'engines/eval/*.png\'' % model_file)
         cmd_list.append('conda deactivate')
         cmd = '\n'.join(cmd_list)
-
+    elif configs["engine"] == 'tesseract':
+        if "prefix" in configs:
+            model_name = configs["prefix"]
+        else:
+            model_name = configs["engine"]
+        cmd_list = ['lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
+                    (pjoin('static/model', model_dir, 'checkpoint', model_name + '_checkpoint'),
+                     pjoin('static/model', model_dir, model_name, model_name + '.traineddata'),
+                     pjoin('static/model', model_dir, model_name + '.traineddata')),
+                    'export TESSDATA_PREFIX=%s' % pjoin(os.getcwd(), 'static/model', model_dir)]
+        convert_image('engines/eval')
+        image_files = get_all_files(data_folder='engines/eval', postfix='.tif')
+        for imf in image_files:
+            cmd_list.append('tesseract -l %s engines/eval/%s.tif engines/eval/%s ' % (model_name, imf, imf))
+        cmd = '\n'.join(cmd_list)
     print(cmd)
     subprocess.run(cmd, shell=True)
-    res_str = str(evl_pair())
+    gt_files = ['engines/eval/' + ele for ele in os.listdir('engines/eval') if ele.endswith('.gt.txt')]
+    res_str = str(evaluate(gt_files))
     return res_str
 
 
