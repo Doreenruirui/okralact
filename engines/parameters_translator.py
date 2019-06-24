@@ -1,7 +1,6 @@
-from os.path import join as pjoin
-import json
 from engines.validate_parameters import read_json, read_parameters
-from engines.train_tesseract import *
+from engines.process_tesseract import *
+from engines.common import split_train_test
 
 
 class Folders:
@@ -18,6 +17,11 @@ class Translate:
         self.engine = configs["engine"]
         self.model_dir = model_dir
         self.translator = read_json('engines/schemas/translate.json')[self.engine]
+        if 'partition' in configs:
+            partition = configs['partition']
+        else:
+            partition = 0.9
+        self.train_files, self.eval_files = split_train_test('engines/data', partition)
         self.translate()
 
     def translate(self):
@@ -31,11 +35,7 @@ class Translate:
             model_prefix = self.engine
         folders = Folders(self.model_dir)
         preprocess(folders, model_prefix)
-        if 'partition' in self.configs:
-            partition = self.configs['partition']
-        else:
-            partition = 0.9
-        split_train_test(folders, train_ratio=partition)
+        split(folders, self.train_files, self.eval_files)
         cmd = 'lstmtraining --traineddata %s --train_listfile %s --eval_listfile %s --learning_rate 0.001 ' %\
               (pjoin(folders.model_folder, model_prefix, model_prefix + '.traineddata'),
                pjoin(folders.tmp_folder, 'list.train'),
@@ -45,8 +45,6 @@ class Translate:
         for para in self.configs:
             if para in ['engine', 'partition']:
                 continue
-            # elif para == 'continue_from':
-            #   cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
             elif para == 'append':
                 cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
             elif para == 'model_spec':
@@ -59,7 +57,11 @@ class Translate:
             else:
                 cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
         print(cmd)
-        self.cmd_list = [cmd]
+        self.cmd_list = [cmd,
+                         'lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
+                         (pjoin(folders.checkpoint_folder, model_prefix + '_checkpoint'),
+                          pjoin(folders.model_folder, model_prefix, model_prefix + '.traineddata'),
+                          pjoin(folders.model_folder, model_prefix + '.traineddata'))]
 
     def kraken(self):
         cmd = 'ketos train engines/data/*.png '
@@ -67,6 +69,7 @@ class Translate:
             model_prefix = self.configs['model_prefix']
         else:
             model_prefix = self.engine
+
         cmd += self.translator['model_prefix'] + ' ' + pjoin(self.model_dir, model_prefix) + ' '
         for para in self.configs:
             if para == 'engine':
@@ -88,7 +91,7 @@ class Translate:
                 cmd += ('%s \"%s\" ' % (self.translator[para], self.configs[para]))
             else:
                 cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
-
+        cmd += '-e engines/data/valid/*.png'
         print(cmd)
         self.cmd_list = ['source activate kraken', cmd, 'conda deactivate']
 

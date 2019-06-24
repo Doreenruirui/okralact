@@ -24,61 +24,63 @@ def convert_image(data_folder):
 def generate_box(folders):
     # load image
     with open(pjoin(folders.tmp_folder, 'all-boxes'), 'w') as f_all:
-        for fn in get_all_files(folders.data_folder, '.tif'):
-            with open(pjoin(folders.data_folder, fn + '.tif'), "rb") as f:
-                width, height = Image.open(f).size
+        for folder_name in ['train', 'valid']:
+            data_folder = pjoin(folders.data_folder, folder_name)
+            for fn in get_all_files(data_folder, '.tif'):
+                with open(pjoin(data_folder, fn + '.tif'), "rb") as f:
+                    width, height = Image.open(f).size
+                # load gt
+                with io.open(pjoin(data_folder, fn + '.gt.txt'), "r", encoding='utf-8') as f:
+                    lines = f.read().strip().split('\n')
+                box_str = ''
+                for line in lines:
+                    if line.strip():
+                        for i in range(1, len(line)):
+                            char = line[i]
+                            prev_char = line[i - 1]
+                            if unicodedata.combining(char):
+                                box_str += u"%s %d %d %d %d 0\n" % ((prev_char + char).encode('utf-8'), 0, 0, width, height)
+                            elif not unicodedata.combining(prev_char):
+                                box_str += u"%s %d %d %d %d 0\n" % (prev_char.encode('utf-8'), 0, 0, width, height)
+                        if not unicodedata.combining(line[-1]):
+                            box_str += u"%s %d %d %d %d 0\n" % (line[-1].encode('utf-8'), 0, 0, width, height)
+                        box_str += "%s %d %d %d %d 0\n" % ("\t", width, height, width + 1, height + 1)
+                with open(pjoin(data_folder, fn + '.box'), 'w') as f_:
+                    f_.write(box_str)
+                f_all.write(box_str)
 
-            # load gt
-            with io.open(pjoin(folders.data_folder, fn + '.gt.txt'), "r", encoding='utf-8') as f:
-                lines = f.read().strip().split('\n')
 
-            box_str = ''
-            for line in lines:
-                if line.strip():
-                    for i in range(1, len(line)):
-                        char = line[i]
-                        prev_char = line[i - 1]
-                        if unicodedata.combining(char):
-                            box_str += u"%s %d %d %d %d 0\n" % ((prev_char + char).encode('utf-8'), 0, 0, width, height)
-                        elif not unicodedata.combining(prev_char):
-                            box_str += u"%s %d %d %d %d 0\n" % (prev_char.encode('utf-8'), 0, 0, width, height)
-                    if not unicodedata.combining(line[-1]):
-                        box_str += u"%s %d %d %d %d 0\n" % (line[-1].encode('utf-8'), 0, 0, width, height)
-                    box_str += "%s %d %d %d %d 0\n" % ("\t", width, height, width + 1, height + 1)
-            with open(pjoin(folders.data_folder, fn + '.box'), 'w') as f_:
-                f_.write(box_str)
-            f_all.write(box_str)
-
-
-def generate_unicharset(folders):
+def generate_unicharset(folder):
     subprocess.run('unicharset_extractor --output_unicharset "%s" --norm_mode 1 "%s"'
-                   % (pjoin(folders.tmp_folder, "unicharset"), pjoin(folders.tmp_folder, "all-boxes")),
+                   % (pjoin(folder.tmp_folder, "unicharset"), pjoin(folder.tmp_folder, "all-boxes")),
                    shell=True)
 
 
 def generate_lstmf(folders):
-    for fn in get_all_files(folders.data_folder, '.tif'):
-        subprocess.run('tesseract %s.tif %s --psm 7 lstm.train' %
-                       (pjoin(folders.data_folder, fn), pjoin(folders.data_folder, fn)), shell=True)
+    for folder in ['train', 'valid']:
+        data_folder = pjoin(folders.data_folder, folder)
+        for fn in get_all_files(data_folder, '.tif'):
+            subprocess.run('tesseract %s.tif %s --psm 7 lstm.train' %
+                           (pjoin(data_folder, fn), pjoin(data_folder, fn)), shell=True)
     with open(pjoin(folders.tmp_folder, 'all-lstmf'), 'w') as f_:
-        lstmf_files = get_all_files(folders.data_folder, '.lstmf')
-        random.shuffle(lstmf_files)
-        for fn in lstmf_files:
-            f_.write(pjoin(folders.data_folder, fn + '.lstmf'))
-            f_.write('\n')
+        for folder_name in ['train', 'valid']:
+            data_folder = pjoin(folders.data_folder, folder_name)
+            lstmf_files = get_all_files(data_folder, '.lstmf')
+            random.shuffle(lstmf_files)
+            for fn in lstmf_files:
+                f_.write(pjoin(data_folder, fn + '.lstmf'))
+                f_.write('\n')
 
 
-def split_train_test(folders, train_ratio=0.9):
-    with open(pjoin(folders.tmp_folder, 'all-lstmf')) as f_:
-        lines = f_.readlines()
-    nline = len(lines)
-    ntrain = int(np.round(nline * train_ratio))
-    with open(pjoin(folders.tmp_folder, 'list.train'), 'w') as f_:
-        for i in range(ntrain):
-            f_.write(lines[i])
-    with open(pjoin(folders.tmp_folder, 'list.eval'), 'w') as f_:
-        for i in range(ntrain, nline):
-            f_.write(lines[i])
+def split(folders, train_files, eval_files):
+    if len(train_files) > 0:
+        with open(pjoin(folders.tmp_folder, 'list.train'), 'w') as f_:
+            for fn in train_files:
+                f_.write(pjoin(folders.data_folder, 'train', fn + '.lstmf') + '\n')
+    if len(eval_files) > 0:
+        with open(pjoin(folders.tmp_folder, 'list.eval'), 'w') as f_:
+            for fn in eval_files:
+                f_.write(pjoin(folders.data_folder, 'valid', fn + '.lstmf') + '\n')
 
 
 def generate_protomodel(folders, model_prefix):
@@ -108,7 +110,8 @@ def preprocess(folders, model_prefix):
     if os.path.exists(folders.checkpoint_folder):
         rmtree(folders.checkpoint_folder)
     os.makedirs(folders.checkpoint_folder)
-    convert_image(folders.data_folder)
+    convert_image(pjoin(folders.data_folder, 'train'))
+    convert_image(pjoin(folders.data_folder, 'valid'))
     generate_box(folders)
     generate_unicharset(folders)
     generate_lstmf(folders)

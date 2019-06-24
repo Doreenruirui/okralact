@@ -1,32 +1,16 @@
 ### Todo: Show all the help info
 
 # from parameters import get_parser
-from engines.validate_parameters import read_json
+from engines.validate_parameters import read_json, read_parameter_from_schema
 from engines.parameters_translator import Translate
 import subprocess
 from os.path import join as pjoin
 import os
 import uuid
 import shutil
-from lib.file_operation import list_model_dir, get_model_dir
-from engines.common import extract_file, clear_data
+from lib.file_operation import list_model_dir
+from engines.common import extract_file, clear_data, split_train_test
 
-
-# def train_from_file(config_file):
-#     configs = Config(config_file)
-#     cur_folder = os.getcwd()
-#     configs.model_dir = pjoin(cur_folder, configs.model_dir)
-#     configs.data_dir = pjoin(cur_folder, configs.data_dir)
-#     train(configs)
-# check whether the data folder contain valid data
-# 1. check whether there are images in the folder
-# 2. check whether every image has a groundtruth manual transcription
-# 3. check whether there is a valid config file
-# error code: 0 -- no error
-#             1 -- image without transcription
-#             2 -- no image in the folder
-#             3 -- configure file not found
-#             4 -- configure file not valid
 
 def check_data(data_folder):
     list_file = os.listdir(data_folder)
@@ -77,11 +61,15 @@ def add_model(file_data, file_config):
     return model_dir
 
 
+
+### TODO: split the dataset into training/test
+### TODO: after train the model and evaluate on the evaulation dataset and choose the best model
 def train_from_file(file_data, file_config):
     clear_data('data')
     root_dir = os.getcwd()
     print(root_dir)
     extract_file(pjoin(root_dir, 'static/data', file_data), 'data')
+
     err = check_data(pjoin(root_dir, 'engines/data'))
     print(err)
     if not err:
@@ -94,6 +82,4 @@ def train_from_file(file_data, file_config):
         print(cmd)
         subprocess.run(cmd, shell=True)
 
-
-# train_from_file('data_kraken.tar.gz', 'sample_tess.json')
 
