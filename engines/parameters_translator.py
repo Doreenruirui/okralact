@@ -1,14 +1,7 @@
 from engines.validate_parameters import read_json, read_parameters
 from engines.process_tesseract import *
+from engines import data_folder, tmp_folder
 from engines.common import split_train_test
-
-
-class Folders:
-    def __init__(self, model_dir):
-        self.tmp_folder = 'engines/tmp'
-        self.data_folder = 'engines/data'
-        self.model_folder = model_dir
-        self.checkpoint_folder = pjoin(model_dir, 'checkpoint')
 
 
 class Translate:
@@ -17,11 +10,15 @@ class Translate:
         self.engine = configs["engine"]
         self.model_dir = model_dir
         self.translator = read_json('engines/schemas/translate.json')[self.engine]
-        if 'partition' in configs:
+        if 'partition' in configs and configs['partition'] < 1.0:
             partition = configs['partition']
         else:
             partition = 0.9
-        self.train_files, self.eval_files = split_train_test('engines/data', partition)
+        self.ntrain, self.ntest = split_train_test(data_folder, tmp_folder, partition, engine=configs["engine"])
+        if 'model_prefix' in self.configs:
+            self.model_prefix = self.configs['model_prefix']
+        else:
+            self.model_prefix = self.engine
         self.translate()
 
     def translate(self):
@@ -29,19 +26,16 @@ class Translate:
         return method()
 
     def tesseract(self):
-        if 'model_prefix' in self.configs:
-            model_prefix = self.configs['model_prefix']
-        else:
-            model_prefix = self.engine
-        folders = Folders(self.model_dir)
-        preprocess(folders, model_prefix)
-        split(folders, self.train_files, self.eval_files)
-        cmd = 'lstmtraining --traineddata %s --train_listfile %s --eval_listfile %s --learning_rate 0.001 ' %\
-              (pjoin(folders.model_folder, model_prefix, model_prefix + '.traineddata'),
-               pjoin(folders.tmp_folder, 'list.train'),
-               pjoin(folders.tmp_folder, 'list.eval'))
-        cmd += self.translator['model_prefix'] + ' ' + pjoin(folders.checkpoint_folder, model_prefix) + ' '
-        voc_size = get_numofchar(folders)
+        model_folder = self.model_dir
+        checkpoint_folder = pjoin(self.model_dir, 'checkpoint')
+        preprocess(data_folder, tmp_folder, model_folder, checkpoint_folder, self.model_prefix)
+        cmd = 'lstmtraining --traineddata %s --train_listfile %s ' %\
+              (pjoin(model_folder, self.model_prefix, self.model_prefix + '.traineddata'),
+               pjoin(tmp_folder, 'list.train'))
+        # if self.ntest > 0:
+        #     cmd += '--eval_listfile %s ' % pjoin(tmp_folder, 'list.eval')
+        cmd += self.translator['model_prefix'] + ' ' + pjoin(checkpoint_folder, self.model_prefix) + ' '
+        voc_size = get_numofchar(tmp_folder)
         for para in self.configs:
             if para in ['engine', 'partition']:
                 continue
@@ -59,28 +53,31 @@ class Translate:
         print(cmd)
         self.cmd_list = [cmd,
                          'lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
-                         (pjoin(folders.checkpoint_folder, model_prefix + '_checkpoint'),
-                          pjoin(folders.model_folder, model_prefix, model_prefix + '.traineddata'),
-                          pjoin(folders.model_folder, model_prefix + '.traineddata'))]
+                         (pjoin(checkpoint_folder, self.model_prefix + '_checkpoint'),
+                          pjoin(model_folder, self.model_prefix, self.model_prefix + '.traineddata'),
+                          pjoin(model_folder, self.model_prefix + '.traineddata'))]
 
     def kraken(self):
-        cmd = 'ketos train engines/data/*.png '
-        if 'model_prefix' in self.configs:
-            model_prefix = self.configs['model_prefix']
+        print(self.configs)
+        cmd = 'ketos train -t %s ' % pjoin(tmp_folder, 'list.train')
+        cmd += '-e %s ' % pjoin(tmp_folder, 'list.eval')
+        cmd += self.translator['model_prefix'] + ' ' + pjoin(self.model_dir, self.model_prefix) + ' '
+        if 'early_stop' in self.configs:
+            cmd += '%s early ' % self.translator['early_stop']
+            if 'early_stop_min_improve' in self.configs:
+                cmd += '%s %f ' % (self.translator['early_stop_min_improve'], self.configs['early_stop_min_improve'])
+            if 'early_stop_nbest' in self.configs:
+                cmd += '%s %d ' % (self.translator['early_stop_nbest'], self.configs['early_stop_nbest'])
         else:
-            model_prefix = self.engine
-
-        cmd += self.translator['model_prefix'] + ' ' + pjoin(self.model_dir, model_prefix) + ' '
+            cmd += '%s dumb ' % self.translator['early_stop']
         for para in self.configs:
-            if para == 'engine':
+            if para in ['engine', 'early_stop', 'partition']:
                 continue
             if para == "preload":
                 if self.configs[para]:
                     cmd += '--preload '
                 else:
                     cmd += '--no-preload '
-            elif para == 'early_stop':
-                cmd += self.translator[para] + ' early '
             elif para == 'continue_from':
                 if len(self.configs[para]) > 0:
                     cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
@@ -90,8 +87,8 @@ class Translate:
             elif para == 'model_spec':
                 cmd += ('%s \"%s\" ' % (self.translator[para], self.configs[para]))
             else:
+                print(para)
                 cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
-        cmd += '-e engines/data/valid/*.png'
         print(cmd)
         self.cmd_list = ['source activate kraken', cmd, 'conda deactivate']
 
