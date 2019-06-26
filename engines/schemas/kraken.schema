@@ -15,7 +15,7 @@
         "nepoch" : {
             "type" : "number",
             "format" : "integer",
-            "default" : -1,
+            "default" : 1,
             "description" : "Number of epoches to train before stopping."
             },
         "partition" : {

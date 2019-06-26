@@ -12,10 +12,10 @@
              "default" : "tesseract",
              "description" : "The prefix of the model file."
              },
-        "niter" : {
+        "nepoch" : {
             "type" : "number",
             "format" : "integer",
-            "default" : 0,
+            "default" : 1,
             "description" : "Number of iterations to train before stopping."
             },
         "partition" : {

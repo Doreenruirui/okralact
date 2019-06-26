@@ -16,7 +16,6 @@ from shutil import move, rmtree
 from engines import data_folder, tmp_folder
 
 
-
 def check_data(data_folder):
     list_file = os.listdir(data_folder)
     flag_empty = 1
@@ -66,22 +65,18 @@ def add_model(file_data, file_config):
     return model_dir
 
 
-
-### TODO: split the dataset into training/test
 ### TODO: after train the model and evaluate on the evaulation dataset and choose the best model
 def train_from_file(file_data, file_config):
-    clear_data('data')
+    clear_data(data_folder)
+    clear_data(tmp_folder)
     root_dir = os.getcwd()
     print(root_dir)
-    extract_file(pjoin(root_dir, 'static/data', file_data), 'data')
-
-    err = check_data(pjoin(root_dir, 'engines/data'))
+    extract_file(pjoin(root_dir, 'static/data', file_data), data_folder)
+    err = check_data(pjoin(root_dir, data_folder))
     print(err)
     if not err:
-        configs = read_json(pjoin(root_dir, 'static/configs', file_config))
-        print(configs)
         model_dir = add_model(file_data, file_config)
-        translator = Translate(configs, model_dir)
+        translator = Translate(file_config, model_dir)
         cmd_list = translator.cmd_list
         cmd = '\n'.join(cmd_list)
         print(cmd)

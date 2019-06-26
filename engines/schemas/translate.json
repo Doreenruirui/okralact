@@ -28,7 +28,7 @@
   "calamari":
   {
     "model_prefix": "--output_model_prefix",
-    "niter": "--max_iters",
+    "nepoch": "--max_iters",
     "continue_from": "--weights",
     "early_stop_freq": "--early_stopping_frequency",
     "early_stop_nbest": "--early_stopping_nbest",
@@ -38,13 +38,13 @@
     "partition": "-p",
     "save_freq": "--checkpoint_frequency",
     "preload": "--train_data_on_the_fly",
-    "preload_test": "--validation_data_on_the_fly"
+    "preload_test": "--validation_data_on_the_fly",
+    "batch_size": "--batch_size"
   },
   "tesseract":
   {
     "model_prefix": "--model_output",
-    "niter": "--max_iterations",
-    "model_spec": "--net_spec",
-    "learning_rate": "--learning_rate"
+    "nepoch": "--max_iterations",
+    "model_spec": "--net_spec"
   }
 }

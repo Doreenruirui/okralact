@@ -12,10 +12,10 @@
              "default" : "calamari",
              "description" : "The prefix of the model file."
              },
-        "niter" : {
+        "nepoch" : {
             "type" : "number",
             "format" : "integer",
-            "default" : 1000000,
+            "default" : 1,
             "description" : "Number of iteration to train before stopping."
             },
         "partition" : {
@@ -37,7 +37,7 @@
         "save_freq" :  {
             "type" : "number",
             "format" : "float",
-             "default" : -1,
+             "default" : 0.5,
              "description" : "The frequency how often to write checkpoints during training. If 0 < value <= 1 the unit is in epochs,  thus relative to the number of training examples. If  -1, the early_stopping_frequency will be used."
             },
         "early_stop_freq" : {
@@ -57,6 +57,13 @@
             "type" : "string",
             "default" : "calamari_best",
             "description" : "The prefix of the model file."
+        },
+        "learning_rate" :
+        {
+            "type" :"number",
+            "format" : "float",
+            "default" : 0.001,
+            "description" : "learning rate"
         },
         "preload" : {
             "type" : "boolean",

@@ -9,6 +9,7 @@ from evaluate.levenshtein import align
 from engines.common import clear_data, extract_file
 from engines.train_tesseract import convert_image, get_all_files
 from evaluate.evaluation import evaluate
+from engines import eval_folder
 
 
 def evl_pair():
@@ -45,10 +46,10 @@ def evl_pair():
 
 
 def eval_from_file(file_test, file_train, file_config):
-    clear_data('eval')
+    clear_data(eval_folder)
     root_dir = os.getcwd()
     print(root_dir)
-    extract_file(pjoin(root_dir, 'static/data', file_test), 'eval')
+    extract_file(pjoin(root_dir, 'static/data', file_test), eval_folder)
     configs = read_json(pjoin(root_dir, 'static/configs', file_config))
     print(configs)
     model_dir = get_model_dir(file_train, file_config)
