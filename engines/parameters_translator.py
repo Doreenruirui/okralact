@@ -1,6 +1,6 @@
 from engines.validate_parameters import read_json, read_parameters, read_parameter_from_schema
 from engines.process_tesseract import *
-from engines import data_folder, tmp_folder
+from engines import data_folder, tmp_folder, act_environ, deact_environ
 from engines.common import split_train_test
 import numpy as np
 
@@ -28,12 +28,9 @@ class Translate:
                                                    tmp_folder,
                                                    partition,
                                                    engine=self.engine)
-        self.act_environ = {"tesseract": '',
-                            "kraken": 'source activate kraken',
-                            "ocropus": 'source activate ocropus_env',
-                            "calamari": 'source activate calamari'}[self.engine]
-        self.deact_environ = 'conda deactivate'
         self.translate()
+        self.cmd_list = [act_environ(self.engine)] + self.cmd_list + [deact_environ]\
+            if self.engine != 'tesseract' else self.cmd_list
 
     def translate(self):
         method = getattr(self, self.engine, lambda: "Invalid Engine")
@@ -129,7 +126,7 @@ class Translate:
         #         cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
 
         print(cmd)
-        self.cmd_list = [self.act_environ, cmd, self.deact_environ]
+        self.cmd_list = [cmd]
 
     def ocropus(self):
         train_str = files2str('train', ' ')
@@ -174,7 +171,7 @@ class Translate:
         #     else:
         #         cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
         print(cmd)
-        self.cmd_list = [self.act_environ, cmd, self.deact_environ]
+        self.cmd_list = [cmd]
 
     def calamari(self):
         train_str = files2str('train', ' ')
@@ -262,7 +259,7 @@ class Translate:
         #         else:
         #             cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
         print(cmd)
-        self.cmd_list = [self.act_environ, cmd, self.deact_environ]
+        self.cmd_list = [cmd]
 
 #
 # def test():

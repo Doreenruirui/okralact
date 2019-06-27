@@ -13,20 +13,20 @@ from engines import eval_folder
 
 
 def evl_pair():
-    gt_files = [ele for ele in os.listdir('engines/eval/') if ele.endswith('gt.txt')]
+    gt_files = [ele for ele in os.listdir(eval_folder) if ele.endswith('gt.txt')]
     pred_files = [ele.strip('.gt.txt') + '.txt' for ele in gt_files]
     gt_lines = []
     for fn in gt_files:
-        with open('engines/eval/%s' % fn) as f_:
+        with open('%s/%s' % (eval_folder, fn)) as f_:
             line = f_.readlines()[0].strip()
             gt_lines.append(line)
     pred_lines = []
     for fn in pred_files:
-        if not os.path.exists(pjoin('engines/eval', fn)):
+        if not os.path.exists(pjoin(eval_folder, fn)):
             pred_lines.append('')
             print('not exist:', fn)
             continue
-        with open('engines/eval/%s' % fn) as f_:
+        with open('%s/%s' % (eval_folder, fn)) as f_:
             lines = f_.readlines()
             if len(lines) > 0:
                 line = lines[0].strip()
@@ -56,14 +56,14 @@ def eval_from_file(file_test, file_train, file_config):
     # noinspection PyInterpreter
     if configs["engine"] == 'kraken':
         cmd_list = ['source activate kraken',
-                    'kraken -I \'%s\' -o .txt ocr -m static/model/%s/kraken_best.mlmodel -s'
-                    % ('engines/eval/*.png',  model_dir),
+                    'kraken -I \'%s/*.png\' -o .txt ocr -m static/model/%s/kraken_best.mlmodel -s'
+                    % (eval_folder,  model_dir),
                     'conda deactivate']
     elif configs["engine"] == 'calamari':
         with open('static/model/%s/checkpoint' % model_dir) as f_:
             model_file = f_.readlines()[0].split('"')[1]
         cmd_list = ['source activate calamari',
-                    'calamari-predict --checkpoint %s --files engines/eval/*.png' % model_file,
+                    'calamari-predict --checkpoint %s --files %s/*.png' % (model_file, eval_folder),
                     'conda deactivate']
     elif configs["engine"] == 'ocropus':
         cmd_list = ['source activate ocropus_env']
@@ -78,21 +78,26 @@ def eval_from_file(file_test, file_train, file_config):
         print(prefix)
         model_file = 'static/model/%s/%s-%s.pyrnn.gz' % (model_dir, prefix, newest_model)
         print(model_file)
-        cmd_list.append('ocropus-rpred -m %s \'engines/eval/*.png\'' % model_file)
+        cmd_list.append('ocropus-rpred -m %s \'%s/*.png\'' % (model_file, eval_folder))
         cmd_list.append('conda deactivate')
     elif configs["engine"] == 'tesseract':
         if "prefix" in configs:
             model_name = configs["prefix"]
         else:
             model_name = configs["engine"]
-        cmd_list = ['export TESSDATA_PREFIX=%s' % pjoin(os.getcwd(), 'static/model', model_dir)]
+        cmd_list = ['export TESSDATA_PREFIX=%s' % pjoin(os.getcwd(),
+                                                        'static/model', model_dir)]
         convert_image('engines/eval')
-        image_files = get_all_files(data_folder='engines/eval', postfix='.tif')
+        image_files = get_all_files(data_folder=eval_folder, postfix='.tif')
         for imf in image_files:
-            cmd_list.append('tesseract -l %s engines/eval/%s.tif engines/eval/%s ' % (model_name, imf, imf))
+            cmd_list.append('tesseract -l %s %s/%s.tif %s/%s ' % (model_name,
+                                                                  eval_folder,
+                                                                  imf,
+                                                                  eval_folder,
+                                                                  imf))
     cmd = '\n'.join(cmd_list)
     subprocess.run(cmd, shell=True)
-    gt_files = ['engines/eval/' + ele for ele in os.listdir('engines/eval') if ele.endswith('.gt.txt')]
+    gt_files = [eval_folder + '/' + ele for ele in os.listdir(eval_folder) if ele.endswith('.gt.txt')]
     res_str = str(evaluate(gt_files))
     return res_str
 
