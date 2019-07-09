@@ -1,1 +1,1 @@
-{"engine": "kraken", "nepoch" : 1}
+{"engine": "tesseract", "partition":  0.9, "save_freq": 0.5, "model_prefix": "aa", "nepoch": 10, "learning_rate":  0.002}

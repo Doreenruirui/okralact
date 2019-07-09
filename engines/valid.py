@@ -7,7 +7,7 @@ import os
 from lib.file_operation import get_model_dir
 from evaluate.levenshtein import align
 from engines.common import clear_data, extract_file
-from engines.train_tesseract import convert_image, get_all_files
+from engines.process_tesseract import convert_image, get_all_files
 from evaluate.evaluation import evaluate
 from engines import valid_folder, act_environ, deact_environ
 

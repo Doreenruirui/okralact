@@ -6,19 +6,11 @@ from rq.job import Job
 import tarfile
 import shutil
 import os
-import sys
-from engines.validate_parameters import valiadte_string
-import engines
+from engines.validate_parameters import validate_string
 import json
-import base64
-from lib.file_operation import list_model_dir, get_engines, get_configs, get_files
-from app.lib.forms import SelectEngineForm, UploadConfigForm, UploadDataForm, SelectConfigForm, SelectModelForm, get_options
+from lib.file_operation import list_model_dir
+from app.lib.forms import *
 from engines.validate_parameters import read_help_information_html
-
-
-# parentdir = os.getcwd().rsplit('/', 1)[0]
-# print(parentdir)
-# sys.path.insert(0, parentdir)
 
 
 def get_file_status():
@@ -29,6 +21,7 @@ def get_file_status():
         dict_status[(filename, config)] = job.get_status()
     return dict_status
 
+
 def get_eval_status():
     dict_status = {}
     for job_id in app.eval_id2file:
@@ -37,6 +30,7 @@ def get_eval_status():
         print({'job': job, 'trainname': trainname, 'testname': testname, 'config': config})
         dict_status[(trainname, testname, config)] = job.get_status()
     return dict_status
+
 
 # Manage Files
 @app.route('/data', methods=['GET', 'POST'])
@@ -65,7 +59,7 @@ def manage_configs(error_message):
     print(error_message)
     if form.validate_on_submit():
         content = f.read()
-        errors = valiadte_string(content)
+        errors = validate_string(content)
         print(errors)
         if len(errors) > 0:
             print('print_error')
@@ -118,12 +112,10 @@ def manage_job():
         print(get_configs())
         select_config = config_choices.get(form.select_config.data)
         select_data = data_choices.get(form.select_data.data)
-    #     redirect(url_for('manage_job'))
         print('data', select_data)
         print('config:', select_config)
         return redirect(url_for('train_model', filename=select_data, config=select_config))
     return render_template('jobs.html', form=form, dict_status=dict_status)
-
 
 
 # Manage Models
@@ -135,6 +127,7 @@ def manage_model():
             del model_dict[ele]
     print(model_dict)
     return render_template('models.html', dict_model=model_dict)
+
 
 # Manage Evals
 @app.route('/evaluation', methods=['GET', 'POST'], defaults={'error_message': ''})
@@ -154,7 +147,6 @@ def manage_eval(error_message):
         select_config = config_choices.get(form.select_config.data)
         select_test = train_choices.get(form.select_test.data)
         select_train = test_choices.get(form.select_train.data)
-    #     redirect(url_for('manage_job'))
         print('train', select_train)
         print('test', select_test)
         print('config:', select_config)
@@ -179,6 +171,7 @@ def train_model():
     # files_list = os.listdir(app.config['UPLOAD_FOLDER'])
     return redirect(url_for('manage_job'))
 
+
 # Run jobs
 @app.route('/eval', methods=['POST', 'GET'])
 def eval_model():
@@ -194,6 +187,7 @@ def eval_model():
         app.eval_id2file[job_id] = (trainname,  testname, config)
     print(app.eval_id2file)
     return redirect(url_for('manage_eval'))
+
 
 def tardir(path, tar_name):
     with tarfile.open(tar_name, "w:gz") as tar_handle:
@@ -229,6 +223,10 @@ def manual(engine):
     # Manage jobs
     print(engine)
     help_info = read_help_information_html(engine)
+    # if engine == 'kraken':
+    #     form = KrakenForm()
+    # elif engine == 'calamari':
+    #     form = CalamariForm()
     form = SelectEngineForm()
     if request.method == 'POST':
         engine_choices = dict(get_options(get_engines()))
@@ -237,6 +235,8 @@ def manual(engine):
         print('engine', select_engine)
         return redirect(url_for('manual', engine=select_engine))
     return render_template('manual.html', form=form, engine=engine, help_info=help_info)
+
+
 
 @app.route("/results", methods=['GET'])
 def get_results():
@@ -249,8 +249,8 @@ def get_results():
     print(job_id)
     job = Job.fetch(job_id, connection=app.redis)
     if job.is_finished:
-        errors =  str(job.result)
+        errors = str(job.result)
     else:
-        errors  = 'Error'
+        errors = 'Error'
     # print(job.result.decode("utf-8"))
     return redirect(url_for('manage_eval', error_message=errors))

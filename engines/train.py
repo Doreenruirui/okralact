@@ -1,7 +1,3 @@
-### Todo: Show all the help info
-
-# from parameters import get_parser
-from engines.validate_parameters import read_json, read_parameter_from_schema
 from engines.parameters_translator import Translate
 import subprocess
 from os.path import join as pjoin
@@ -10,9 +6,6 @@ import uuid
 import shutil
 from lib.file_operation import list_model_dir
 from engines.common import extract_file, clear_data
-import random
-import numpy as np
-from shutil import move, rmtree
 from engines import data_folder, tmp_folder
 
 

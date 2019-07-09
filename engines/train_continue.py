@@ -1,5 +1,3 @@
-### Todo: Show all the help info
-
 # from parameters import get_parser
 from engines.validate_parameters import read_json
 from engines.parameters_translator import Translate

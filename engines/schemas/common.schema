@@ -1,12 +1,39 @@
-{"type": "object",
- "required": ["engine"],
- "properties": {
-  "engine": {
-    "type": "string",
-    "default" : "kraken",
-    "enum": ["kraken", "ocropus", "calamari", "tesseract"]
-  }
- }
+{
+    "type": "object",
+    "required": ["engine"],
+    "properties": {
+        "engine": {
+        "type": "string",
+        "default" : "kraken",
+        "enum": ["kraken", "ocropus", "calamari", "tesseract"],
+        "description" : "Engine name."
+        }
+    },
+    "definitions": {
+        "model_prefix" : {
+            "type" : "string",
+            "default" : "model",
+            "description" : "The prefix of the model file."
+        },
+        "nepoch" : {
+            "type" : "number",
+            "format" : "integer",
+            "default" : 1,
+            "description" : "Number of epoches to train before stopping."
+        },
+        "partition" : {
+            "type" : "number",
+            "format" : "float",
+            "default" : 0.9,
+            "description":"ratio of training and validation data"
+        },
+        "learning_rate" : {
+            "type" :"number",
+            "format" : "float",
+            "default" : 0.001,
+             "description" : "learning rate"
+        }
+    }
 }
 
 

@@ -1,6 +1,5 @@
 import argparse
 
-##ToDo 1. Add automatically splitting the training and evaluation data
 ##ToDO 2. Unify the early stop parameters
 
 

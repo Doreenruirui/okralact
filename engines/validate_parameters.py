@@ -1,5 +1,6 @@
 import json
-from jsonschema import Draft4Validator
+from jsonschema import Draft4Validator, RefResolver
+import os
 
 
 class Config(object):
@@ -20,17 +21,18 @@ def write_json(dict_res, json_file):
 
 
 def validate(schema, config):
-    validator = Draft4Validator(schema)
+    resolver = RefResolver('file://%s/engines/schemas/' % os.getcwd(), None)
+    validator = Draft4Validator(schema, resolver=resolver)
     error_message = []
     for eno, error in enumerate(validator.iter_errors(config)):
         if len(error.path) > 0:
-            error_message.append('error %d:\tparameter %s %s' %(eno,  error.path[0], error.message))
+            error_message.append('error %d:\tparameter %s, %s' %(eno,  error.path[0], error.message))
         else:
-            error_message.append('error %d:\t%s' %(eno, error.message))
+            error_message.append('error %d:\t%s' % (eno, error.message))
     return error_message
 
 
-def valiadte_file(config_file):
+def validate_file(config_file):
     common_schema = read_json('engines/schemas/common.schema')
     config = read_json(config_file)
     errors = validate(common_schema, config)
@@ -44,7 +46,7 @@ def valiadte_file(config_file):
         return errors
 
 
-def valiadte_string(config_str):
+def validate_string(config_str):
     common_schema = read_json('engines/schemas/common.schema')
     config = json.loads(config_str)
     errors = validate(common_schema, config)
@@ -75,12 +77,27 @@ def read_help_information(engine):
     return help_info
 
 
+def load_jsonref(ref_path):
+    ref_file, ref_propty, ref_attr = ref_path.split('/')
+    ref_file = ref_file[:-1]
+    schema_path = '%s/engines/schemas/%s' % (os.getcwd(), ref_file)
+    print(schema_path)
+    ref_schema = read_json(schema_path)
+    return ref_schema[ref_propty][ref_attr]
+
+
 def read_help_information_html(engine):
     schema = read_json('engines/schemas/%s.schema' % engine)
     attrs = schema['properties']
     help_info = []
     for k in attrs:
-        help_info.append([k, str(attrs[k]["default"]), attrs[k]["description"]])
+        print(k, attrs[k])
+        if "$ref" in attrs[k]:
+            ref_path = attrs[k]["$ref"]
+            cur_node = load_jsonref(ref_path)
+        else:
+            cur_node = attrs[k]
+        help_info.append([k, str(cur_node["default"]), cur_node["description"]])
     return help_info
 
 
@@ -96,6 +113,7 @@ def read_parameters(config_file):
     return new_configs
 
 
+# print(validate_file("engines/schemas/sample.json"))
 # read_parameters('engines/schemas/sample.json')
 # print(read_help_information('calamari'))
 # errors = valiadte_file('engines/schemas/sample.json')

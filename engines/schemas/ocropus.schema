@@ -1,51 +1,32 @@
-{"type": "object",
- "additionalProperties": false,
- "properties": {
-        "engine": {
-            "type": "string",
-            "default": "ocropus",
-            "description" : "Engine Name, one from kraken/ocropus/calamari/tesseract",
-            "enum": ["ocropus"]
+{
+    "type": "object",
+    "properties": {
+    "engine": {
+        "const": "ocropus",
+        "default": "ocropus",
+        "description": "Engine name."
         },
-        "model_prefix" : {
-             "type" : "string",
-             "default" : "ocropus",
-             "description" : "The prefix of the model file."
-             },
-        "nepoch" : {
-            "type" : "number",
-            "format" : "integer",
-            "default" : 1,
-            "description" : "Number of lines to train before stopping."
-            },
-        "partition" : {
-            "type" : "number",
-            "format" : "float",
-            "default" : 0.9,
-            "description":"ratio of training and validation data"
-            },
-        "model_spec": {
-            "type" : "string",
-            "default" : "[b100]",
-            "description" : "The network structure. (f|b)(s) where f means forward only LSTM and b means bidirectional LSTM. s is the number of LSTM hidden size"
-            },
-        "learning_rate" : {
-            "type" :"number",
-            "format" : "float",
-            "default" : 0.0001,
-             "description" : "learning rate"
-            },
-        "save_freq" :  {
-            "type" : "number",
-            "format" : "float",
-             "default" : 0.5,
-             "description" : "The frequency of how often to save the model paratmeters during training. The unit is in epoches."
-            },
-        "start": {
-            "type" : "number",
-            "format" : "integer",
-            "default" : -1,
-            "description": "Manually set the number of already learned lines, which influences the naming and stoping condition."
-        }
-     }
+    "model_prefix": {"$ref": "common.schema#/definitions/model_prefix"},
+    "nepoch": {"$ref": "common.schema#/definitions/nepoch"},
+    "partition": {"$ref": "common.schema#/definitions/partition"},
+    "learning_rate": {"$ref": "common.schema#/definitions/learning_rate"},
+    "model_spec": {
+        "type" : "string",
+        "default" : "[b100]",
+        "description" : "The network structure. (f|b)(s) where f means forward only LSTM and b means bidirectional LSTM. s is the number of LSTM hidden size"
+        },
+    "save_freq" :  {
+        "type" : "number",
+        "format" : "float",
+         "default" : 0.5,
+         "description" : "The frequency of how often to save the model paratmeters during training. The unit is in epoches."
+        },
+    "start": {
+        "type" : "number",
+        "format" : "integer",
+        "default" : -1,
+        "description": "Manually set the number of already learned lines, which influences the naming and stoping condition."
+    }
+    },
+    "additionalProperties": false
 }
