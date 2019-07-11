@@ -1,0 +1,36 @@
+{
+    "type": "object",
+    "definitions": {
+        "cell":{
+            "type": "string",
+            "default": "lstm",
+            "enum": ["lstm", "gru"],
+            "description": "RNN cell, one of gru/lstm."
+            },
+        "direction": {
+            "type": "string",
+            "default" : "bidirection",
+            "enum": ["forward", "backward", "bidirection"],
+            "description": "The direction of RNN layer."
+            },
+        "time_axis":{
+            "type": "string",
+            "default": "x",
+            "enum": ["x", "y"],
+            "description": "Time axis, height (y) or width (x)"
+            },
+        "output": {
+            "type": "number",
+            "format": "integer",
+            "default": 100,
+            "description": "Output size"
+            },
+        "sum": {
+            "type": "boolean",
+            "default": false,
+            "description": "Summarizes the output in the requested dimension, outputting only the final step, collapsing the dimension to a single element."
+            }
+    }
+}
+
+

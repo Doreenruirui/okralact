@@ -1,0 +1,29 @@
+{
+    "type": "object",
+    "definitions": {
+        "width":{
+            "type": "number",
+            "format": "integer",
+            "default": 3,
+            "description": "Kernel width."
+            },
+        "height": {
+            "type": "number",
+            "format": "integer",
+            "default": 3,
+            "description": "Kernel height."
+            },
+        "output": {
+            "type": "number",
+            "format": "integer",
+            "default": 3,
+            "description": "Output size."
+            },
+        "activation": {
+            "type": "string",
+            "default" : "relu",
+            "enum": ["sigmoid", "tanh", "relu", "linear", "softmax"],
+            "description": "Activation function, one of sigmoid/tanh/relu/linear/softmax"
+            }
+    }
+}
