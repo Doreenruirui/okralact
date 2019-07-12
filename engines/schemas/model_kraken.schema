@@ -5,10 +5,40 @@
             "type": "object",
             "properties": {
                 "direction": {"$ref": "models/rnn.schema#/definitions/direction"},
-                "output": {"$ref": "models/rnn.schema#/definitions/output"}
+                "output": {"$ref": "models/rnn.schema#/definitions/output"},
+                "name": {
+                    "const":  "rnn"
+                    }
+                },
+            "additionalProperties": false
+            },
+        "cnn": {
+            "type": "object",
+            "properties": {
+                "width": {"$ref": "models/cnn.schema#/definitions/width"},
+                "height": {"$ref": "models/cnn.schema#/definitions/height"},
+                "activation": {"ref": "models/cnn.schema#/definitions/activation"},
+                "name": {
+                    "const":  "cnn"
+                    }
                 },
             "additionalProperties": false
             }
+    },
+    "properties":
+     {
+        "layer0": {"oneOf": [
+                        {"$ref": "model_kraken.schema#/definitions/rnn"},
+                        {"$ref": "model_kraken.schema#/definitions/cnn"}
+                        ]},
+        "layer1": {"oneOf": [
+                        {"$ref": "model_kraken.schema#/definitions/rnn"},
+                        {"$ref": "model_kraken.schema#/definitions/cnn"}
+                        ]},
+        "layer2": {"oneOf": [
+                        {"$ref": "model_kraken.schema#/definitions/rnn"},
+                        {"$ref": "model_kraken.schema#/definitions/cnn"}
+                        ]}
     },
     "additionalProperties": false
 }
