@@ -1,1 +1,1 @@
-{"layer0":  {"name": "rnn","direction":  "forward", "output": 10}, "layer1": { "name":"cnn", "width":  10, "activation": 0},  "layer2": { "name":"cnn","width":  10, "activation": 10}}
+{"layers":  [{"name": "rnn","direction":  "forward", "output": 10}, { "name":"cnn", "width":  10, "activation": 0},  { "name":"cnn","width":  10, "activation": 10}]}

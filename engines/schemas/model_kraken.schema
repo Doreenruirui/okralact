@@ -1,45 +1,21 @@
 {
     "type": "object",
     "definitions": {
-        "rnn": {
-            "type": "object",
-            "properties": {
-                "direction": {"$ref": "models/rnn.schema#/definitions/direction"},
-                "output": {"$ref": "models/rnn.schema#/definitions/output"},
-                "name": {
-                    "const":  "rnn"
-                    }
-                },
-            "additionalProperties": false
-            },
-        "cnn": {
-            "type": "object",
-            "properties": {
-                "width": {"$ref": "models/cnn.schema#/definitions/width"},
-                "height": {"$ref": "models/cnn.schema#/definitions/height"},
-                "activation": {"ref": "models/cnn.schema#/definitions/activation"},
-                "name": {
-                    "const":  "cnn"
-                    }
-                },
-            "additionalProperties": false
+        "layers":{
+            "type": "array",
+            "items": {
+                "oneOf":
+                    [
+                    {"$ref": "models/layers_kraken.schema#/definitions/rnn"},
+                    {"$ref": "models/layers_kraken.schema#/definitions/cnn"}
+                    ]
+                }
             }
     },
     "properties":
      {
-        "layer0": {"oneOf": [
-                        {"$ref": "model_kraken.schema#/definitions/rnn"},
-                        {"$ref": "model_kraken.schema#/definitions/cnn"}
-                        ]},
-        "layer1": {"oneOf": [
-                        {"$ref": "model_kraken.schema#/definitions/rnn"},
-                        {"$ref": "model_kraken.schema#/definitions/cnn"}
-                        ]},
-        "layer2": {"oneOf": [
-                        {"$ref": "model_kraken.schema#/definitions/rnn"},
-                        {"$ref": "model_kraken.schema#/definitions/cnn"}
-                        ]}
-    },
+          "layers":{"$ref": "model_kraken.schema#/definitions/layers"}
+     },
     "additionalProperties": false
 }
 
