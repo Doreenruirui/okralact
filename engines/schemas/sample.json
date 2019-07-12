@@ -1,1 +1,1 @@
-{"engine": "tesseract", "partition":  0.9, "save_freq": 0.5, "model_prefix": "aa", "nepoch": 10, "learning_rate":  0.002}
+{"layer0":  {"name": "rnn","direction":  "forward", "output": 10}, "layer1": { "name":"cnn", "width":  10, "activation": 0},  "layer2": { "name":"cnn","width":  10, "activation": 10}}
