@@ -1,0 +1,27 @@
+{
+    "type": "object",
+    "definitions": {
+        "type":{
+            "type": "number",
+            "format": "integer",
+            "default": 1,
+            "enum": [0,1,2],
+            "description": "2 (heatmap): a 2-d vector map of the input (possibly at different scale). (Not yet supported.) 1 (sequence): Output is a 1-d sequence of vector values. 0 (category): Output is a 0-d single vector value."
+            },
+        "CTC":{
+            "type": "string",
+            "default": "c",
+            "enum": ["l", "s", "c"],
+            "description": "l uses a logistic non-linearity on the output, allowing multiple hot elements in any output vector value. (Not yet supported. s uses a softmax non-linearity, with one-hot output in each value. c uses a softmax with CTC. Can only be used with s (sequence)."
+            },
+        "size": {
+            "type": "number",
+            "format": "integer",
+            "default": 103,
+            "description": "Output size, currently ignored since it is taken from the unicharset."
+            }
+        }
+    }
+}
+
+

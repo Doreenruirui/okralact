@@ -1,0 +1,20 @@
+{
+    "type": "object",
+    "definitions": {
+        "output": {
+            "type": "number",
+            "format": "integer",
+            "default": 3,
+            "description": "Output size of fully connected layer."
+            },
+        "activation": {
+            "type": "string",
+            "default" : "relu",
+            "enum": ["sigmoid", "tanh", "relu", "linear", "softmax"],
+            "description": "Activation function, one of sigmoid/tanh/relu/linear/softmax"
+            }
+        }
+    }
+}
+
+

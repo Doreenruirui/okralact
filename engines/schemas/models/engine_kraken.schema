@@ -4,22 +4,64 @@
         "rnn": {
             "type": "object",
             "properties": {
-                "name": {"const":  "rnn"},
+                "name": {"type": "string", "default":"rnn", "enum":  ["rnn"]},
+                "cell": {"$ref": "layer_rnn.schema#/definitions/cell"},
+                "time_axis": {"$ref": "layer_rnn.schema#/definitions/time_axis"},
                 "direction": {"$ref": "layer_rnn.schema#/definitions/direction"},
-                "output": {"$ref": "layer_rnn.schema#/definitions/output"}
-                },
-            "additionalProperties": false
+                "output": {"$ref": "layer_rnn.schema#/definitions/output"},
+                "sum": {"$ref": "layer_rnn.schema#/definitions/sum"}
             },
+            "additionalProperties": false
+        },
         "cnn": {
             "type": "object",
             "properties": {
-                "name": {"const":  "cnn"},
+                "name": {"type": "string", "default":"cnn", "enum":  ["cnn"]},
                 "width": {"$ref": "layer_cnn.schema#/definitions/width"},
                 "height": {"$ref": "layer_cnn.schema#/definitions/height"},
-                "activation": {"$ref": "layer_cnn.schema#/definitions/activation"}
-                },
+                "activation": {"$ref": "layer_cnn.schema#/definitions/activation"},
+                "output": {"$ref": "layer_cnn.schema#/definitions/output"}
+            },
             "additionalProperties": false
+        },
+        "maxpooling": {
+            "type" : "object",
+            "properties": {
+                "name": {"type": "string", "default": "maxpooling", "enum":  ["maxpooling"]},
+                "width": {"$ref": "layer_pooling.schema#/definitions/width"},
+                "height": {"$ref": "layer_pooling.schema#/definitions/height"},
+                "x_stride":{"$ref": "layer_pooling.schema#/definitions/x_stride"},
+                "x_stride":{"$ref": "layer_pooling.schema#/definitions/y_stride"}
+            },
+            "additionalProperties": false
+        },
+        "reshape": {
+            "type" : "object",
+            "properties": {
+                "name": {"type": "string", "default":"reshape", "enum":  ["reshape"]},
+                "dim":{"$ref": "layer_reshape.schema#/definitions/dim"},
+                "a": {"$ref": "layer_reshape.schema#/definitions/a"},
+                "b": {"$ref": "layer_reshape.schema#/definitions/b"},
+                "dim_e":{"$ref": "layer_reshape.schema#/definitions/dim_e"},
+                "dim_f":{"$ref": "layer_reshape.schema#/definitions/dim_f"}
+            },
+            "additionalProperties": false
+        },
+        "dropout": {
+            "type" : "object",
+            "properties": {
+                "name": {"type": "string", "default":"dropout", "enum":  ["dropout"]},
+                "prob": {"$ref": "layer_dropout.schema#/definitions/prob"},
+                "dim":{"$ref": "layer_dropout.schema#/definitions/dim"}
             }
+        },
+        "output": {
+            "type" : "object",
+            "properties": {
+                "name": {"type": "string", "default":"output", "enum":  ["output"]},
+                "size": {"$ref": "layer_output.schema#/definitions/size"}
+            }
+        }
     },
     "properties":
      {
@@ -28,9 +70,12 @@
             "items": {
                 "oneOf":[
                     {"$ref": "models/engine_kraken.schema#/definitions/rnn"},
-                    {"$ref": "models/engine_kraken.schema#/definitions/cnn"}
+                    {"$ref": "models/engine_kraken.schema#/definitions/cnn"},
+                    {"$ref": "models/engine_kraken.schema#/definitions/dropout"},
+                    {"$ref": "models/engine_kraken.schema#/definitions/reshape"},
+                    {"$ref": "models/engine_kraken.schema#/definitions/output"}
                     ]
-                }
+            }
         }
      },
     "additionalProperties": false
