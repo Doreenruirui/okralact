@@ -33,17 +33,18 @@ def validate(schema, config):
 
 
 def validate_file(config_file):
-    common_schema = read_json('engines/schemas/common.schema')
+    common_schema = read_json('engines/schemas/models/engine_kraken.schema')
     config = read_json(config_file)
     errors = validate(common_schema, config)
-    if len(errors) > 0:
-        return errors
-    else:
-        engine = config["engine"]
-        # print('engines/schemas/%s.schema' % engine)
-        engine_schema = read_json('engines/schemas/%s.schema' % engine)
-        errors = validate(engine_schema, config)
-        return errors
+    print(errors)
+    # if len(errors) > 0:
+    #     return errors
+    # else:
+    #     engine = config["engine"]
+    #     # print('engines/schemas/%s.schema' % engine)
+    #     engine_schema = read_json('engines/schemas/%s.schema' % engine)
+    #     errors = validate(engine_schema, config)
+    #     return errors
 
 
 def validate_string(config_str):
@@ -113,7 +114,7 @@ def read_parameters(config_file):
     return new_configs
 
 
-# print(validate_file("engines/schemas/sample.json"))
+print(validate_file("engines/schemas/sample.json"))
 # read_parameters('engines/schemas/sample.json')
 # print(read_help_information('calamari'))
 # errors = valiadte_file('engines/schemas/sample.json')
