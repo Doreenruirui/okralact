@@ -9,7 +9,7 @@
             },
         "direction": {
             "type": "string",
-            "default" : "bidirection",
+            "default" : "forward",
             "enum": ["forward", "backward", "bidirection"],
             "description": "The direction of RNN layer."
             },
@@ -20,8 +20,7 @@
             "description": "Time axis, height (y) or width (x)"
             },
         "output": {
-            "type": "number",
-            "format": "integer",
+            "type": "integer",
             "default": 100,
             "description": "Output size"
             },

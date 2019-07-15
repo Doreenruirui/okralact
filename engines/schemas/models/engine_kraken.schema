@@ -1,0 +1,37 @@
+{
+    "type": "object",
+    "definitions": {
+        "rnn": {
+            "type": "object",
+            "properties": {
+                "name": {"const":  "rnn"},
+                "direction": {"$ref": "layer_rnn.schema#/definitions/direction"},
+                "output": {"$ref": "layer_rnn.schema#/definitions/output"}
+                },
+            "additionalProperties": false
+            },
+        "cnn": {
+            "type": "object",
+            "properties": {
+                "name": {"const":  "cnn"},
+                "width": {"$ref": "layer_cnn.schema#/definitions/width"},
+                "height": {"$ref": "layer_cnn.schema#/definitions/height"},
+                "activation": {"$ref": "layer_cnn.schema#/definitions/activation"}
+                },
+            "additionalProperties": false
+            }
+    },
+    "properties":
+     {
+        "layers": {
+            "type": "array",
+            "items": {
+                "oneOf":[
+                    {"$ref": "models/engine_kraken.schema#/definitions/rnn"},
+                    {"$ref": "models/engine_kraken.schema#/definitions/cnn"}
+                    ]
+                }
+        }
+     },
+    "additionalProperties": false
+}
