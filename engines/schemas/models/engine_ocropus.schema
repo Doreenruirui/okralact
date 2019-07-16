@@ -19,7 +19,8 @@
                 "oneOf":[
                     {"$ref": "models/engine_kraken.schema#/definitions/rnn"}
                     ]
-                }
+                },
+            "maxItems": 1
         }
      },
     "additionalProperties": false

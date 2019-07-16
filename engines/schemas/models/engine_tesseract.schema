@@ -24,10 +24,10 @@
             },
             "additionalProperties": false
         },
-        "pooling": {
+        "maxpooling": {
             "type" : "object",
             "properties": {
-                "name": {"type": "string", "default": "pooling", "enum":  ["pooling"]},
+                "name": {"type": "string", "default": "maxpooling", "enum":  ["maxpooling"]},
                 "width": {"$ref": "layer_pooling.schema#/definitions/width"},
                 "height": {"$ref": "layer_pooling.schema#/definitions/height"},
                 "x_stride":{"$ref": "layer_pooling.schema#/definitions/x_stride"},
@@ -71,7 +71,6 @@
                 "oneOf":[
                     {"$ref": "models/engine_kraken.schema#/definitions/rnn"},
                     {"$ref": "models/engine_kraken.schema#/definitions/cnn"},
-                    {"$ref": "models/engine_kraken.schema#/definitions/pooling"},
                     {"$ref": "models/engine_kraken.schema#/definitions/dropout"},
                     {"$ref": "models/engine_kraken.schema#/definitions/reshape"},
                     {"$ref": "models/engine_kraken.schema#/definitions/output"}

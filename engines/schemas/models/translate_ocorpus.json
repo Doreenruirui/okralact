@@ -1,0 +1,5 @@
+{
+  "cnn": {"activation": {"sigmoid": "s", "tanh": "t", "relu": "r", "linear": "l", "softmax": "m"}},
+  "rnn": {"cell": {"gru":  "G", "lstm":  "L"},
+          "direction": {"forward": "f", "backward": "r", "bidirection":  "b"}},
+}
