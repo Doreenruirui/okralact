@@ -1,4 +1,5 @@
-from engines.validate_parameters import read_json, read_parameters, read_parameter_from_schema
+from engines.validate_parameters import read_parameter_from_schema
+from engines.common import read_json
 from engines.process_tesseract import *
 from engines import data_folder, tmp_folder, act_environ, deact_environ
 from engines.common import split_train_test
