@@ -1,0 +1,11 @@
+{"sigmoid": "s",
+  "tanh": "t",
+  "relu": "r",
+  "linear": "l",
+  "softmax": "m",
+  "gru": "G",
+  "lstm": "L",
+  "forward": "f",
+  "backward": "r",
+  "bidirection": "b"
+}

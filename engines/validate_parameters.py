@@ -26,7 +26,7 @@ def validate(schema, config):
     error_message = []
     for eno, error in enumerate(validator.iter_errors(config)):
         if len(error.path) > 0:
-            error_message.append('error %d:\tparameter %s, %s' %(eno,  error.path[0], error.message))
+            error_message.append('error %d:\tparameter %s, %s' % (eno,  error.path[0], error.message))
         else:
             error_message.append('error %d:\t%s' % (eno, error.message))
     return error_message
@@ -114,7 +114,9 @@ def read_parameters(config_file):
     return new_configs
 
 
-print(validate_file("engines/schemas/sample.json"))
+
+
+# print(validate_file("engines/schemas/sample.json"))
 # read_parameters('engines/schemas/sample.json')
 # print(read_help_information('calamari'))
 # errors = valiadte_file('engines/schemas/sample.json')

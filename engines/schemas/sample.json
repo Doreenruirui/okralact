@@ -1,1 +1,3 @@
-{"layers":  [{"name": "rnn", "direction":  "forward", "output": 10, "cell": "gru"}, {"name": "cnn", "width": 10, "output": 10, "activation": "relu"}]}
+{"layers":  [{"name": "cnn", "width": 10, "output": 10, "activation": "relu"},
+            {"name": "rnn", "direction":  "forward", "output": 10, "cell": "gru"}
+            ]}
