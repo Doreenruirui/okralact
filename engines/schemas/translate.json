@@ -14,14 +14,12 @@
   "momentum": "-m",
   "weight_decay": "-w",
   "optimizer": "--optimizer",
-  "partition": "-p",
-  "save_freq": "--savefreq"
+  "partition": "-p"
 },
   "ocropus":
   {
     "model_prefix": "-o",
     "nepoch": "-N",
-    "save_freq": "--savefreq",
     "start": "--start",
     "learning_rate": "-r"
   },

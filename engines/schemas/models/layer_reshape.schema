@@ -2,34 +2,29 @@
     "type": "object",
     "definitions": {
         "dim":{
-            "type": "number",
-            "format": "integer",
+            "type": "integer",
             "default": 1,
             "enum": [0, 1, 2, 3],
             "description": "Dimension chosen to be split."
             },
         "a": {
-            "type": "number",
-            "format": "integer",
+            "type": "integer",
             "default": 1,
             "description": "Distribute the chosen dimension into 2 dimension: a X b"
             },
         "b": {
-            "type": "number",
-            "format": "integer",
+            "type": "integer",
             "default": 12,
             "description": "Distribute the chosen dimension into 2 dimension: a X b"
             },
         "dim_e":{
-            "type": "number",
-            "format": "integer",
+            "type": "integer",
             "default": 1,
             "enum": [0, 1, 2, 3],
             "description": "Distributes a into dimension e"
             },
         "dim_f":{
-            "type": "number",
-            "format": "integer",
+            "type": "integer",
             "default": 3,
             "enum": [0, 1, 2, 3],
             "description": "Distributes b into dimension f"

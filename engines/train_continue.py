@@ -1,6 +1,6 @@
 # from parameters import get_parser
 from engines.validate_parameters import read_json
-from engines.parameters_translator import Translate
+from engines.translate_parameters import Translate
 import subprocess
 from os.path import join as pjoin
 import os

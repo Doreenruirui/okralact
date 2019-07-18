@@ -1,0 +1,25 @@
+{
+    "type": "object",
+    "definitions": {
+        "width":{
+            "type": "number",
+            "format": "integer",
+            "default": 0,
+            "description": "scale the input image with the user specific image width, 0 for variables."
+            },
+        "height": {
+            "type": "number",
+            "format": "integer",
+            "default": 48,
+            "description": "scale the input image with the user specific image height, 0 for variables."
+            },
+        "channel": {
+            "type": "number",
+            "format": "integer",
+            "default": 1,
+            "description": "Channel size."
+            }
+    }
+}
+
+

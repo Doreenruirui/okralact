@@ -10,17 +10,8 @@
     "nepoch": {"$ref": "common.schema#/definitions/nepoch"},
     "partition": {"$ref": "common.schema#/definitions/partition"},
     "learning_rate": {"$ref": "common.schema#/definitions/learning_rate"},
-    "model_spec": {
-        "type" : "string",
-        "default" : "[b100]",
-        "description" : "The network structure. (f|b)(s) where f means forward only LSTM and b means bidirectional LSTM. s is the number of LSTM hidden size"
-        },
-    "save_freq" :  {
-        "type" : "number",
-        "format" : "float",
-         "default" : 0.5,
-         "description" : "The frequency of how often to save the model paratmeters during training. The unit is in epoches."
-        },
+    "savefreq": {"$ref": "common.schema#/definitions/savefreq"},
+    "model": {"$ref": "models/model_ocropus.schema#/definitions/model"},
     "start": {
         "type" : "number",
         "format" : "integer",

@@ -2,22 +2,20 @@
     "type": "object",
     "properties": {
         "engine": {
-            "const": "kraken",
+            "type": "string",
             "default": "kraken",
+            "enum": ["kraken"],
             "description": "Engine name."
             },
         "model_prefix": {"$ref": "common.schema#/definitions/model_prefix"},
         "nepoch": {"$ref": "common.schema#/definitions/nepoch"},
         "partition": {"$ref": "common.schema#/definitions/partition"},
         "learning_rate": {"$ref": "common.schema#/definitions/learning_rate"},
-        "model_spec": {
-            "type" : "string",
-            "default" : "[1,48,0,1 Cr3,3,32 Do0.1,2 Mp2,2 Cr3,3,64 Do0.1,2 Mp2,2 S1(1x12)1,3 Lbx100 Do]",
-            "description" : "The network structure."
-            },
+        "savefreq": {"$ref": "common.schema#/definitions/savefreq"},
+        "batch_size": {"$ref": "common.schema#/definitions/batch_size"},
+        "model": {"$ref": "models/model_kraken.schema#/definitions/model"},
         "append" : {
-            "type": "number",
-            "format" : "integer",
+            "type": "integer",
             "default" : 0,
             "description" : "Removes layers before argument and then appends spec. Only works when loading an existing model."
             },
@@ -34,21 +32,15 @@
             },
         "momentum" : {
             "type" : "number",
-            "format" : "float",
+            "format": "float",
             "default" : 0.9,
             "description" : "Momentum used with SGD optimizer. Ignored otherwise."
             },
         "weight_decay" : {
             "type" : "number",
-            "format" : "float",
+            "format": "float",
             "default" : 0.0,
             "description" : "Weight decay, penalize the large weight, similar to regularization."
-            },
-        "save_freq" :  {
-            "type" : "number",
-            "format" : "float",
-             "default" : 1,
-             "description" : "The frequency of how often to save the model paratmeters during training. The unit is in epoches."
             },
         "early_stop" : {
             "type" : "boolean",
@@ -57,13 +49,12 @@
             },
         "early_stop_min_improve" : {
             "type" : "number",
-            "format" : "float",
+            "format": "float",
             "default" : 0.005,
             "description" : "Mininum improvement between epoches to reset early stopping. default is scales the delta by the best loss."
             },
         "early_stopp_nbest" : {
-            "type" : "number",
-            "format" : "integer",
+            "type" : "integer",
             "default" : 5,
             "description" : "Number of evaluations to wait before stopping training without improvement."
             },
@@ -78,6 +69,6 @@
              "description" : "Select device to use cpu, cuda:0, cuda:1, ….",
              "pattern" : "cpu|cuda:[0-9]"
         }
-        },
-        "additionalProperties": false
+    },
+    "additionalProperties": false
 }

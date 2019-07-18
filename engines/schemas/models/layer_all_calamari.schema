@@ -1,0 +1,41 @@
+{
+    "type": "object",
+    "definitions": {
+        "rnn": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "default":"rnn", "enum":  ["rnn"]},
+                "output": {"$ref": "layer_rnn.schema#/definitions/output"}
+            },
+            "additionalProperties": false
+        },
+        "cnn": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "default":"cnn", "enum":  ["cnn"]},
+                "width": {"$ref": "layer_cnn.schema#/definitions/width"},
+                "height": {"$ref": "layer_cnn.schema#/definitions/height"},
+                "output": {"$ref": "layer_cnn.schema#/definitions/output"}
+            },
+            "additionalProperties": false
+        },
+        "pooling": {
+            "type" : "object",
+            "properties": {
+                "name": {"type": "string", "default": "pooling", "enum":  ["pooling"]},
+                "width": {"$ref": "layer_pooling.schema#/definitions/width"},
+                "height": {"$ref": "layer_pooling.schema#/definitions/height"},
+                "x_stride":{"$ref": "layer_pooling.schema#/definitions/x_stride"},
+                "y_stride":{"$ref": "layer_pooling.schema#/definitions/y_stride"}
+            },
+            "additionalProperties": false
+        },
+        "dropout": {
+            "type" : "object",
+            "properties": {
+                "name": {"type": "string", "default":"dropout", "enum":  ["dropout"]},
+                "prob": {"$ref": "layer_dropout.schema#/definitions/prob"}
+            }
+        }
+    }
+}

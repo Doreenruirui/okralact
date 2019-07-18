@@ -9,11 +9,8 @@
     "model_prefix": {"$ref": "common.schema#/definitions/model_prefix"},
     "nepoch": {"$ref": "common.schema#/definitions/nepoch"},
     "partition": {"$ref": "common.schema#/definitions/partition"},
-    "model_spec": {
-        "type" : "string",
-        "default" : "[1,36,0,1 Ct3,3,16 Mp3,3 Lfys48 Lfx96 Lrx96 Lfx256 O1c111]",
-        "description" : "The network structure."
-        },
+    "batch_size": {"$ref": "common.schema#/definitions/batch_size"},
+    "model": {"$ref": "models/model_tesseract.schema#/definitions/model"},
     "append" : {
         "type": "number",
         "format" : "integer",

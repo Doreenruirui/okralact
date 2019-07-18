@@ -1,0 +1,15 @@
+{
+    "type": "object",
+    "definitions": {
+        "rnn": {
+            "type": "object",
+            "properties": {
+                "name": {"const":  "rnn"},
+                "direction": {"$ref": "models/rnn.schema#/definitions/direction"},
+                "output": {"$ref": "models/rnn.schema#/definitions/output"}
+                },
+            "additionalProperties": false
+            }
+    }
+}
+

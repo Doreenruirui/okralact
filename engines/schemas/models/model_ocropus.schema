@@ -1,28 +1,15 @@
 {
     "type": "object",
     "definitions": {
-        "rnn": {
-            "type": "object",
-            "properties": {
-                "name": {"const":  "rnn"},
-                "direction": {"$ref": "models/rnn.schema#/definitions/direction"},
-                "output": {"$ref": "models/rnn.schema#/definitions/output"}
-                },
-            "additionalProperties": false
-            }
-    },
-    "properties":
-     {
-        "layers": {
+        "model": {
             "type": "array",
             "items": {
                 "oneOf":[
-                    {"$ref": "models/engine_kraken.schema#/definitions/rnn"}
+                    {"$ref": "layer_all_ocropus.schema#/definitions/rnn"}
                     ]
                 },
             "maxItems": 1
         }
-     },
-    "additionalProperties": false
+    }
 }
 

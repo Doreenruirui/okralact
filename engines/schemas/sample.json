@@ -1,3 +1,5 @@
-{"layers":  [{"name": "cnn", "width": 10, "output": 10, "activation": "relu"},
-            {"name": "rnn", "direction":  "forward", "output": 10, "cell": "gru"}
-            ]}
+{"model":  [{"name": "cnn", "width": 10, "output": 10, "activation": "sigmoid"},
+            {"name": "pooling", "width": 2, "height": 2},
+            {"name": "rnn", "direction": "forward", "output": 10}
+            ],
+  "engine":  "kraken"}

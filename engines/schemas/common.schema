@@ -16,22 +16,32 @@
             "description" : "The prefix of the model file."
         },
         "nepoch" : {
-            "type" : "number",
-            "format" : "integer",
+            "type" : "integer",
             "default" : 1,
             "description" : "Number of epoches to train before stopping."
         },
         "partition" : {
             "type" : "number",
-            "format" : "float",
+            "format": "float",
             "default" : 0.9,
             "description":"ratio of training and validation data"
         },
         "learning_rate" : {
-            "type" :"number",
-            "format" : "float",
+            "type" : "number",
+            "format": "float",
             "default" : 0.001,
              "description" : "learning rate"
+        },
+        "batch_size": {
+            "type" : "integer",
+            "default" : 1,
+            "description" : "Mini batch size for training the model."
+        },
+        "savefreq" :  {
+            "type" : "number",
+            "format": "float",
+            "default" : 0.5,
+            "description" : "The frequency of how often to save the model paratmeters during training. The unit is in epoches."
         }
     }
 }

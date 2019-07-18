@@ -1,56 +1,16 @@
 {
     "type": "object",
     "definitions": {
-        "rnn": {
-            "type": "object",
-            "properties": {
-                "name": {"type": "string", "default":"rnn", "enum":  ["rnn"]},
-                "output": {"$ref": "layer_rnn.schema#/definitions/output"}
-            },
-            "additionalProperties": false
-        },
-        "cnn": {
-            "type": "object",
-            "properties": {
-                "name": {"type": "string", "default":"cnn", "enum":  ["cnn"]},
-                "width": {"$ref": "layer_cnn.schema#/definitions/width"},
-                "height": {"$ref": "layer_cnn.schema#/definitions/height"},
-                "output": {"$ref": "layer_cnn.schema#/definitions/output"}
-            },
-            "additionalProperties": false
-        },
-        "pooling": {
-            "type" : "object",
-            "properties": {
-                "name": {"type": "string", "default": "pooling", "enum":  ["pooling"]},
-                "width": {"$ref": "layer_pooling.schema#/definitions/width"},
-                "height": {"$ref": "layer_pooling.schema#/definitions/height"},
-                "x_stride":{"$ref": "layer_pooling.schema#/definitions/x_stride"},
-                "x_stride":{"$ref": "layer_pooling.schema#/definitions/y_stride"}
-            },
-            "additionalProperties": false
-        },
-        "dropout": {
-            "type" : "object",
-            "properties": {
-                "name": {"type": "string", "default":"dropout", "enum":  ["dropout"]},
-                "prob": {"$ref": "layer_dropout.schema#/definitions/prob"}
-            }
-        }
-    },
-    "properties":
-     {
-        "layers": {
+        "model": {
             "type": "array",
             "items": {
                 "oneOf":[
-                    {"$ref": "models/engine_kraken.schema#/definitions/rnn"},
-                    {"$ref": "models/engine_kraken.schema#/definitions/cnn"},
-                    {"$ref": "models/engine_kraken.schema#/definitions/pooling"},
-                    {"$ref": "models/engine_kraken.schema#/definitions/dropout"}
+                    {"$ref": "layer_all_calamari.schema#/definitions/rnn"},
+                    {"$ref": "layer_all_calamari.schema#/definitions/cnn"},
+                    {"$ref": "layer_all_calamari.schema#/definitions/pooling"},
+                    {"$ref": "layer_all_calamari.schema#/definitions/dropout"}
                     ]
             }
         }
-     },
-    "additionalProperties": false
+     }
 }

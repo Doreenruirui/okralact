@@ -2,26 +2,22 @@
     "type": "object",
     "definitions": {
         "width": {
-            "type": "number",
-            "format": "integer",
+            "type": "integer",
             "default": 2,
             "description": "Kernel width, x dimension"
             },
         "height": {
-            "type": "number",
-            "format": "integer",
+            "type": "integer",
             "default": 2,
             "description": "Kernel height, y dimension"
             },
         "x_stride":{
-            "type": "number",
-            "format": "integer",
+            "type": "integer",
             "default": 1,
             "description": "stride in x dimension."
             },
-        "x_stride":{
-            "type": "number",
-            "format": "integer",
+        "y_stride":{
+            "type": "integer",
             "default": 1,
             "description": "stride in y dimension."
             }

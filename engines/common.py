@@ -5,6 +5,18 @@ import subprocess
 import random
 import numpy as np
 from shutil import rmtree
+import json
+
+
+def read_json(json_file):
+    with open(json_file) as f_:
+        data = json.loads(f_.read())
+    return data
+
+
+def write_json(dict_res, json_file):
+    with open(json_file, 'w') as f_:
+        json.dump(dict_res, f_)
 
 
 def extract_file(filename, foldername):

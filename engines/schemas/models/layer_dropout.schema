@@ -5,17 +5,17 @@
             "type": "number",
             "format": "float",
             "default": 0.5,
+            "minimum": 0.0,
+            "maximum": 1.0,
             "description": "Dropout probability."
             },
         "dim":{
-            "type": "number",
-            "format": "integer",
+            "type": "integer",
             "default": 1,
             "enum": [1, 2],
             "description": "Dropout dimension, 1D or 2D."
             }
         }
-    }
 }
 
 

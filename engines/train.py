@@ -1,4 +1,4 @@
-from engines.parameters_translator import Translate
+from engines.translate_parameters import Translate
 import subprocess
 from os.path import join as pjoin
 import os

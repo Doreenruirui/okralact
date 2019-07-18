@@ -10,21 +10,13 @@
     "nepoch": {"$ref": "common.schema#/definitions/nepoch"},
     "partition": {"$ref": "common.schema#/definitions/partition"},
     "learning_rate": {"$ref": "common.schema#/definitions/learning_rate"},
-    "model_spec": {
-        "type" : "string",
-        "default" : "[C3,3,40 Mp2,2 C3,3,60 Mp2,2 L200 Do0.5]",
-        "description" : "The network structure."
-        },
+    "savefreq": {"$ref": "common.schema#/definitions/savefreq"},
+    "batch_size": {"$ref": "common.schema#/definitions/batch_size"},
+    "model": {"$ref": "models/model_calamari.schema#/definitions/model"},
     "continue_from" : {
         "type" : "string",
         "default": "",
         "description":"Loading existing file to continue training."
-        },
-    "save_freq" :  {
-        "type" : "number",
-        "format" : "float",
-         "default" : 0.5,
-         "description" : "The frequency how often to write checkpoints during training. If 0 < value <= 1 the unit is in epochs,  thus relative to the number of training examples. If  -1, the early_stopping_frequency will be used."
         },
     "early_stop_freq" : {
         "type" : "number",
@@ -94,12 +86,5 @@
         "description": "The backend to use for the neural net computation. Currently supported only tensorflow.",
         "enum": ["tensorflow"]
         },
-    "batch_size" : {
-        "type": "number",
-        "format": "integer",
-        "default": 1,
-        "description": "The batch size to use for training."
-        }
-    },
     "additionalProperties": false
 }
