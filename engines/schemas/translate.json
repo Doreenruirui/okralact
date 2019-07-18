@@ -1,48 +1,37 @@
 {
   "kraken":
-{
-  "model_prefix": "-o",
-  "nepoch": "-N",
-  "continue_from": "-i",
-  "append": "-a",
-  "learning_rate" : "-r",
-  "early_stop": "-q",
-  "early_stop_min_improve": "--min-delta",
-  "early_stop_nbest": "--lag",
-  "device": "-d",
-  "model_spec": "-s",
-  "momentum": "-m",
-  "weight_decay": "-w",
-  "optimizer": "--optimizer",
-  "partition": "-p"
-},
+  {
+    "model_prefix": "output",
+    "nepoch": "epochs",
+    "continue_from": "load",
+    "learning_rate" : "lrate",
+    "early_stop": "quit",
+    "early_stop_min_improve": "min-delta",
+    "early_stop_nbest": "lag",
+    "device": "device",
+    "weight_decay": "weight-decay"
+  },
   "ocropus":
   {
-    "model_prefix": "-o",
-    "nepoch": "-N",
-    "start": "--start",
-    "learning_rate": "-r"
+    "model_prefix": "output",
+    "nepoch": "ntrain",
+    "learning_rate": "lrate"
   },
   "calamari":
   {
-    "model_prefix": "--output_model_prefix",
-    "nepoch": "--max_iters",
-    "continue_from": "--weights",
-    "early_stop_freq": "--early_stopping_frequency",
-    "early_stop_nbest": "--early_stopping_nbest",
-    "early_stop_model_prefix": "--early_stopping_best_model_prefix",
-    "model_spec": "--network",
-    "optimizer": "--optimizer",
-    "partition": "-p",
-    "save_freq": "--checkpoint_frequency",
-    "preload": "--train_data_on_the_fly",
-    "preload_test": "--validation_data_on_the_fly",
-    "batch_size": "--batch_size"
+    "model_prefix": "output_model_prefix",
+    "nepoch": "max_iters",
+    "continue_from": "weights",
+    "early_stop_freq": "early_stopping_frequency",
+    "early_stop_nbest": "early_stopping_nbest",
+    "early_stop_model_prefix": "early_stopping_best_model_prefix",
+    "savefreq": "checkpoint_frequency",
+    "preload": "train_data_on_the_fly",
+    "preload_test": "validation_data_on_the_fly"
   },
   "tesseract":
   {
-    "model_prefix": "--model_output",
-    "nepoch": "--max_iterations",
-    "model_spec": "--net_spec"
+    "model_prefix": "model_output",
+    "nepoch": "max_iterations"
   }
 }

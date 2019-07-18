@@ -12,12 +12,8 @@
     "learning_rate": {"$ref": "common.schema#/definitions/learning_rate"},
     "savefreq": {"$ref": "common.schema#/definitions/savefreq"},
     "batch_size": {"$ref": "common.schema#/definitions/batch_size"},
+        "continue_from" : {"$ref": "common.schema#/definitions/continue_from"},
     "model": {"$ref": "models/model_calamari.schema#/definitions/model"},
-    "continue_from" : {
-        "type" : "string",
-        "default": "",
-        "description":"Loading existing file to continue training."
-        },
     "early_stop_freq" : {
         "type" : "number",
         "format" : "float",
@@ -85,6 +81,7 @@
         "default": "tensorflow",
         "description": "The backend to use for the neural net computation. Currently supported only tensorflow.",
         "enum": ["tensorflow"]
-        },
+        }
+    },
     "additionalProperties": false
 }

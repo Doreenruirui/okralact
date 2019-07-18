@@ -1,6 +1,11 @@
 {
     "type": "object",
     "definitions": {
+        "name": {
+            "type": "string",
+            "default":"dropout",
+             "enum":  ["dropout"]
+             },
         "prob": {
             "type": "number",
             "format": "float",

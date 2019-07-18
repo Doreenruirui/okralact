@@ -1,6 +1,11 @@
 {
     "type": "object",
     "definitions": {
+        "name": {
+            "type": "string",
+            "default": "pooling",
+             "enum":  ["pooling"]
+             },
         "width": {
             "type": "integer",
             "default": 2,

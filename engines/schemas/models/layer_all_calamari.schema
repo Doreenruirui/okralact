@@ -1,10 +1,18 @@
 {
     "type": "object",
     "definitions": {
+        "input": {
+            "type": "object",
+            "properties": {
+                "name": {"$ref": "layer_input.schema#/definitions/name"},
+                "height": {"$ref": "layer_input.schema#/definitions/height"}
+            },
+            "additionalProperties": false
+        },
         "rnn": {
             "type": "object",
             "properties": {
-                "name": {"type": "string", "default":"rnn", "enum":  ["rnn"]},
+                "name": {"$ref": "layer_rnn.schema#/definitions/name"},
                 "output": {"$ref": "layer_rnn.schema#/definitions/output"}
             },
             "additionalProperties": false
@@ -12,7 +20,7 @@
         "cnn": {
             "type": "object",
             "properties": {
-                "name": {"type": "string", "default":"cnn", "enum":  ["cnn"]},
+                "name": {"$ref": "layer_cnn.schema#/definitions/name"},
                 "width": {"$ref": "layer_cnn.schema#/definitions/width"},
                 "height": {"$ref": "layer_cnn.schema#/definitions/height"},
                 "output": {"$ref": "layer_cnn.schema#/definitions/output"}
@@ -22,7 +30,7 @@
         "pooling": {
             "type" : "object",
             "properties": {
-                "name": {"type": "string", "default": "pooling", "enum":  ["pooling"]},
+                "name": {"$ref": "layer_pooling.schema#/definitions/name"},
                 "width": {"$ref": "layer_pooling.schema#/definitions/width"},
                 "height": {"$ref": "layer_pooling.schema#/definitions/height"},
                 "x_stride":{"$ref": "layer_pooling.schema#/definitions/x_stride"},
@@ -33,7 +41,7 @@
         "dropout": {
             "type" : "object",
             "properties": {
-                "name": {"type": "string", "default":"dropout", "enum":  ["dropout"]},
+                "name": {"$ref": "layer_dropout.schema#/definitions/name"},
                 "prob": {"$ref": "layer_dropout.schema#/definitions/prob"}
             }
         }

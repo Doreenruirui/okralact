@@ -1,6 +1,10 @@
 {
     "type": "object",
     "definitions": {
+        "name": {
+            "type": "string",
+            "default":"rnn",
+             "enum":["rnn"]},
         "cell":{
             "type": "string",
             "default": "lstm",

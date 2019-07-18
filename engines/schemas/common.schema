@@ -40,9 +40,15 @@
         "savefreq" :  {
             "type" : "number",
             "format": "float",
-            "default" : 0.5,
+            "default" : 1,
             "description" : "The frequency of how often to save the model paratmeters during training. The unit is in epoches."
+        },
+        "continue_from": {
+            "type": "string",
+            "default": "",
+            "description": "Loading existing file to continue training."
         }
+
     }
 }
 

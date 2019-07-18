@@ -78,7 +78,7 @@ def generate_protomodel(tmp_folder, model_folder, model_prefix):
 
 def get_numofchar(tmp_folder):
     with open(pjoin(tmp_folder, 'unicharset')) as f_:
-        nchar = f_.readlines()[0].strip()
+        nchar = int(f_.readlines()[0].strip())
     return nchar
 
 

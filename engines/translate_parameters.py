@@ -24,6 +24,7 @@ def files2str(setname, catstr):
     with open(pjoin(tmp_folder, 'list.%s' % setname)) as f_:
         for line in f_:
             a.append(line.strip())
+            # a.append(os.path.join(os.getcwd(), line.strip()))
     res_str = catstr.join(a)
     return res_str
 
@@ -36,12 +37,12 @@ class Translate:
 
         self.translator = read_json('engines/schemas/translate.json')[self.engine]
 
+        # load default values
         self.default = read_parameter_default(self.engine)
+        # replace default values with user specified values
         self.values = {k: self.configs[k] if k in self.configs else self.default[k] for k in self.default} # Rewrite value according to user specific configuration
 
-        self.batch_size = self.values["batch_size"]
         self.model_translator = ModelTranslator(self.configs["model"], self.engine)
-
 
         self.model_prefix = self.values["model_prefix"]
         self.nepoch = self.values['nepoch']
@@ -50,7 +51,6 @@ class Translate:
                                                    tmp_folder,
                                                    partition,
                                                    engine=self.engine)
-        # print(translator.model_str)
 
         self.translate()
         self.cmd_list = [act_environ(self.engine)] + self.cmd_list + [deact_environ]\
@@ -67,28 +67,34 @@ class Translate:
         model_folder = self.model_dir
         checkpoint_folder = pjoin(self.model_dir, 'checkpoint')
         preprocess(data_folder, tmp_folder, model_folder, checkpoint_folder, self.model_prefix)
+        # partition
         cmd = 'lstmtraining --traineddata %s --train_listfile %s ' %\
               (pjoin(model_folder, self.model_prefix, self.model_prefix + '.traineddata'),
                pjoin(tmp_folder, 'list.train'))
         if self.ntest > 0:
             cmd += '--eval_listfile %s ' % pjoin(tmp_folder, 'list.eval')
-
-        max_iter = self.nepoch * self.ntrain
+        # nepoch
+        max_iter = int(self.nepoch * np.ceil(self.ntrain / self.values["batch_size"]))
         cmd += '%s %d ' % (self.translator["nepoch"], max_iter)
 
+        # model_prefix
         cmd += '%s %s ' % (self.translator['model_prefix'],
                            pjoin(checkpoint_folder, self.model_prefix))
 
+        # model
         voc_size = get_numofchar(tmp_folder)
         cmd += '%s ' % self.model_translator.tesseract(self.values["batch_size"], voc_size)
 
+        floats = ["append",  "continue_from",
+                  "optimizer", "momentum", "adam_beta",
+                  "target_error_rate",
+                  "perfect_sample_delay"]
         for para in self.configs:
-            if para in ['engine', 'partition', "model_prefix"]:
+            if para not in floats:
                 continue
-            elif para == 'append':
-                cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
             else:
-                cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
+                para_name = self.translator[para] if para in self.translator else para
+                cmd += '--%s %s ' % (para_name, str(self.configs[para]))
         print(cmd)
         self.cmd_list = [cmd,
                          'lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
@@ -98,35 +104,47 @@ class Translate:
 
     def kraken(self):
         print(self.configs)
+        # Partition
         cmd = 'ketos train -t %s -e %s ' % (pjoin(tmp_folder, 'list.train'),
                                                  pjoin(tmp_folder, 'list.eval'))
-        cmd += '%s %s ' % (self.translator['model_prefix'],
+        # model_prefix
+        cmd += '--%s %s ' % (self.translator['model_prefix'],
                            pjoin(self.model_dir, self.model_prefix))
-
-        cmd += '%s %d ' % (self.translator['nepoch'], self.nepoch)
-
+        # nepoch
+        cmd += '--%s %d ' % (self.translator['nepoch'], self.nepoch)
+        # save_freq
         cmd += '--savefreq %.1f ' % self.values['savefreq']
+        # learning_rate
+        cmd += '--%s %f ' % (self.translator['learning_rate'], self.values['learning_rate'])
+        # model
+        cmd += '%s ' % self.model_translator.kraken(self.values["batch_size"])  # model specification
 
-        cmd += '%s ' % self.model_translator.kraken(self.values["batch_size"])
-
+        # early stop
         if 'early_stop' in self.configs:
-            cmd += '%s early ' % self.translator['early_stop']
+            cmd += '--%s early ' % self.translator['early_stop']
             if 'early_stop_min_improve' in self.configs:
-                cmd += '%s %f ' % (self.translator['early_stop_min_improve'],
+                cmd += '--%s %f ' % (self.translator['early_stop_min_improve'],
                                    self.configs['early_stop_min_improve'])
             if 'early_stop_nbest' in self.configs:
-                cmd += '%s %d ' % (self.translator['early_stop_nbest'],
+                cmd += '--%s %d ' % (self.translator['early_stop_nbest'],
                                    self.configs['early_stop_nbest'])
         else:
-            cmd += '%s dumb ' % self.translator['early_stop']
+            cmd += '--%s dumb ' % self.translator['early_stop']
 
-        cmd += '%s %f ' % (self.translator['learning_rate'],
-                           self.values['learning_rate'])
+        floats = ["append", "continue_from",
+                  "optimizer", "momentum",
+                  "weight_decay", "preload", "device"]
 
+        for para in self.configs:
+            if para not in floats:
+                continue
+            para_name = self.translator[para] if para in self.translator else para
+            cmd += '--%s %s ' % (para_name, self.values[para])
         print(cmd)
         self.cmd_list = [cmd]
 
     def ocropus(self):
+        # partition
         train_str = files2str('train', ' ')
         if self.ntest > 0:
             test_str = files2str('eval', ':')
@@ -134,44 +152,34 @@ class Translate:
         else:
             cmd = 'ocropus-rtrain %s/*.png ' % data_folder
 
+        # nepoch
         max_iter = self.nepoch * self.ntrain
+        cmd += '--%s %d ' % (self.translator["nepoch"], max_iter)
 
-        cmd += '%s %d ' % (self.translator["nepoch"], max_iter)
-
-        cmd += '%s %s ' % (self.translator['model_prefix'],
+        # model_prefix
+        cmd += '--%s %s ' % (self.translator['model_prefix'],
                            pjoin(self.model_dir, self.model_prefix))
-
+        # save_freq
         save_freq = int(self.values['savefreq'] * self.ntrain)
         cmd += '--savefreq %d ' % save_freq
 
-        model_spec = self.values['model_spec'][1:-1]
-        direction = model_spec[0]
-        hidden_size = int(model_spec[1:])
-        if direction != 'b':
-            cmd += '--unidirectional '
-        cmd += '-S %d ' % hidden_size
+        # model
+        cmd += '%s ' % self.model_translator.ocropus()
 
-        cmd += '%s %f ' % (self.translator['learning_rate'],
-                           self.values['learning_rate'])
+        # learning_rate
+        cmd += '--%s %f ' % (self.translator['learning_rate'], self.values['learning_rate'])
 
-
-        # for para in self.configs:
-        #     if para not in self.translator:
-        #         if para in ["engine", "save_freq", "nepoch", "model_prefix"]:
-        #             continue
-        #         if para == "model_spec":
-        #             value = self.configs[para][1:-1]
-        #             direction = value[0]
-        #             hidden_size = int(value[1:])
-        #             if direction != 'b':
-        #                 cmd += '--unidirectional '
-        #             cmd += '-S %d ' % hidden_size
-        #     else:
-        #         cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
-        print(cmd)
-        self.cmd_list = [cmd]
+        floats = ["start"]
+        for para in self.configs:
+            if para not in floats:
+                continue
+            para_name = self.translator[para] if para in self.translator else para
+            cmd += '--%s %s ' % (para_name, self.values[para])
+        # print(cmd)
+        self.cmd_list = [cmd.strip()]
 
     def calamari(self):
+        # partition
         train_str = files2str('train', ' ')
         if self.ntest > 0:
             test_str = files2str('eval', ' ')
@@ -179,71 +187,47 @@ class Translate:
         else:
             cmd = 'calamari-train --files %s/*.png ' % data_folder
 
-        batch_size = self.values['batch_size']
-        cmd += '%s %d ' % (self.translator['batch_size'], batch_size)
-
+        # nepoch
+        batch_size = self.values["batch_size"]
         max_iter = self.nepoch * int(np.ceil(self.ntrain / batch_size))
-        cmd += '%s %d ' % (self.translator['nepoch'], max_iter)
+        cmd += '--%s %d ' % (self.translator['nepoch'], max_iter)
 
-        cmd += '%s %.1f ' % (self.translator['savefreq'], self.values['savefreq'])
+        # savefreq
+        cmd += '--%s %.1f ' % (self.translator['savefreq'], self.values['savefreq'])
 
-        cmd += '%s %s ' % (self.translator['model_prefix'], self.model_prefix)
-
+        # model_prefix
+        cmd += '--%s %s ' % (self.translator['model_prefix'], self.model_prefix)
         cmd += '--output_dir %s ' % self.model_dir
 
+        # model
         cmd += self.model_translator.calamari(learning_rate=self.values["learning_rate"])
 
+        floats = ["batch_size",
+                  "continue_from", "preload", "preload_test",
+                  "early_stop_freq", "early_stop_nbest", "early_stop_model_prefix",
+                  "num_threads", "num_inter_threads", "num_intra_threads",
+                  "no_skip_invalid_gt",
+                  "gradient_clipping_mode", "gradient_clipping_const",
+                  "backend"]
 
-        # for para in self.configs:
-        #     if para in ["engine", "nepoch", "batch_size", 'partition']:
-        #         continue
-        #     if para == 'no_skip_invalid_gt':
-        #         if self.configs[para]:
-        #             print(self.configs[para])
-        #             cmd += '--no_skip_invalid_gt '
-        #         continue
-        #     if para == 'preload' or para == 'preload_test':
-        #         if self.configs[para]:
-        #             cmd += '%s ' % self.translator[para]
-        #         continue
-        #     if para not in self.translator:
-        #         print(para)
-        #         cmd += '--' + para + ' ' + str(self.configs[para]) + ' '
-        #     else:
-        #         if para == 'model_spec':
-        #             value = self.configs[para]
-        #             items = value[1:-1].split(' ')
-        #             network = ''
-        #             for ele in items:
-        #                 if ele[0] == 'C':
-        #                     print(ele)
-        #                     subeles = ele[1:].split(',')
-        #                     print(subeles)
-        #                     network += "cnn=" + subeles[-1] + ':' + subeles[0] + 'x' + subeles[1] + ','
-        #                 elif ele[:2] == 'Mp':
-        #                     print(ele)
-        #                     subeles = ele[2:].split(',')
-        #                     network += "pool=" + subeles[0] + 'x' + subeles[1] + ','
-        #                 elif ele[:2] == 'Do':
-        #                     print(ele)
-        #                     network += 'dropout=' + ele[2:] + ','
-        #                 elif ele[0] == 'L':
-        #                     print(ele)
-        #                     network += 'lstm=' + ele[1:] + ','
-        #             cmd += '--network %s ' % network.strip(',')
-        #         elif para == 'continue_from':
-        #             if len(self.configs["continue_from"]) > 0:
-        #                 cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
-        #         else:
-        #             cmd += self.translator[para] + ' ' + str(self.configs[para]) + ' '
+        for para in self.configs:
+            if para not in floats:
+                continue
+            if para == 'no_skip_invalid_gt':
+                if self.configs[para]:
+                    cmd += '--no_skip_invalid_gt '
+            elif para == 'preload' or para == 'preload_test':
+                if self.configs[para]:
+                    cmd += '--%s ' % self.translator[para]
+            else:
+                para_name = self.translator[para] if para in self.translator else para
+                cmd += '--%s %s ' % (para_name, str(self.configs[para]))
         print(cmd)
         self.cmd_list = [cmd]
 
-#
+
 def test():
-    # configs = read_json('engines/schemas/sample.json')
-    # print(configs)
-    translate = Translate('sample_kraken.json', model_dir='model')
+    translate = Translate('sample_calamari.json', model_dir='model')
     print(translate.cmd_list)
 
 test()

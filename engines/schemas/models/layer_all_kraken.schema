@@ -4,7 +4,7 @@
         "input": {
             "type": "object",
             "properties": {
-                "name": {"type": "string", "default":"input", "enum":  ["input"]},
+                "name": {"$ref": "layer_input.schema#/definitions/name"},
                 "width": {"$ref": "layer_input.schema#/definitions/width"},
                 "height": {"$ref": "layer_input.schema#/definitions/height"},
                 "channel": {"$ref": "layer_input.schema#/definitions/channel"}
@@ -14,7 +14,7 @@
         "rnn": {
             "type": "object",
             "properties": {
-                "name": {"type": "string", "default":"rnn", "enum":  ["rnn"]},
+                "name": {"$ref": "layer_rnn.schema#/definitions/name"},
                 "cell": {"$ref": "layer_rnn.schema#/definitions/cell"},
                 "time_axis": {"$ref": "layer_rnn.schema#/definitions/time_axis"},
                 "direction": {"$ref": "layer_rnn.schema#/definitions/direction"},
@@ -26,7 +26,7 @@
         "cnn": {
             "type": "object",
             "properties": {
-                "name": {"type": "string", "default":"cnn", "enum":  ["cnn"]},
+                "name": {"$ref": "layer_cnn.schema#/definitions/name"},
                 "width": {"$ref": "layer_cnn.schema#/definitions/width"},
                 "height": {"$ref": "layer_cnn.schema#/definitions/height"},
                 "activation": {"$ref": "layer_cnn.schema#/definitions/activation"},
@@ -37,7 +37,7 @@
         "pooling": {
             "type" : "object",
             "properties": {
-                "name": {"type": "string", "default": "pooling", "enum":  ["pooling"]},
+                "name": {"$ref": "layer_pooling.schema#/definitions/name"},
                 "width": {"$ref": "layer_pooling.schema#/definitions/width"},
                 "height": {"$ref": "layer_pooling.schema#/definitions/height"},
                 "x_stride":{"$ref": "layer_pooling.schema#/definitions/x_stride"},
@@ -48,7 +48,7 @@
         "reshape": {
             "type" : "object",
             "properties": {
-                "name": {"type": "string", "default":"reshape", "enum":  ["reshape"]},
+                "name": {"$ref": "layer_reshape.schema#/definitions/name"},
                 "dim":{"$ref": "layer_reshape.schema#/definitions/dim"},
                 "a": {"$ref": "layer_reshape.schema#/definitions/a"},
                 "b": {"$ref": "layer_reshape.schema#/definitions/b"},
@@ -60,7 +60,7 @@
         "dropout": {
             "type" : "object",
             "properties": {
-                "name": {"type": "string", "default":"dropout", "enum":  ["dropout"]},
+                "name": {"$ref": "layer_dropout.schema#/definitions/name"},
                 "prob": {"$ref": "layer_dropout.schema#/definitions/prob"},
                 "dim":{"$ref": "layer_dropout.schema#/definitions/dim"}
             }
@@ -68,7 +68,7 @@
         "output": {
             "type" : "object",
             "properties": {
-                "name": {"type": "string", "default":"output", "enum":  ["output"]},
+                "name": {"$ref": "layer_output.schema#/definitions/name"},
                 "size": {"$ref": "layer_output.schema#/definitions/size"}
             }
         }

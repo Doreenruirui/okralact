@@ -1,6 +1,11 @@
 {
     "type": "object",
     "definitions": {
+        "name": {
+            "type": "string",
+             "default":"cnn",
+             "enum":  ["cnn"]
+             },
         "width":{
             "type": "integer",
             "default": 3,

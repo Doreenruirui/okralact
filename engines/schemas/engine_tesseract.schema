@@ -11,16 +11,12 @@
     "partition": {"$ref": "common.schema#/definitions/partition"},
     "batch_size": {"$ref": "common.schema#/definitions/batch_size"},
     "model": {"$ref": "models/model_tesseract.schema#/definitions/model"},
+    "continue_from" : {"$ref": "common.schema#/definitions/continue_from"},
     "append" : {
         "type": "number",
         "format" : "integer",
         "default" : 0,
         "description" : "Removes layers before argument and then appends spec. Only works when loading an existing model."
-        },
-    "continue_from" : {
-        "type" : "string",
-        "default": "",
-        "description":"Loading existing file to continue training."
         },
     "optimizer" : {
         "type" : "string",
