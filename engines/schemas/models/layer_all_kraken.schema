@@ -63,14 +63,16 @@
                 "name": {"$ref": "layer_dropout.schema#/definitions/name"},
                 "prob": {"$ref": "layer_dropout.schema#/definitions/prob"},
                 "dim":{"$ref": "layer_dropout.schema#/definitions/dim"}
-            }
+            },
+            "additionalProperties": false
         },
         "output": {
             "type" : "object",
             "properties": {
                 "name": {"$ref": "layer_output.schema#/definitions/name"},
                 "size": {"$ref": "layer_output.schema#/definitions/size"}
-            }
+            },
+            "additionalProperties": false
         }
     }
 }

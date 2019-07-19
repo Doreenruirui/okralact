@@ -49,7 +49,8 @@
                 "type": {"$ref": "layer_output.schema#/definitions/type"},
                 "CTC": {"$ref": "layer_output.schema#/definitions/CTC"},
                 "size": {"$ref": "layer_output.schema#/definitions/size"}
-            }
+            },
+            "additionalProperties": false
         }
     }
 }

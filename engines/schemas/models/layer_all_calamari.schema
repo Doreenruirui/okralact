@@ -43,7 +43,8 @@
             "properties": {
                 "name": {"$ref": "layer_dropout.schema#/definitions/name"},
                 "prob": {"$ref": "layer_dropout.schema#/definitions/prob"}
-            }
+            },
+            "additionalProperties": false
         }
     }
 }
