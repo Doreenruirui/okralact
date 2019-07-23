@@ -75,15 +75,15 @@ class Translate:
             cmd += '--eval_listfile %s ' % pjoin(tmp_folder, 'list.eval')
         # nepoch
         max_iter = int(self.nepoch * np.ceil(self.ntrain / self.values["batch_size"]))
-        cmd += '%s %d ' % (self.translator["nepoch"], max_iter)
+        cmd += '--%s %d ' % (self.translator["nepoch"], max_iter)
 
         # model_prefix
-        cmd += '%s %s ' % (self.translator['model_prefix'],
+        cmd += '--%s %s ' % (self.translator['model_prefix'],
                            pjoin(checkpoint_folder, self.model_prefix))
 
         # model
         voc_size = get_numofchar(tmp_folder)
-        cmd += '%s ' % self.model_translator.tesseract(self.values["batch_size"], voc_size)
+        cmd += '--%s ' % self.model_translator.tesseract(self.values["batch_size"], voc_size)
 
         floats = ["append",  "continue_from",
                   "optimizer", "momentum", "adam_beta",
@@ -96,11 +96,11 @@ class Translate:
                 para_name = self.translator[para] if para in self.translator else para
                 cmd += '--%s %s ' % (para_name, str(self.configs[para]))
         print(cmd)
-        self.cmd_list = [cmd,
-                         'lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
-                         (pjoin(checkpoint_folder, self.model_prefix + '_checkpoint'),
-                          pjoin(model_folder, self.model_prefix, self.model_prefix + '.traineddata'),
-                          pjoin(model_folder, self.model_prefix + '.traineddata'))]
+        self.cmd_list = [cmd]
+                         # 'lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
+                         # (pjoin(checkpoint_folder, self.model_prefix + '_checkpoint'),
+                         #  pjoin(model_folder, self.model_prefix, self.model_prefix + '.traineddata'),
+                         #  pjoin(model_folder, self.model_prefix + '.traineddata'))]
 
     def kraken(self):
         print(self.configs)
@@ -227,7 +227,8 @@ class Translate:
 
 
 def test():
-    translate = Translate('sample_calamari.json', model_dir='model')
+    translate = Translate('sample_tess.json', model_dir='tess_new')
     print(translate.cmd_list)
+
 
 test()
