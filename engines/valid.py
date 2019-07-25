@@ -47,7 +47,7 @@ def get_model_postfixes(engine, model_dir, model_prefix):
     dict_postfix = {"kraken": 'mlmodel', 'calamari': 'index',
                     'ocropus': 'pyrnn.gz', 'tesseract': 'checkpoint'}
     if engine == 'tesseract':
-        models = [ele.split('.')[0] for ele in os.listdir(pjoin(model_root, model_dir))
+        models = [ele.split('.')[0] for ele in os.listdir(pjoin(model_root, model_dir, 'checkpoint'))
                   if ele.endswith(dict_postfix[engine])
                   and 'best' not in ele and ele.startswith('tess_')]
     else:
