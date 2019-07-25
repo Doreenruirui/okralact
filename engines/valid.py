@@ -46,40 +46,33 @@ def read_report(model_dir):
 def get_model_postfixes(engine, model_dir, model_prefix):
     dict_postfix = {"kraken": 'mlmodel', 'calamari': 'index',
                     'ocropus': 'pyrnn.gz', 'tesseract': 'checkpoint'}
-    if engine != 'tesseract':
+    if engine == 'tesseract':
+        models = [ele.split('.')[0] for ele in os.listdir(pjoin(model_root, model_dir))
+                  if ele.endswith(dict_postfix[engine])
+                  and 'best' not in ele and ele.startswith('tess_')]
+    else:
         models = [ele.split('.')[0] for ele in os.listdir(pjoin(model_root, model_dir))
                   if ele.endswith(dict_postfix[engine])
                   and 'best' not in ele]
-        if engine == 'kraken':
-            return sorted([ele.split('_')[1] for ele in models])
-        elif engine == 'calamari':
-            return sorted([ele[len(model_prefix):] for ele in models])
-        elif engine == 'ocropus':
-            return sorted([ele.split('-')[1] for ele in models])
+    if engine == 'kraken':
+        return sorted([ele.split('_')[1] for ele in models])
+    elif engine == 'calamari':
+        return sorted([ele[len(model_prefix):] for ele in models])
+    elif engine == 'ocropus':
+        return sorted([ele.split('-')[1] for ele in models])
     else:
-        models = [ele.rsplit('.', 1)[0] for ele in os.listdir(pjoin(model_root, model_dir, 'checkpoint'))
-                  if ele.endswith(dict_postfix[engine])
-                  and 'best' not in ele
-                  and '_checkpoint' not in ele]
-        new_models = []
-        for model in models:
-            model_name, index = model.split('_')
-            if len(model_name) > len(model_prefix):
-                move(pjoin(model_root, model_dir, 'checkpoint', model + '.checkpoint'),
-                     pjoin(model_root, model_dir, 'checkpoint', '%s_%s.checkpoint' % (model_prefix, index)))
-            new_models.append(index)
-        return sorted(new_models)
+        return sorted([ele.split('_')[1] for ele in models])
 
 
 def get_model_path(engine, model_prefix, index):
-    if engine == 'tesseract':
-        return '%s.traineddata' % model_prefix
     if engine == 'kraken':
         model_str = '%s_%s.mlmodel'
     elif engine == 'calamari':
         model_str = '%s%s.ckpt'
     elif engine == 'ocropus':
         model_str = '%s-%s.pyrnn.gz'
+    else:
+        model_str = 'checkpoint/%s_%s.checkpoint'
     return model_str % (model_prefix, index)
 
 
@@ -125,8 +118,7 @@ def copy_best_model(engine, model_dir, model_prefix, best_model_index):
     else:
         best_model_file = '%s_%s.checkpoint' % (model_prefix, best_model_index)
         dest_model_file = 'best.checkpoint'
-        copyfile(pjoin(abs_model_dir, 'checkpoint', best_model_file),
-                  pjoin(abs_model_dir, 'checkpoint', dest_model_file))
+        copyfile(pjoin(abs_model_dir, 'checkpoint', best_model_file), pjoin(abs_model_dir, 'checkpoint', dest_model_file))
 
 
 def eval_from_file(model_dir, engine, model_prefix):
@@ -145,7 +137,7 @@ def eval_from_file(model_dir, engine, model_prefix):
             if engine == 'tesseract':
                 cmd_list = ['export TESSDATA_PREFIX=%s' % pjoin(os.getcwd(), model_root, model_dir),
                             'lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
-                            (pjoin(model_root, model_dir, 'checkpoint', '%s_%s.checkpoint' % (model_prefix, index)),
+                            (model_path,
                              pjoin(model_root, model_dir, model_prefix, '%s.traineddata' % model_prefix),
                              pjoin(model_root, model_dir, model_prefix + '.traineddata'))]
                 convert_image(valid_folder)
