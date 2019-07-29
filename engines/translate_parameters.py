@@ -14,9 +14,33 @@ def read_parameter_default(engine):
         default_values[key] = common_schema["definitions"][key]["default"]
     engine_schema = read_json("engines/schemas/engine_%s.schema" % engine)
     for key in engine_schema["properties"]:
-        if key not in default_values and key != "model":
-            default_values[key] = engine_schema["properties"][key]["default"]
+        if key not in default_values and key != "model" and key != "engine":
+            if engine_schema["properties"][key]["type"] == "object":
+                for ele in engine_schema["properties"][key]["properties"]:
+                    new_key = '%s_%s' % (key, ele)
+                    default_values[new_key] = engine_schema["properties"][key]["properties"][ele]["default"]
+            else:
+                default_values[key] = engine_schema["properties"][key]["default"]
     return default_values
+
+
+def read_value(configs, engine):
+    default_values = read_parameter_default(engine)
+    values = {}
+    for k in configs:
+        if type(configs[k]) is dict:
+            for ele in configs[k]:
+                new_key = '%s_%s' % (k, ele)
+                values[new_key] = configs[k][ele]
+        else:
+            values[k] = configs[k]
+    for ele in default_values:
+        if ele not in values:
+            values[ele] = default_values[ele]
+    return values
+
+    # self.values = {k: self.configs[k] if k in self.configs else self.default[k] for k in
+    #                self.default}  # Rewrite value according to user specific configuration
 
 
 def files2str(setname, catstr):
@@ -38,10 +62,9 @@ class Translate:
         self.translator = read_json('engines/schemas/translate.json')[self.engine]
 
         # load default values
-        self.default = read_parameter_default(self.engine)
+        # self.default = read_parameter_default(self.engine)
         # replace default values with user specified values
-        self.values = {k: self.configs[k] if k in self.configs else self.default[k] for k in self.default} # Rewrite value according to user specific configuration
-
+        self.values = read_value(self.configs, self.engine)
         self.model_translator = ModelTranslator(self.configs["model"], self.engine)
 
         self.model_prefix = self.values["model_prefix"]
@@ -60,8 +83,8 @@ class Translate:
         method = getattr(self, self.engine, lambda: "Invalid Engine")
         return method()
 
-    def values(self, key):
-        return self.configs[key] if key in self.configs else self.default[key]
+    # def values(self, key):
+    #     return self.configs[key] if key in self.configs else self.default[key]
 
     def tesseract(self):
         model_folder = self.model_dir
@@ -73,6 +96,7 @@ class Translate:
                pjoin(tmp_folder, 'list.train'))
         if self.ntest > 0:
             cmd += '--eval_listfile %s ' % pjoin(tmp_folder, 'list.eval')
+
         # nepoch
         max_iter = int(self.nepoch * np.ceil(self.ntrain / self.values["batch_size"]))
         cmd += '--%s %d ' % (self.translator["nepoch"], max_iter)
@@ -81,9 +105,12 @@ class Translate:
         cmd += '--%s %s ' % (self.translator['model_prefix'],
                            pjoin(checkpoint_folder, self.model_prefix))
 
+        # append
+        flag_append = False if self.values["append"] == -1 and len(self.values["continue_from"]) == 0 else True
+
         # model
-        voc_size = get_numofchar(tmp_folder)
-        cmd += '--%s ' % self.model_translator.tesseract(self.values["batch_size"], voc_size)
+        # voc_size = get_numofchar(tmp_folder)
+        cmd += '%s ' % self.model_translator.tesseract(self.values["batch_size"], flag_append)
 
         floats = ["append",  "continue_from",
                   "optimizer", "momentum", "adam_beta",
@@ -94,13 +121,9 @@ class Translate:
                 continue
             else:
                 para_name = self.translator[para] if para in self.translator else para
-                cmd += '--%s %s ' % (para_name, str(self.configs[para]))
+                cmd += '--%s %s ' % (para_name, str(self.values[para]))
         print(cmd)
         self.cmd_list = [cmd]
-                         # 'lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
-                         # (pjoin(checkpoint_folder, self.model_prefix + '_checkpoint'),
-                         #  pjoin(model_folder, self.model_prefix, self.model_prefix + '.traineddata'),
-                         #  pjoin(model_folder, self.model_prefix + '.traineddata'))]
 
     def kraken(self):
         print(self.configs)
@@ -116,18 +139,21 @@ class Translate:
         cmd += '--savefreq %.1f ' % self.values['savefreq']
         # learning_rate
         cmd += '--%s %f ' % (self.translator['learning_rate'], self.values['learning_rate'])
+        # append
+        flag_append = False if self.values["append"] == -1 and len(self.values["continue_from"]) == 0 else True
+
         # model
-        cmd += '%s ' % self.model_translator.kraken(self.values["batch_size"])  # model specification
+        cmd += '%s ' % self.model_translator.kraken(self.values["batch_size"], flag_append)  # model specification
 
         # early stop
         if 'early_stop' in self.configs:
             cmd += '--%s early ' % self.translator['early_stop']
-            if 'early_stop_min_improve' in self.configs:
+            if 'min_improve' in self.configs["early_stop"]:
                 cmd += '--%s %f ' % (self.translator['early_stop_min_improve'],
-                                   self.configs['early_stop_min_improve'])
-            if 'early_stop_nbest' in self.configs:
+                                   self.values['early_stop_min_improve'])
+            if 'nbest' in self.configs["early_stop"]:
                 cmd += '--%s %d ' % (self.translator['early_stop_nbest'],
-                                   self.configs['early_stop_nbest'])
+                                   self.values['early_stop_nbest'])
         else:
             cmd += '--%s dumb ' % self.translator['early_stop']
 
@@ -196,38 +222,46 @@ class Translate:
         cmd += '--%s %.1f ' % (self.translator['savefreq'], self.values['savefreq'])
 
         # model_prefix
+        if self.model_prefix[-1] != '_':
+            self.model_prefix += '_'
         cmd += '--%s %s ' % (self.translator['model_prefix'], self.model_prefix)
         cmd += '--output_dir %s ' % self.model_dir
 
         # model
-        cmd += self.model_translator.calamari(learning_rate=self.values["learning_rate"])
+        cmd += self.model_translator.calamari(learning_rate=self.values["learning_rate"]) + ' '
 
         floats = ["batch_size",
-                  "continue_from", "preload", "preload_test",
-                  "early_stop_freq", "early_stop_nbest", "early_stop_model_prefix",
-                  "num_threads", "num_inter_threads", "num_intra_threads",
+                  "continue_from",
                   "no_skip_invalid_gt",
-                  "gradient_clipping_mode", "gradient_clipping_const",
+                  "gradient_clipping_mode",
+                  "gradient_clipping_const",
                   "backend"]
-
+        floats_hier = ["early_stop", "num_threads", "preload"]
         for para in self.configs:
-            if para not in floats:
+            if para not in floats and para not in floats_hier:
                 continue
-            if para == 'no_skip_invalid_gt':
-                if self.configs[para]:
-                    cmd += '--no_skip_invalid_gt '
-            elif para == 'preload' or para == 'preload_test':
-                if self.configs[para]:
-                    cmd += '--%s ' % self.translator[para]
-            else:
-                para_name = self.translator[para] if para in self.translator else para
-                cmd += '--%s %s ' % (para_name, str(self.configs[para]))
+            if para in floats:
+                if para == 'no_skip_invalid_gt':
+                    if self.configs[para]:
+                        cmd += '--no_skip_invalid_gt '
+                else:
+                    para_name = self.translator[para] if para in self.translator else para
+                    cmd += '--%s %s ' % (para_name, str(self.values[para]))
+            elif para in floats_hier:
+                for ele in self.configs[para]:
+                    fullname = '%s_%s' % (para, ele)
+                    para_name = self.translator[fullname] if fullname in self.translator else fullname
+                    if "preload" in fullname:
+                        if self.values[fullname]:
+                            cmd += '--%s ' % para_name
+                    else:
+                        cmd += '--%s %s ' % (para_name, str(self.values[fullname]))
         print(cmd)
         self.cmd_list = [cmd]
 
 
 def test():
-    translate = Translate('sample_tess.json', model_dir='tess_new')
+    translate = Translate('sample_calamari.json', model_dir='static/model/calamari')
     print(translate.cmd_list)
 
 

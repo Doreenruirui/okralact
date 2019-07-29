@@ -15,7 +15,8 @@
   {
     "model_prefix": "output",
     "nepoch": "ntrain",
-    "learning_rate": "lrate"
+    "learning_rate": "lrate",
+    "continue_from": "load"
   },
   "calamari":
   {
@@ -26,12 +27,16 @@
     "early_stop_nbest": "early_stopping_nbest",
     "early_stop_model_prefix": "early_stopping_best_model_prefix",
     "savefreq": "checkpoint_frequency",
-    "preload": "train_data_on_the_fly",
-    "preload_test": "validation_data_on_the_fly"
+    "preload_train": "train_data_on_the_fly",
+    "preload_test": "validation_data_on_the_fly",
+    "num_threads_all": "num_threads",
+    "num_threads_inter": "num_inter_threads",
+    "num_threads_intra": "num_intra_threads"
   },
   "tesseract":
   {
     "model_prefix": "model_output",
-    "nepoch": "max_iterations"
+    "nepoch": "max_iterations",
+    "append": "append_index"
   }
 }

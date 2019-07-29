@@ -17,11 +17,12 @@ class ModelTranslator:
         self.translator = read_json("engines/schemas/models/translate_model.json")
         # self.model_str = self.translate()
 
-    def kraken(self, batch_size):
+    def kraken(self, batch_size, flag_append=False):
         def get_pool_dim(input_size, kernel_size, stride_size):
             return int(np.floor((input_size - (kernel_size - 1) - 1) / stride_size + 1))
         model_str = []
-        self.model = [read_layer_default("input")] + self.model if self.model[0]["name"] != "input" else self.model
+        if not flag_append:
+            self.model = [read_layer_default("input")] + self.model if self.model[0]["name"] != "input" else self.model
         input_size = self.model[0]["height"]
         for layer in self.model:
             layer_name = layer["name"]
@@ -59,8 +60,8 @@ class ModelTranslator:
 
             elif layer_name == "dropout":
                 layer_str = "Do%.2f,%d" % (values["prob"], values["dim"])
-            elif layer_name == "output":
-                layer_str = "O%d%s%d" % (values["type"], values["CTC"], values["size"])
+            # elif layer_name == "output":
+                # layer_str = "O%d%s%d" % (values["type"], values["CTC"], values["size"])
             else:
                 raise "Layer %s not defined." % layer_name
             model_str.append(layer_str)
@@ -111,12 +112,13 @@ class ModelTranslator:
         model_str.append('l_rate=%f' % learning_rate)
         return '%s --network=%s' % (model_str[0], ','.join(model_str[1:]))
 
-    def tesseract(self, batch_size, voc_size):
+    def tesseract(self, batch_size, flag_append=False):
         model_str = []
-        if self.model[0]["name"] != "input":
-            input_layer = read_layer_default("input")
-            input_layer["name"] = "input"
-            self.model = [input_layer] + self.model
+        if not flag_append:
+            if self.model[0]["name"] != "input":
+                input_layer = read_layer_default("input")
+                input_layer["name"] = "input"
+                self.model = [input_layer] + self.model
         for layer in self.model:
             layer_name = layer["name"]
             values = read_layer_default(layer_name)  # Get default value for each layer attribute
@@ -140,16 +142,17 @@ class ModelTranslator:
                                            values["output"])
             elif layer_name == "pooling":
                 layer_str = 'Mp%d,%d' % (values["height"], values["width"])
-            elif layer_name == "output":
-                voc_size = voc_size if "size" not in layer else values["size"]
-                layer_str = "O%d%s%d" % (values["type"], values["CTC"], voc_size)
+            # elif layer_name == "output":
+            #     voc_size = voc_size if "size" not in layer else values["size"]
+            #     layer_str = "O%d%s%d" % (values["type"], values["CTC"], voc_size)
             else:
                 raise "Layer %s not defined." % layer_name
             model_str.append(layer_str)
         if self.model[-1]["name"] != "output":
             values = read_layer_default("output")
-            print(values["type"], values["CTC"], voc_size)
-            layer_str = "O%d%s%d" % (values["type"], values["CTC"], voc_size)
+            # print(values["type"], values["CTC"], voc_size)
+            layer_str = "O%d%s" % (values["type"], values["CTC"])
+            # layer_str = "O%d%s%d" % (values["type"], values["CTC"], voc_size)
             model_str.append(layer_str)
         return '--net_spec \'[' + ' '.join(model_str) + ']\''
 

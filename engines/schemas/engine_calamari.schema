@@ -12,54 +12,71 @@
     "learning_rate": {"$ref": "common.schema#/definitions/learning_rate"},
     "savefreq": {"$ref": "common.schema#/definitions/savefreq"},
     "batch_size": {"$ref": "common.schema#/definitions/batch_size"},
-        "continue_from" : {"$ref": "common.schema#/definitions/continue_from"},
+    "continue_from" : {"$ref": "common.schema#/definitions/continue_from"},
     "model": {"$ref": "models/model_calamari.schema#/definitions/model"},
-    "early_stop_freq" : {
-        "type" : "number",
-        "format" : "float",
-        "default" : 0.5,
-        "description" : "The frequency of early stopping. By default the checkpoint frequency uses the early stopping  frequency. By default (value = 0.5) the early stopping frequency equates to a half epoch. If 0 < value <= 1 the frequency has the unit of an epoch (relative to  number of training data)."
+    "early_stop": {
+        "type": "object",
+        "properties": {
+            "freq" : {
+                "type" : "number",
+                "format" : "float",
+                "default" : 0.5,
+                "description" : "The frequency of early stopping. By default the checkpoint frequency uses the early stopping  frequency. By default (value = 0.5) the early stopping frequency equates to a half epoch. If 0 < value <= 1 the frequency has the unit of an epoch (relative to  number of training data)."
+                },
+            "nbest" : {
+                "type" : "integer",
+                "default" : 5,
+                "description" : "Number of models to wait before stopping training without improvement."
+                },
+            "model_prefix" :
+            {
+                "type" : "string",
+                "default" : "best_",
+                "description" : "The prefix of the model file."
+            }
         },
-    "early_stop_nbest" : {
-        "type" : "number",
-        "format" : "integer",
-        "default" : 5,
-        "description" : "Number of models to wait before stopping training without improvement."
-        },
-    "early_stop_model_prefix" :
-    {
-        "type" : "string",
-        "default" : "calamari_best",
-        "description" : "The prefix of the model file."
+        "additionalProperties": false
     },
     "preload" : {
-        "type" : "boolean",
-        "default" : false,
-        "description" : "Whether to preload all the training set into memory for accelerating training."
+        "type": "object",
+        "properties": {
+            "train": {
+                "type" : "boolean",
+                "default" : false,
+                "description" : "Whether to preload all the training set into memory for accelerating training."
+                },
+            "test": {
+                "type" : "boolean",
+                "default" : false,
+                "description" : "Whether to preload all the evaluation set into memory for accelerating evaluation."
+                }
         },
-    "preload_test" : {
-        "type" : "boolean",
-        "default" : false,
-        "description" : "Whether to preload all the evaluation set into memory for accelerating evaluation."
-        },
+        "additionalProperties": false
+    },
     "num_threads" : {
-        "type" : "number",
-        "format" : "integer",
-        "default" : 0,
-        "description" : "The number of threads to use for all operations."
+        "type": "object",
+        "properties": {
+            "all": {
+                "type" : "number",
+                "format" : "integer",
+                "default" : 0,
+                "description" : "The number of threads to use for all operations."
+            },
+            "inter" : {
+                "type": "number",
+                "format": "integer",
+                "default": 0,
+                "description" : "Tensorflow's session inter threads param."
+                },
+            "intra" : {
+                "type": "number",
+                "format": "integer",
+                "default": 0,
+                "description" : "Tensorflow's session intra threads param"
+            }
         },
-    "num_inter_threads" : {
-        "type": "number",
-        "format": "integer",
-        "default": 0,
-        "description" : "Tensorflow's session inter threads param."
-        },
-    "num_intra_threads" : {
-        "type": "number",
-        "format": "integer",
-        "default": 0,
-        "description" : "Tensorflow's session intra threads param"
-        },
+        "additionalProperties": false
+    },
     "no_skip_invalid_gt" : {
         "type" : "boolean",
         "default" : false,

@@ -14,12 +14,25 @@
         "savefreq": {"$ref": "common.schema#/definitions/savefreq"},
         "batch_size": {"$ref": "common.schema#/definitions/batch_size"},
         "continue_from" : {"$ref": "common.schema#/definitions/continue_from"},
+        "append": {"$ref": "common.schema#/definitions/append"},
         "model": {"$ref": "models/model_kraken.schema#/definitions/model"},
-        "append" : {
-            "type": "integer",
-            "default" : 0,
-            "description" : "Removes layers before argument and then appends spec. Only works when loading an existing model."
+        "early_stop" : {
+            "type": "object",
+            "properties": {
+                "min_improve" : {
+                    "type" : "number",
+                    "format": "float",
+                    "default" : 0.005,
+                    "description" : "Mininum improvement between epoches to reset early stopping. default is scales the delta by the best loss."
+                },
+            "nbest" : {
+                "type" : "integer",
+                "default" : 5,
+                "description" : "Number of evaluations to wait before stopping training without improvement."
+                }
             },
+            "additionalProperties": false
+        },
         "optimizer" : {
             "type" : "string",
             "default" : "Adam",
@@ -37,22 +50,6 @@
             "format": "float",
             "default" : 0.0,
             "description" : "Weight decay, penalize the large weight, similar to regularization."
-            },
-        "early_stop" : {
-            "type" : "boolean",
-            "default" : false,
-            "description" : "Whether to enable early stop"
-            },
-        "early_stop_min_improve" : {
-            "type" : "number",
-            "format": "float",
-            "default" : 0.005,
-            "description" : "Mininum improvement between epoches to reset early stopping. default is scales the delta by the best loss."
-            },
-        "early_stopp_nbest" : {
-            "type" : "integer",
-            "default" : 5,
-            "description" : "Number of evaluations to wait before stopping training without improvement."
             },
         "preload" : {
             "type" : "boolean",

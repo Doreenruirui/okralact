@@ -17,7 +17,7 @@ def convert_image(data_folder):
     for fn in get_all_files(data_folder):
         im = Image.open(pjoin(data_folder, fn + '.png'))
         im.save(pjoin(data_folder, fn + '.tif'))
-        os.remove(pjoin(data_folder, fn + '.png'))
+        # os.remove(pjoin(data_folder, fn + '.png'))
 
 
 def generate_box(data_folder, tmp_folder):

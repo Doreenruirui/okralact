@@ -12,6 +12,7 @@
     "learning_rate": {"$ref": "common.schema#/definitions/learning_rate"},
     "savefreq": {"$ref": "common.schema#/definitions/savefreq"},
     "model": {"$ref": "models/model_ocropus.schema#/definitions/model"},
+    "continue_from" : {"$ref": "common.schema#/definitions/continue_from"},
     "start": {
         "type" : "number",
         "format" : "integer",

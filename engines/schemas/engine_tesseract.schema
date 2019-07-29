@@ -12,12 +12,7 @@
     "batch_size": {"$ref": "common.schema#/definitions/batch_size"},
     "model": {"$ref": "models/model_tesseract.schema#/definitions/model"},
     "continue_from" : {"$ref": "common.schema#/definitions/continue_from"},
-    "append" : {
-        "type": "number",
-        "format" : "integer",
-        "default" : 0,
-        "description" : "Removes layers before argument and then appends spec. Only works when loading an existing model."
-        },
+    "append": {"$ref": "common.schema#/definitions/append"},
     "optimizer" : {
         "type" : "string",
         "default" : "Adam",

@@ -47,8 +47,12 @@
             "type": "string",
             "default": "",
             "description": "Loading existing file to continue training."
+        },
+        "append" : {
+            "type": "integer",
+            "default" : -1,
+            "description" : "Removes layers before argument and then appends spec. Only works when loading an existing model."
         }
-
     }
 }
 
