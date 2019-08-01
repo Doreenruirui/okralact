@@ -1,1 +1,13 @@
-{"engine": "calamari", "niter": 100}
+{"model":  [{"name": "input", "height":50},
+            {"name": "cnn", "height":3, "width": 10, "output": 10},
+            {"name": "pooling", "height":2, "width": 2, "x_stride": 1, "y_stride": 1},
+            {"name": "cnn", "height":3, "width": 10, "output": 10},
+            {"name": "pooling", "width": 2, "height": 2, "x_stride": 1, "y_stride": 1},
+            {"name": "dropout", "prob":  0.9},
+            {"name": "rnn", "direction": "forward", "output": 10}
+            ],
+  "engine":  "calamari",
+  "early_stop": {"freq":  1.0,  "nbest": 3, "model_prefix": "best_"},
+  "preload": {"train": true, "test": false},
+  "nepoch": 5,
+  "num_threads": {"inter": 3, "intra": 3}}
