@@ -24,7 +24,7 @@
         "type": "integer",
         "default" :100,
         "description": "Average this many iterations for computing an average loss, label error rate and training time."
-    }
+    },
     "early_stop": {
         "type": "object",
         "properties": {
@@ -117,12 +117,12 @@
         "enum": ["ltr", "rtl", "auto"],
         "description": "The default text direction when preprocessing bidirectional text. Supported values are 'auto' to  automatically detect the direction, 'ltr' and 'rtl'  for left-to-right and right-to-left, respectively."
         },
-    "normalization": {
+    "text_normalization": {
         "type": "string",
         "default": "NFC",
         "description": "Unicode text normalization to apply."
         }
-    "regularization": {
+    "text_regularization": {
         "type": "string",
         "default": "extended",
         "description": "Text regularization to apply."
