@@ -9,7 +9,8 @@ from evaluate.levenshtein import align
 from engines.common import clear_data, extract_file
 from engines.process_tesseract import convert_image, get_all_files
 from evaluate.evaluation import evaluate
-from engines import eval_folder
+from engines import eval_folder, model_root, data_root, config_root, act_environ, deact_environ
+from engines import act_environ, model_root, valid_folder, data_folder
 
 
 def evl_pair():
@@ -45,52 +46,54 @@ def evl_pair():
     return sum_dis * 1. / sum_len
 
 
+def get_best_model_path(engine, model_dir):
+    if engine == 'kraken':
+        return pjoin(model_root, model_dir, 'best.mlmodel')
+    elif engine == 'calamari':
+        return pjoin(model_root, model_dir, 'best.ckpt')
+    elif engine == 'ocropus':
+        return pjoin(model_root, model_dir, 'best.pyrnn.gz')
+    else:
+        return pjoin(model_root, model_dir, 'checkpoint', 'best.checkpoint')
+
+
+
+
 def eval_from_file(file_test, file_train, file_config):
     clear_data(eval_folder)
-    root_dir = os.getcwd()
-    print(root_dir)
-    extract_file(pjoin(root_dir, 'static/data', file_test), eval_folder)
-    configs = read_json(pjoin(root_dir, 'static/configs', file_config))
+    extract_file(pjoin('static/data', file_test), eval_folder)
+    configs = read_json(pjoin('static/configs', file_config))
     print(configs)
     model_dir = get_model_dir(file_train, file_config)
+    engine = configs["engine"]
+    common_schema = read_json("engines/schemas/common.schema")
+    model_prefix = configs["model_prefix"] if "model_prefix" in configs \
+        else common_schema["definitions"]["model_prefix"]["default"]
+    if engine != "tesseract":
+        cmd_list = [act_environ(engine)]
+    else:
+        cmd_list = []
     # noinspection PyInterpreter
-    if configs["engine"] == 'kraken':
-        cmd_list = ['source activate kraken',
-                    'kraken -I \'%s/*.png\' -o .txt ocr -m static/model/%s/kraken_best.mlmodel -s'
-                    % (eval_folder,  model_dir),
-                    'conda deactivate']
-    elif configs["engine"] == 'calamari':
-        with open('static/model/%s/checkpoint' % model_dir) as f_:
-            model_file = f_.readlines()[0].split('"')[1]
-        cmd_list = ['source activate calamari',
-                    'calamari-predict --checkpoint %s --files %s/*.png' % (model_file, eval_folder),
-                    'conda deactivate']
-    elif configs["engine"] == 'ocropus':
-        cmd_list = ['source activate ocropus_env']
-        list_model = [ele.split('.')[0].split('-')[1] for ele in os.listdir('static/model/%s' % model_dir) if ele.endswith('.pyrnn.gz')]
-        newest_model = max(list_model)
-        prefix = 'ocropus'
-        for ele in os.listdir('static/model/%s' % model_dir):
-            if ele.endswith('.pyrnn.gz'):
-                prefix = ele.split('.')[-3].split('-')[0]
-                break
-        print(newest_model)
-        print(prefix)
-        model_file = 'static/model/%s/%s-%s.pyrnn.gz' % (model_dir, prefix, newest_model)
-        print(model_file)
-        cmd_list.append('ocropus-rpred -m %s \'%s/*.png\'' % (model_file, eval_folder))
-        cmd_list.append('conda deactivate')
-    elif configs["engine"] == 'tesseract':
-        if "prefix" in configs:
-            model_name = configs["prefix"]
-        else:
-            model_name = configs["engine"]
-        cmd_list = ['export TESSDATA_PREFIX=%s' % pjoin(os.getcwd(),
-                                                        'static/model', model_dir)]
+    best_model = get_best_model_path(engine, model_dir)
+    if engine == 'kraken':
+        cmd_list.append('kraken -I \'%s/*.png\' -o .txt ocr -m %s -s'
+                        % (eval_folder,  best_model))
+    elif engine == 'calamari':
+        cmd_list.append('calamari-predict --checkpoint %s --files %s/*.png'
+                        % (best_model, eval_folder))
+    elif engine == 'ocropus':
+        cmd_list.append('ocropus-rpred -m %s \'%s/*.png\'' % (best_model, eval_folder))
+    elif engine == 'tesseract':
+        cmd_list.append('export TESSDATA_PREFIX=%s' % pjoin(os.getcwd(), model_root, model_dir),
+                        'lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
+                        (best_model,
+                         pjoin(model_root, model_dir, model_prefix, '%s.traineddata' % model_prefix),
+                         pjoin(model_root, model_dir, model_prefix + '.traineddata')))
+        cmd_list = ['export TESSDATA_PREFIX=%s' % pjoin(model_root, model_dir)]
         convert_image('engines/eval')
         image_files = get_all_files(data_folder=eval_folder, postfix='.tif')
         for imf in image_files:
-            cmd_list.append('tesseract -l %s %s/%s.tif %s/%s ' % (model_name,
+            cmd_list.append('tesseract -l %s %s/%s.tif %s/%s ' % (model_prefix,
                                                                   eval_folder,
                                                                   imf,
                                                                   eval_folder,

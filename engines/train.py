@@ -7,6 +7,7 @@ import shutil
 from lib.file_operation import list_model_dir
 from engines.common import extract_file, clear_data
 from engines import data_folder, tmp_folder
+from engines.valid import valid_from_file
 
 
 def check_data(data_folder):
@@ -58,7 +59,6 @@ def add_model(file_data, file_config):
     return model_dir
 
 
-### TODO: after train the model and evaluate on the evaulation dataset and choose the best model
 def train_from_file(file_data, file_config):
     clear_data(data_folder)
     clear_data(tmp_folder)
@@ -74,5 +74,7 @@ def train_from_file(file_data, file_config):
         cmd = '\n'.join(cmd_list)
         print(cmd)
         subprocess.run(cmd, shell=True)
+        valid_from_file(file_data, file_config)
+
 
 

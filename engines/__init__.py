@@ -4,6 +4,8 @@ tmp_folder = 'engines/tmp'
 eval_folder = 'engines/eval'
 valid_folder = 'engines/valid'
 model_root = 'static/model'
+data_root = 'static/data'
+config_root = 'static/configs'
 
 
 def act_environ(engine):

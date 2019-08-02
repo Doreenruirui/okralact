@@ -1,12 +1,13 @@
 import subprocess
 from os.path import join as pjoin
 import os
-from engines.common import clear_data
+from engines.common import clear_data, read_json
 from evaluate.evaluation import evaluate
 from shutil import copyfile, move
 from collections import OrderedDict
 from engines import act_environ, model_root, valid_folder, data_folder
 from engines.process_tesseract import convert_image, get_all_files
+from lib.file_operation import get_model_dir
 
 
 def creat_valid():
@@ -19,7 +20,8 @@ def creat_valid():
             src_file = pjoin(data_folder,  file_name)
             dst_file = pjoin(valid_folder, file_name)
             copyfile(src_file, dst_file)
-            copyfile(src_file.rsplit('.', 1)[0] + '.gt.txt', dst_file.rsplit('.', 1)[0] + '.gt.txt')
+            copyfile(src_file.rsplit('.', 1)[0] + '.gt.txt',
+                     dst_file.rsplit('.', 1)[0] + '.gt.txt')
 
 
 def read_report(model_dir):
@@ -121,7 +123,14 @@ def copy_best_model(engine, model_dir, model_prefix, best_model_index):
         copyfile(pjoin(abs_model_dir, 'checkpoint', best_model_file), pjoin(abs_model_dir, 'checkpoint', dest_model_file))
 
 
-def eval_from_file(model_dir, engine, model_prefix):
+# def eval_from_file(model_dir, engine, model_prefix):
+def valid_from_file(file_train, file_config):
+    configs = read_json(pjoin('static/configs', file_config))
+    model_dir = get_model_dir(file_train, file_config)
+    engine = configs["engine"]
+    common_schema = read_json("engines/schemas/common.schema")
+    model_prefix = configs["model_prefix"] if "model_prefix" in configs \
+        else common_schema["definitions"]["model_prefix"]["default"]
     creat_valid()
     # noinspection PyInterpreter
     dict_res, best_perform, best_model = read_report(model_dir)
@@ -166,4 +175,4 @@ def eval_from_file(model_dir, engine, model_prefix):
     copy_best_model(engine, model_dir, model_prefix, best_model)
 
 
-eval_from_file(model_dir='tess_new', engine='tesseract', model_prefix='tess')
+# eval_from_file(model_dir='tess_new', engine='tesseract', model_prefix='tess')

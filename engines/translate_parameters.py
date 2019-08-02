@@ -1,4 +1,3 @@
-from engines.validate_parameters import read_parameter_from_schema
 from engines.common import read_json
 from engines.process_tesseract import *
 from engines import data_folder, tmp_folder, act_environ, deact_environ
@@ -241,7 +240,8 @@ class Translate:
         # model
         cmd += self.model_translator.calamari(learning_rate=self.values["learning_rate"]) + ' '
 
-        floats = ["batch_size",
+        floats = ["batch_size", "stats_size", "seed",
+                  "bidi_dir", "text_normalization", "text_regularization"
                   "continue_from",
                   "no_skip_invalid_gt",
                   "gradient_clipping_mode",
