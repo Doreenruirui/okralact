@@ -2,11 +2,14 @@ import re
 
 import numpy as np
 from scipy.ndimage import filters
+import unicodedata
 
 
 def levenshtein(a, b):
     """Calculates the Levenshtein distance between a and b.
     (Clever compact Pythonic implementation from hetland.org)"""
+    a = unicodedata.normalize('NFC', a)
+    b = unicodedata.normalize('NFC', b)
     n, m = len(a), len(b)
     if n > m:
         a, b = b, a;
@@ -26,13 +29,16 @@ def levenshtein(a, b):
 def xlevenshtein(a, b, context=1):
     """Calculates the Levensthein distance between a and b
     and generates a list of differences by context."""
+    a = unicodedata.normalize('NFC', a)
+    b = unicodedata.normalize('NFC', b)
     n, m = len(a), len(b)
-    assert m > 0 # xlevenshtein should only be called with non-empty b string (ground truth)
-    if a == b: return 0,[] # speed up for the easy case
-    sources = np.empty((m+1,n+1),object)
+    assert m > 0    # xlevenshtein should only be called with non-empty b string (ground truth)
+    if a == b:
+        return 0, []    # speed up for the easy case
+    sources = np.empty((m+1, n+1), object)
     sources[:, :] = None
     dists = np.full((m+1, n+1), 99999)
-    dists[0,:] = np.arange(n+1)
+    dists[0, :] = np.arange(n+1)
     for i in range(1, m+1):
         previous = dists[i-1, :]
         current = dists[i, :]
@@ -75,10 +81,10 @@ def xlevenshtein(a, b, context=1):
 
     # now compute a splittable string with the differences
     assert len(al) == len(bl)
-    al = " "*context+al+" "*context
-    bl = " "*context+bl+" "*context
+    al = " "*context+al + " "*context
+    bl = " "*context+bl + " "*context
     assert "~" not in al and "~" not in bl
-    same = np.array([al[i]==bl[i] for i in range(len(al))],'i')
+    same = np.array([al[i] == bl[i] for i in range(len(al))], 'i')
     same = filters.minimum_filter(same, 1+2*context)
     als = "".join([al[i] if not same[i] else "~" for i in range(len(al))])
     bls = "".join([bl[i] if not same[i] else "~" for i in range(len(bl))])

@@ -51,6 +51,12 @@
             "default" : 0.0,
             "description" : "Weight decay, penalize the large weight, similar to regularization."
             },
+        "schedule": {
+            "type": "string",
+            "default": "constant",
+            "enum": ["constant", "1cycle"]
+            "decription": "Set learning rate scheduler. For 1cycle, cycle length is determined by the '--epoch' option."
+        },
         "preload" : {
             "type" : "boolean",
             "default" : false,
@@ -61,6 +67,38 @@
              "default" : "cpu",
              "description" : "Select device to use cpu, cuda:0, cuda:1, ….",
              "pattern" : "cpu|cuda:[0-9]"
+        },
+        "codec": {
+            "type": "string",
+            "default": "",
+            "description": "Load a codec JSON definition (invalid if loading existing model)"
+        },
+        "resize": {
+            "type": "string",
+            "default" : "fail",
+            "enum": ["add", "both", "fail"],
+            "description": "Codec/output layer resizing option. If set to 'add' code points will be added, 'both' will set the layer to match exactly the training data, 'fail' will abort if training data and model codec do not match."
+        },
+        "reorder": {
+           "type" : "boolean",
+            "default" : true,
+            "description" : "Reordering of code points to display order"
+        }
+        "normalization": {
+            "type": "string",
+            "default": null,
+            "enum": ["NFD", "NFKD", "NFC", "NFKC"],
+            "description": "Ground truth normalization"
+        },
+        "normalize-whitespace": {
+           "type" : "boolean",
+            "default" : true,
+            "description" : "Normalizes unicode whitespace."
+        },
+        "threads": {
+            "type": "integer",
+            "default": 1,
+            "description": "Number of OpenMP threads and workers when  running on CPU."
         }
     },
     "additionalProperties": false

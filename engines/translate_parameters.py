@@ -158,14 +158,22 @@ class Translate:
             cmd += '--%s dumb ' % self.translator['early_stop']
 
         floats = ["append", "continue_from",
-                  "optimizer", "momentum",
-                  "weight_decay", "preload", "device"]
+                  "optimizer", "momentum", "schedule", "weight_decay",
+                  "preload", "device", "threads",
+                  "normalization", "normalize-whitespace",
+                  "codec", "resize", "reorder"]
 
         for para in self.configs:
             if para not in floats:
                 continue
             para_name = self.translator[para] if para in self.translator else para
-            cmd += '--%s %s ' % (para_name, self.values[para])
+            if para in ['preload', 'reorder', "normalize-whitespace"]:
+                if self.values[para]:
+                    cmd += '--%s ' % para_name
+                else:
+                    cmd += '--no-%s' % para_name
+            else:
+                cmd += '--%s %s ' % (para_name, self.values[para])
         print(cmd)
         self.cmd_list = [cmd]
 
@@ -195,12 +203,15 @@ class Translate:
         # learning_rate
         cmd += '--%s %f ' % (self.translator['learning_rate'], self.values['learning_rate'])
 
-        floats = ["start"]
+        floats = ["start", "codec"]
         for para in self.configs:
             if para not in floats:
                 continue
             para_name = self.translator[para] if para in self.translator else para
-            cmd += '--%s %s ' % (para_name, self.values[para])
+            if para == 'codec':
+                cmd += '--%s %s' % (para_name, ' '.join(['\'' + ele + '\'' for ele in self.values[para]]))
+            else:
+                cmd += '--%s %s ' % (para_name, self.values[para])
         # print(cmd)
         self.cmd_list = [cmd.strip()]
 
@@ -261,7 +272,7 @@ class Translate:
 
 
 def test():
-    translate = Translate('sample_calamari.json', model_dir='static/model/calamari')
+    translate = Translate('sample_kraken.json', model_dir='static/model/kraken')
     print(translate.cmd_list)
 
 

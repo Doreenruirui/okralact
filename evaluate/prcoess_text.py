@@ -4,9 +4,7 @@ import re
 from evaluate import chars
 import unicodedata
 import glob
-from evaluate.exceptions import (BadClassLabel, BadInput, FileNotFound,
-                                OcropusException)
-import multiprocessing
+from evaluate.exceptions import (BadInput, FileNotFound)
 
 
 def normalize_text(s):
@@ -30,19 +28,19 @@ def project_text(s, kind="exact"):
     s = normalize_text(s)
     s = re.sub(r'( *[.] *){4,}',u'....',s) # dot rows
     s = re.sub(r'[~_]',u'',s) # dot rows
-    if kind=="exact":
+    if kind == "exact":
         return s
-    if kind=="nospace":
+    if kind == "nospace":
         return re.sub(r'\s','',s)
-    if kind=="spletdig":
+    if kind == "spletdig":
         return re.sub(r'[^A-Za-z0-9 ]', '', s)
-    if kind=="letdig":
+    if kind == "letdig":
         return re.sub(r'[^A-Za-z0-9]', '', s)
-    if kind=="letters":
+    if kind == "letters":
         return re.sub(r'[^A-Za-z]', '', s)
-    if kind=="digits":
+    if kind == "digits":
         return re.sub(r'[^0-9]', '', s)
-    if kind=="lnc":
+    if kind == "lnc":
         s = s.upper()
         return re.sub(r'[^A-Z]', '', s)
     raise BadInput("unknown normalization: "+kind)
@@ -66,7 +64,7 @@ def allsplitext(path):
     """Split all the pathname extensions, so that "a/b.c.d" -> "a/b", ".c.d" """
     match = re.search(r'((.*/)*[^.]*)([^/]*)',path)
     if not match:
-        return path,""
+        return path, ""
     else:
         return match.group(1), match.group(3)
 

@@ -17,9 +17,10 @@ import multiprocessing
 # disable rank warnings from polyfit
 warnings.simplefilter('ignore', np.RankWarning)
 
+
 class Args:
     def __init__(self):
-        self.kind = 'exact'
+        self.kind = 'exact'  #one from
         self.extension = '.txt'
         self.files = []
         self.confusion = 10
@@ -113,16 +114,10 @@ def evaluate(files):
     res['errors'] = errs
     res['missing'] = missing
     res['total'] = total
-    # print("errors    %8d" % errs)
-    # print("missing   %8d" % missing)
-    # print("total     %8d" % total)
 
     if total > 0:
-        res['char_error_rate'] = "%.6f %%" % (errs * 1.0 / total)
-        res['errnomiss'] = "%8.3f %%" % ((errs-missing) * 100.0 / total)
-        # print("err       %8.3f %%" % (errs * 100.0 / total))
-        # print("errnomiss %8.3f %%" % ((errs-missing) * 100.0 / total))
-
+        res['char_error_rate'] = "%.3f " % (errs * 1.0 / total)
+        res['errnomiss'] = "%8.3f " % ((errs-missing) * 100.0 / total)
     if args.confusion > 0:
         res['confusion'] = []
         for (a, b), v in counts.most_common(args.confusion):
@@ -130,10 +125,4 @@ def evaluate(files):
             res['confusion'].append((v, a, b))
     print(res)
     return res
-    # if total > 0:
-    #     print(errs * 1.0 / total)
-    # else:
-    #     print("Nothing to compare")
 
-
-# evaluate()

@@ -14,6 +14,17 @@
     "batch_size": {"$ref": "common.schema#/definitions/batch_size"},
     "continue_from" : {"$ref": "common.schema#/definitions/continue_from"},
     "model": {"$ref": "models/model_calamari.schema#/definitions/model"},
+    "seed": {
+        "type": "integer",
+        "default": 0,
+        "description": "Seed for random operations. If negative or zero a  'random' seed is used."
+    },
+    "stats_size":
+    {
+        "type": "integer",
+        "default" :100,
+        "description": "Average this many iterations for computing an average loss, label error rate and training time."
+    }
     "early_stop": {
         "type": "object",
         "properties": {
@@ -53,6 +64,7 @@
         },
         "additionalProperties": false
     },
+
     "num_threads" : {
         "type": "object",
         "properties": {
@@ -98,6 +110,22 @@
         "default": "tensorflow",
         "description": "The backend to use for the neural net computation. Currently supported only tensorflow.",
         "enum": ["tensorflow"]
+        },
+    "bidi_dir" {
+        "type": "string",
+        "default": null,
+        "enum": ["ltr", "rtl", "auto"],
+        "description": "The default text direction when preprocessing bidirectional text. Supported values are 'auto' to  automatically detect the direction, 'ltr' and 'rtl'  for left-to-right and right-to-left, respectively."
+        },
+    "normalization": {
+        "type": "string",
+        "default": "NFC",
+        "description": "Unicode text normalization to apply."
+        }
+    "regularization": {
+        "type": "string",
+        "default": "extended",
+        "description": "Text regularization to apply."
         }
     },
     "additionalProperties": false

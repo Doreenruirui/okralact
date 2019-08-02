@@ -18,6 +18,25 @@
         "format" : "integer",
         "default" : -1,
         "description": "Manually set the number of already learned lines, which influences the naming and stoping condition."
+    },
+    "codec":
+    {
+        "type": "array",
+        "items": {
+            "type": "string"
+         },
+         "default": [],
+         "description": "construct a codec from the list of input text files. Not Support Yet"
+    },
+    "clstm": {
+        "type" : "boolean",
+        "default" : true,
+        "description" : "use C++ LSTM"
+    },
+    "strip": {
+        "type" : "boolean",
+        "default" : false,
+        "description" : "whether to strip the model before saving"
     }
     },
     "additionalProperties": false
