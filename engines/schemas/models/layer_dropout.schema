@@ -4,7 +4,8 @@
         "name": {
             "type": "string",
             "default":"dropout",
-             "enum":  ["dropout"]
+             "enum":  ["dropout"],
+             "description": "Name of the current layer."
              },
         "prob": {
             "type": "number",

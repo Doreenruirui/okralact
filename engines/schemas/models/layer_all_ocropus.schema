@@ -8,6 +8,7 @@
                 "direction": {"$ref": "layer_rnn.schema#/definitions/direction"},
                 "output": {"$ref": "layer_rnn.schema#/definitions/output"}
                 },
+            "description": "RNN Layer",
             "additionalProperties": false
             }
     }

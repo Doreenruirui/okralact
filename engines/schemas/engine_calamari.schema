@@ -2,8 +2,9 @@
     "type": "object",
     "properties": {
     "engine": {
-        "const": "calamari",
+        "type": "string",
         "default": "calamari",
+        "enum":["calamari"],
         "description": "Engine name."
         },
     "model_prefix": {"$ref": "common.schema#/definitions/model_prefix"},
@@ -46,6 +47,7 @@
                 "description" : "The prefix of the model file."
             }
         },
+        "description": "Early stop parameters.",
         "additionalProperties": false
     },
     "preload" : {
@@ -62,6 +64,7 @@
                 "description" : "Whether to preload all the evaluation set into memory for accelerating evaluation."
                 }
         },
+        "description": "Preload parameters.",
         "additionalProperties": false
     },
 
@@ -87,6 +90,7 @@
                 "description" : "Tensorflow's session intra threads param"
             }
         },
+        "description": "Thread parameters.",
         "additionalProperties": false
     },
     "no_skip_invalid_gt" : {
@@ -111,7 +115,7 @@
         "description": "The backend to use for the neural net computation. Currently supported only tensorflow.",
         "enum": ["tensorflow"]
         },
-    "bidi_dir" {
+    "bidi_dir": {
         "type": "string",
         "default": null,
         "enum": ["ltr", "rtl", "auto"],
@@ -121,7 +125,7 @@
         "type": "string",
         "default": "NFC",
         "description": "Unicode text normalization to apply."
-        }
+        },
     "text_regularization": {
         "type": "string",
         "default": "extended",

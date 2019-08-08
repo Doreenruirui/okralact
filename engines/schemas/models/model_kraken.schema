@@ -12,7 +12,8 @@
                     {"$ref": "layer_all_kraken.schema#/definitions/reshape"},
                     {"$ref": "layer_all_kraken.schema#/definitions/output"}
                     ]
-             }
+             },
+             "description": "The model structure of Kraken."
         }
     }
 }

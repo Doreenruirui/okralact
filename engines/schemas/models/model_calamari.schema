@@ -11,7 +11,8 @@
                     {"$ref": "layer_all_calamari.schema#/definitions/pooling"},
                     {"$ref": "layer_all_calamari.schema#/definitions/dropout"}
                     ]
-            }
+            },
+            "description": "The model structure of Calamari."
         }
      }
 }

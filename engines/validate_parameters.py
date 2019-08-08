@@ -68,30 +68,6 @@ def read_help_information(engine):
     return help_info
 
 
-def load_jsonref(ref_path):
-    ref_file, ref_propty, ref_attr = ref_path.split('/')
-    ref_file = ref_file[:-1]
-    schema_path = '%s/engines/schemas/%s' % (os.getcwd(), ref_file)
-    print(schema_path)
-    ref_schema = read_json(schema_path)
-    return ref_schema[ref_propty][ref_attr]
-
-
-def read_help_information_html(engine):
-    schema = read_json('engines/schemas/%s.schema' % engine)
-    attrs = schema['properties']
-    help_info = []
-    for k in attrs:
-        print(k, attrs[k])
-        if "$ref" in attrs[k]:
-            ref_path = attrs[k]["$ref"]
-            cur_node = load_jsonref(ref_path)
-        else:
-            cur_node = attrs[k]
-        help_info.append([k, str(cur_node["default"]), cur_node["description"]])
-    return help_info
-
-
 def read_parameters(config_file):
     configs = read_json(config_file)
     engine = configs["engine"]

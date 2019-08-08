@@ -4,7 +4,9 @@
         "name": {
             "type": "string",
             "default":"rnn",
-             "enum":["rnn"]},
+             "enum":["rnn"],
+             "description":  "Name of the current layer."
+             },
         "cell":{
             "type": "string",
             "default": "lstm",

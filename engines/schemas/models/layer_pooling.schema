@@ -4,7 +4,8 @@
         "name": {
             "type": "string",
             "default": "pooling",
-             "enum":  ["pooling"]
+             "enum":  ["pooling"],
+             "description":  "Name of the current layer."
              },
         "width": {
             "type": "integer",

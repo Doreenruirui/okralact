@@ -10,7 +10,8 @@
                     {"$ref": "layer_all_tesseract.schema#/definitions/pooling"},
                     {"$ref": "layer_all_tesseract.schema#/definitions/output"}
                     ]
-            }
+            },
+            "description": "The model structure of Tesseract."
         }
      }
 }

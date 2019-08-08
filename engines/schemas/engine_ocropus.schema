@@ -2,7 +2,8 @@
     "type": "object",
     "properties": {
     "engine": {
-        "const": "ocropus",
+        "type": "string",
+        "enum": ["ocropus"],
         "default": "ocropus",
         "description": "Engine name."
         },

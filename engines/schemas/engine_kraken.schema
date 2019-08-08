@@ -31,6 +31,7 @@
                 "description" : "Number of evaluations to wait before stopping training without improvement."
                 }
             },
+            "description": "Early stop parameters.",
             "additionalProperties": false
         },
         "optimizer" : {
@@ -54,8 +55,8 @@
         "schedule": {
             "type": "string",
             "default": "constant",
-            "enum": ["constant", "1cycle"]
-            "decription": "Set learning rate scheduler. For 1cycle, cycle length is determined by the '--epoch' option."
+            "enum": ["constant", "1cycle"],
+            "description": "Set learning rate scheduler. For 1cycle, cycle length is determined by the '--epoch' option."
         },
         "preload" : {
             "type" : "boolean",
@@ -83,7 +84,7 @@
            "type" : "boolean",
             "default" : true,
             "description" : "Reordering of code points to display order"
-        }
+        },
         "normalization": {
             "type": "string",
             "default": null,

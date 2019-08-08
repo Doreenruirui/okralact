@@ -10,7 +10,7 @@ from engines.validate_parameters import validate_string
 import json
 from lib.file_operation import list_model_dir
 from app.lib.forms import *
-from engines.validate_parameters import read_help_information_html
+from engines.common import read_help_information_html
 
 
 def get_file_status():
@@ -220,22 +220,15 @@ def download(filename):
 @app.route('/', methods=['GET', 'POST'], defaults={'engine': 'kraken'})
 @app.route('/<engine>',  methods=['GET', 'POST'])
 def manual(engine):
-    # Manage jobs
     print(engine)
     help_info = read_help_information_html(engine)
-    # if engine == 'kraken':
-    #     form = KrakenForm()
-    # elif engine == 'calamari':
-    #     form = CalamariForm()
     form = SelectEngineForm()
     if request.method == 'POST':
         engine_choices = dict(get_options(get_engines()))
         select_engine = engine_choices.get(form.select_engine.data)
-        #     redirect(url_for('manage_job'))
         print('engine', select_engine)
         return redirect(url_for('manual', engine=select_engine))
     return render_template('manual.html', form=form, engine=engine, help_info=help_info)
-
 
 
 @app.route("/results", methods=['GET'])

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import SubmitField, SelectField
+from wtforms import SubmitField, SelectField, StringField, validators
 from lib.file_operation import get_files, get_configs, get_engines, get_models
 
 
@@ -44,3 +44,13 @@ class SelectModelForm(FlaskForm):
     test_choices = get_options(get_files())
     select_test = SelectField(u'data', choices=test_choices)
     submit = SubmitField(u'run')
+
+
+class KrakenForm(SelectEngineForm):
+    input_model_prefix = StringField('Model_Prefix:', validators=[validators.required()], default='kraken')
+    input_nepoch = StringField('number epoch:', validators=[validators.required()], default='20')
+
+
+class CalamariForm(SelectEngineForm):
+    input_model_prefix = StringField('Model_Prefix:', validators=[validators.required()], default='Calamari')
+    input_nepoch = StringField('number epoch:', validators=[validators.required()], default='20')

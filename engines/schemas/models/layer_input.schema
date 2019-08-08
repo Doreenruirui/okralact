@@ -4,7 +4,9 @@
         "name": {
             "type": "string",
             "default":"input",
-            "enum":  ["input"]},
+            "enum":  ["input"],
+            "description":  "Name of the current layer."
+            },
         "width":{
             "type": "number",
             "format": "integer",

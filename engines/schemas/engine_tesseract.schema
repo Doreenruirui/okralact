@@ -2,7 +2,8 @@
     "type": "object",
     "properties": {
     "engine": {
-        "const": "tesseract",
+        "type": "string",
+        "enum": ["tesseract"],
         "default": "tesseract",
         "description": "Engine name."
         },

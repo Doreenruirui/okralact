@@ -1,7 +1,6 @@
 from engines.train import clear_data
 from engines.validate_parameters import read_json
 import subprocess
-from subprocess import check_output
 from os.path import join as pjoin
 import os
 from lib.file_operation import get_model_dir
@@ -10,7 +9,6 @@ from engines.common import clear_data, extract_file
 from engines.process_tesseract import convert_image, get_all_files
 from evaluate.evaluation import evaluate
 from engines import eval_folder, model_root, data_root, config_root, act_environ, deact_environ
-from engines import act_environ, model_root, valid_folder, data_folder
 
 
 def evl_pair():
@@ -57,23 +55,16 @@ def get_best_model_path(engine, model_dir):
         return pjoin(model_root, model_dir, 'checkpoint', 'best.checkpoint')
 
 
-
-
 def eval_from_file(file_test, file_train, file_config):
     clear_data(eval_folder)
-    extract_file(pjoin('static/data', file_test), eval_folder)
-    configs = read_json(pjoin('static/configs', file_config))
-    print(configs)
+    extract_file(pjoin(data_root, file_test), eval_folder)
+    configs = read_json(pjoin(config_root, file_config))
     model_dir = get_model_dir(file_train, file_config)
     engine = configs["engine"]
     common_schema = read_json("engines/schemas/common.schema")
     model_prefix = configs["model_prefix"] if "model_prefix" in configs \
         else common_schema["definitions"]["model_prefix"]["default"]
-    if engine != "tesseract":
-        cmd_list = [act_environ(engine)]
-    else:
-        cmd_list = []
-    # noinspection PyInterpreter
+    cmd_list = [act_environ(engine)] if engine != 'tesseract' else []
     best_model = get_best_model_path(engine, model_dir)
     if engine == 'kraken':
         cmd_list.append('kraken -I \'%s/*.png\' -o .txt ocr -m %s -s'
@@ -84,12 +75,11 @@ def eval_from_file(file_test, file_train, file_config):
     elif engine == 'ocropus':
         cmd_list.append('ocropus-rpred -m %s \'%s/*.png\'' % (best_model, eval_folder))
     elif engine == 'tesseract':
-        cmd_list.append('export TESSDATA_PREFIX=%s' % pjoin(os.getcwd(), model_root, model_dir),
-                        'lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
+        cmd_list.append('export TESSDATA_PREFIX=%s' % pjoin(model_root, model_dir))
+        cmd_list.append('lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
                         (best_model,
                          pjoin(model_root, model_dir, model_prefix, '%s.traineddata' % model_prefix),
                          pjoin(model_root, model_dir, model_prefix + '.traineddata')))
-        cmd_list = ['export TESSDATA_PREFIX=%s' % pjoin(model_root, model_dir)]
         convert_image('engines/eval')
         image_files = get_all_files(data_folder=eval_folder, postfix='.tif')
         for imf in image_files:
@@ -98,6 +88,8 @@ def eval_from_file(file_test, file_train, file_config):
                                                                   imf,
                                                                   eval_folder,
                                                                   imf))
+    if engine != 'tesseract':
+        cmd_list.append(deact_environ)
     cmd = '\n'.join(cmd_list)
     subprocess.run(cmd, shell=True)
     gt_files = [eval_folder + '/' + ele for ele in os.listdir(eval_folder) if ele.endswith('.gt.txt')]

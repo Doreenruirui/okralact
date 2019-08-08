@@ -8,7 +8,8 @@
                     {"$ref": "layer_all_ocropus.schema#/definitions/rnn"}
                     ]
                 },
-            "maxItems": 1
+            "maxItems": 1,
+            "description": "The model structure of Ocropus."
         }
     }
 }

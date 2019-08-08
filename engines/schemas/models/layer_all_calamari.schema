@@ -7,6 +7,7 @@
                 "name": {"$ref": "layer_input.schema#/definitions/name"},
                 "height": {"$ref": "layer_input.schema#/definitions/height"}
             },
+            "description": "Input Layer",
             "additionalProperties": false
         },
         "rnn": {
@@ -15,6 +16,7 @@
                 "name": {"$ref": "layer_rnn.schema#/definitions/name"},
                 "output": {"$ref": "layer_rnn.schema#/definitions/output"}
             },
+            "description": "RNN Layer",
             "additionalProperties": false
         },
         "cnn": {
@@ -25,6 +27,7 @@
                 "height": {"$ref": "layer_cnn.schema#/definitions/height"},
                 "output": {"$ref": "layer_cnn.schema#/definitions/output"}
             },
+            "description": "CNN Layer",
             "additionalProperties": false
         },
         "pooling": {
@@ -36,6 +39,7 @@
                 "x_stride":{"$ref": "layer_pooling.schema#/definitions/x_stride"},
                 "y_stride":{"$ref": "layer_pooling.schema#/definitions/y_stride"}
             },
+            "description": "Pooling Layer",
             "additionalProperties": false
         },
         "dropout": {
@@ -44,6 +48,7 @@
                 "name": {"$ref": "layer_dropout.schema#/definitions/name"},
                 "prob": {"$ref": "layer_dropout.schema#/definitions/prob"}
             },
+            "description": "Dropout Layer",
             "additionalProperties": false
         }
     }

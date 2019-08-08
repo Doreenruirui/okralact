@@ -9,6 +9,7 @@
                 "height": {"$ref": "layer_input.schema#/definitions/height"},
                 "channel": {"$ref": "layer_input.schema#/definitions/channel"}
             },
+            "description": "Input Layer",
             "additionalProperties": false
         },
         "rnn": {
@@ -21,6 +22,7 @@
                 "output": {"$ref": "layer_rnn.schema#/definitions/output"},
                 "sum": {"$ref": "layer_rnn.schema#/definitions/sum"}
             },
+            "description": "RNN Layer",
             "additionalProperties": false
         },
         "cnn": {
@@ -32,6 +34,7 @@
                 "activation": {"$ref": "layer_cnn.schema#/definitions/activation"},
                 "output": {"$ref": "layer_cnn.schema#/definitions/output"}
             },
+            "description": "CNN Layer",
             "additionalProperties": false
         },
         "pooling": {
@@ -43,6 +46,7 @@
                 "x_stride":{"$ref": "layer_pooling.schema#/definitions/x_stride"},
                 "y_stride":{"$ref": "layer_pooling.schema#/definitions/y_stride"}
             },
+            "description": "Pooling Layer",
             "additionalProperties": false
         },
         "reshape": {
@@ -55,6 +59,7 @@
                 "dim_e":{"$ref": "layer_reshape.schema#/definitions/dim_e"},
                 "dim_f":{"$ref": "layer_reshape.schema#/definitions/dim_f"}
             },
+            "description": "Reshape Layer",
             "additionalProperties": false
         },
         "dropout": {
@@ -64,6 +69,7 @@
                 "prob": {"$ref": "layer_dropout.schema#/definitions/prob"},
                 "dim":{"$ref": "layer_dropout.schema#/definitions/dim"}
             },
+            "description": "Dropout Layer",
             "additionalProperties": false
         },
         "output": {
@@ -72,6 +78,7 @@
                 "name": {"$ref": "layer_output.schema#/definitions/name"},
                 "size": {"$ref": "layer_output.schema#/definitions/size"}
             },
+            "description": "Output Layer",
             "additionalProperties": false
         }
     }

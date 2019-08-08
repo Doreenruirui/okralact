@@ -9,6 +9,7 @@
                 "height": {"$ref": "layer_input.schema#/definitions/height"},
                 "channel": {"$ref": "layer_input.schema#/definitions/channel"}
             },
+            "description": "Input Layer",
             "additionalProperties": false
         },
         "rnn": {
@@ -20,6 +21,7 @@
                 "output": {"$ref": "layer_rnn.schema#/definitions/output"},
                 "sum": {"$ref": "layer_rnn.schema#/definitions/sum"}
             },
+            "description": "RNN Layer",
             "additionalProperties": false
         },
         "cnn": {
@@ -31,6 +33,7 @@
                 "activation": {"$ref": "layer_cnn.schema#/definitions/activation"},
                 "output": {"$ref": "layer_cnn.schema#/definitions/output"}
             },
+            "description": "CNN Layer",
             "additionalProperties": false
         },
         "pooling": {
@@ -40,6 +43,7 @@
                 "width": {"$ref": "layer_pooling.schema#/definitions/width"},
                 "height": {"$ref": "layer_pooling.schema#/definitions/height"}
             },
+            "description": "Pooling Layer",
             "additionalProperties": false
         },
         "output": {
@@ -50,6 +54,7 @@
                 "CTC": {"$ref": "layer_output.schema#/definitions/CTC"},
                 "size": {"$ref": "layer_output.schema#/definitions/size"}
             },
+            "description": "Output Layer",
             "additionalProperties": false
         }
     }

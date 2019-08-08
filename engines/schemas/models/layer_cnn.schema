@@ -4,7 +4,8 @@
         "name": {
             "type": "string",
              "default":"cnn",
-             "enum":  ["cnn"]
+             "enum":  ["cnn"],
+             "description": "Name of the current layer."
              },
         "width":{
             "type": "integer",
