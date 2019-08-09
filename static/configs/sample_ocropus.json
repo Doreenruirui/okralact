@@ -1,1 +1,4 @@
-{"engine": "ocropus"}
+{"engine": "ocropus",
+  "codec": ["123", "234"],
+  "model": [{"rnn": {"direction": "bidirection", "output": 100}}]
+}
