@@ -158,7 +158,7 @@ class ModelTranslator:
             model_str.append(layer_str)
         return '--net_spec \'[' + ' '.join(model_str) + ']\''
 
-
-model = read_json('static/configs/sample_calamari.json')["model"]
-translator = ModelTranslator(model, 'calamari')
-print(translator.calamari())
+#
+# model = read_json('static/configs/sample_calamari.json')["model"]
+# translator = ModelTranslator(model, 'calamari')
+# print(translator.tesseract())

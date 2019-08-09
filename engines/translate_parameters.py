@@ -104,6 +104,11 @@ class Translate:
         cmd += '--%s %s ' % (self.translator['model_prefix'],
                            pjoin(checkpoint_folder, self.model_prefix))
 
+
+        # save_freq
+        save_freq = np.floor(self.values["savefreq"] * self.ntrain)
+        cmd += '--save_freq %d ' % save_freq
+
         # append
         flag_append = False if self.values["append"] == -1 and len(self.values["continue_from"]) == 0 else True
 
@@ -272,7 +277,7 @@ class Translate:
 
 
 def test():
-    translate = Translate('sample_kraken.json', model_dir='static/model/kraken')
+    translate = Translate('sample_tess.json', model_dir='static/model/tess_new')
     print(translate.cmd_list)
 
 
