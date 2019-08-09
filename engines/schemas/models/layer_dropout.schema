@@ -1,12 +1,6 @@
 {
     "type": "object",
     "definitions": {
-        "name": {
-            "type": "string",
-            "default":"dropout",
-             "enum":  ["dropout"],
-             "description": "Name of the current layer."
-             },
         "prob": {
             "type": "number",
             "format": "float",

@@ -20,6 +20,10 @@ app.eval_id2file = {}
 app.eval_file2id = {}
 app.eval_id2err = {}
 
+model_root = 'static/model'
+data_root = 'static/data'
+config_root = 'static/configs'
+
 from app import routes
 from app.api import bp as api_bp
 app.register_blueprint(api_bp, url_prefix='/api')

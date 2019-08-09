@@ -1,12 +1,6 @@
 {
     "type": "object",
     "definitions": {
-        "name": {
-            "type": "string",
-            "default":"reshape",
-            "enum":  ["reshape"],
-             "description":  "Name of the current layer."
-            },
         "dim":{
             "type": "integer",
             "default": 1,

@@ -4,10 +4,16 @@
         "rnn": {
             "type": "object",
             "properties": {
-                "name": {"$ref": "layer_rnn.schema#/definitions/name"},
-                "direction": {"$ref": "layer_rnn.schema#/definitions/direction"},
-                "output": {"$ref": "layer_rnn.schema#/definitions/output"}
-                },
+                "rnn": {
+                    "type": "object",
+                    "properties": {
+                         "direction": {"$ref": "layer_rnn.schema#/definitions/direction"},
+                         "output": {"$ref": "layer_rnn.schema#/definitions/output"}
+                    },
+                    "description": "RNN Layer",
+                    "additionalProperties": false
+                }
+             },
             "description": "RNN Layer",
             "additionalProperties": false
             }

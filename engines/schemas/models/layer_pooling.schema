@@ -1,12 +1,6 @@
 {
     "type": "object",
     "definitions": {
-        "name": {
-            "type": "string",
-            "default": "pooling",
-             "enum":  ["pooling"],
-             "description":  "Name of the current layer."
-             },
         "width": {
             "type": "integer",
             "default": 2,

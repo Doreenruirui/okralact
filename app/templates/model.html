@@ -1,14 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-    <form method=post enctype=multipart/form-data>
-    {{ form.hidden_tag() }}
-        {{ form.select_engine()}} {{ form.submit() }}<br>
-    </form>
-    <p/>
-    <p/>
-    Model Chosen: {{ engine }}
+    Possible layers of Model : {{ engine }}
     <table border=1>
         <tr>
                <th  align="left" width="150"> Parameter </th>

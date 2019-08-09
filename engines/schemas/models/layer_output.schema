@@ -1,12 +1,6 @@
 {
     "type": "object",
     "definitions": {
-        "name": {
-            "type": "string",
-             "default":"output",
-             "enum":  ["output"],
-             "description":  "Name of the current layer."
-             },
         "type":{
             "type": "integer",
             "default": 1,

@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, request, send_file
 from werkzeug.utils import secure_filename
-from app import app
+from app import app, model_root, config_root
 from lib.file_operation import rename_file
 from rq.job import Job
 import tarfile
@@ -10,7 +10,7 @@ from engines.validate_parameters import validate_string
 import json
 from lib.file_operation import list_model_dir
 from app.lib.forms import *
-from engines.common import read_help_information_html
+from engines.common import read_help_information_html, read_model_param
 
 
 def get_file_status():
@@ -47,7 +47,7 @@ def manage_data():
     return render_template('data.html', form=form, files_list=files_list)
 
 
-# Manage Files
+# Manage configure files
 @app.route('/configs', methods=['GET', 'POST'], defaults={'error_message': ''})
 @app.route('/configs/<error_message>', methods=['GET', 'POST'])
 def manage_configs(error_message):
@@ -122,11 +122,33 @@ def manage_job():
 @app.route('/models', methods=['GET', 'POST'])
 def manage_model():
     model_dict = list_model_dir()
+    print(model_dict)
     for ele in model_dict:
-        if not os.listdir(os.path.join(os.getcwd(), 'static/model', model_dict[ele])):
+        if not os.listdir(os.path.join(os.getcwd(), model_root, model_dict[ele])):
             del model_dict[ele]
     print(model_dict)
     return render_template('models.html', dict_model=model_dict)
+
+
+# Manage Model files
+@app.route('/models/<model_dir>', methods=['GET', 'POST'])
+def manage_model_list(model_dir):
+    tess_path = os.path.join(model_root, model_dir, "checkpoint")
+    if os.path.exists(tess_path) and os.path.isdir(tess_path):
+        models = [ele for ele in os.listdir(tess_path)]
+    else:
+        models = [ele for ele in os.listdir(os.path.join(model_root, model_dir))]
+    print("models:\n", models)
+    file_list = []
+    for ele in models:
+        if ele.endswith('mlmodel') or ele.endswith('.pyrnn.gz') or ele.endswith("checkpoint"):
+            file_list.append(ele)
+        elif ".ckpt." in ele and ele != "checkpoint":
+            file_list.append(ele)
+    if os.path.exists(os.path.join(model_root, model_dir, "report")):
+        file_list.append("report")
+    print(file_list)
+    return render_template('model_list.html',  model_dir=model_dir, files_list=file_list)
 
 
 # Manage Evals
@@ -196,24 +218,49 @@ def tardir(path, tar_name):
                 tar_handle.add(os.path.join(root, file))
 
 
-# download model
-@app.route('/download/<filename>', methods=['GET', 'POST'])
-def download(filename):
-    root_dir = os.getcwd()
-    model_dir = 'static/model/'
-    # model_files = os.listdir(os.path.join(model_dir, filename))
-    # print(model_files)
-    outfile = os.path.join(root_dir, model_dir, 'model_%s.tar.gz' % filename)
-    if os.path.exists(outfile):
-        os.remove(outfile)
-    tardir(os.path.join(root_dir, model_dir, filename), outfile)
-    # with tarfile.open(outfile, "w:gz") as _tar:
-    #     for fn in model_files:
-    #         new_fn = os.path.join(model_dir, filename, fn)
-    #         print(new_fn)
-    #         _tar.add('model/%s' % fn, new_fn)
-    #         # _tar.add(tarfile.TarInfo('model/%s' % fn), open(new_fn))
-    return send_file(outfile, mimetype='text/tar', attachment_filename='model.tar.gz', as_attachment=True)
+@app.route('/models/', methods=['GET', 'POST'])
+def download():
+    model_dir = request.args.get('model_dir', None)
+    file_name = request.args.get("filename", None)
+    out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name)
+    return send_file(out_file, attachment_filename=file_name, as_attachment=True)
+
+
+@app.route('/show_file', methods=['GET', 'POST'])
+def show_content():
+    file_name = request.args.get("filename", None)
+    file_type = request.args.get("type", None)
+    data_dir = request.args.get("file_dir", None)
+    print(file_name, file_type, data_dir)
+    if file_type == "config":
+        text = open(os.path.join(os.getcwd(), config_root, file_name), 'r', encoding="utf-8")
+        content = text.read()
+        text.close()
+    elif file_type == "report":
+        text = open(os.path.join(os.getcwd(), model_root, data_dir, file_name), 'r', encoding="utf-8")
+        content = text.read()
+        text.close()
+    return render_template('content.html', response=content)
+
+
+# # download model
+# @app.route('/download/<filename>', methods=['GET', 'POST'])
+# def download(filename):
+#     root_dir = os.getcwd()
+#     model_dir = model_root
+#     # model_files = os.listdir(os.path.join(model_dir, filename))
+#     # print(model_files)
+#     outfile = os.path.join(root_dir, model_dir, 'model_%s.tar.gz' % filename)
+#     if os.path.exists(outfile):
+#         os.remove(outfile)
+#     tardir(os.path.join(root_dir, model_dir, filename), outfile)
+#     # with tarfile.open(outfile, "w:gz") as _tar:
+#     #     for fn in model_files:
+#     #         new_fn = os.path.join(model_dir, filename, fn)
+#     #         print(new_fn)
+#     #         _tar.add('model/%s' % fn, new_fn)
+#     #         # _tar.add(tarfile.TarInfo('model/%s' % fn), open(new_fn))
+#     return send_file(outfile, mimetype='text/tar', attachment_filename='model.tar.gz', as_attachment=True)
 
 
 # Manual of Using OCR Engines
@@ -229,6 +276,16 @@ def manual(engine):
         print('engine', select_engine)
         return redirect(url_for('manual', engine=select_engine))
     return render_template('manual.html', form=form, engine=engine, help_info=help_info)
+
+
+# Model info
+@app.route('/manual_model',  methods=['GET', 'POST'])
+def get_model_info():
+    print('train_model')
+    engine = request.args.get('engine_name', None)
+    print("current engine", engine)
+    help_info = read_model_param(engine)
+    return render_template('model.html', engine=engine, help_info=help_info)
 
 
 @app.route("/results", methods=['GET'])

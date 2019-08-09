@@ -1,0 +1,29 @@
+
+{% extends "base.html" %}
+{% block content %}
+    <table border=0>
+        <tr>
+               <th  align="left" width="150"> Models </th>
+               <th  align="left" width="150">  </th>
+        </tr>
+         {% for data in files_list %}
+            <tr>
+                <td>
+                {% if (data == "report") %}
+                        <a href="{{ url_for('show_content', file_dir=model_dir, filename=data, type="report")}}">{{ data }}</a>
+                {% else %}
+                    {{ data }}
+                {% endif %}
+
+                </td>
+                <td>
+                    <a href="{{ url_for('download', model_dir=model_dir, filename=data)}}">download</a>
+
+                </td>
+            </tr>
+         {% endfor %}
+      </table>
+    <br>
+    <br>
+
+{% endblock %}

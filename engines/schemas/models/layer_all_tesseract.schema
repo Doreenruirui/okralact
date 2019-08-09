@@ -4,10 +4,16 @@
         "input": {
             "type": "object",
             "properties": {
-                "name": {"$ref": "layer_input.schema#/definitions/name"},
-                "width": {"$ref": "layer_input.schema#/definitions/width"},
-                "height": {"$ref": "layer_input.schema#/definitions/height"},
-                "channel": {"$ref": "layer_input.schema#/definitions/channel"}
+                "input": {
+                    "type": "object",
+                    "properties": {
+                        "width": {"$ref": "layer_input.schema#/definitions/width"},
+                        "height": {"$ref": "layer_input.schema#/definitions/height"},
+                        "channel": {"$ref": "layer_input.schema#/definitions/channel"}
+                    },
+                    "description": "Input Layer",
+                    "additionalProperties": false
+                }
             },
             "description": "Input Layer",
             "additionalProperties": false
@@ -15,11 +21,17 @@
         "rnn": {
             "type": "object",
             "properties": {
-                "name": {"$ref": "layer_rnn.schema#/definitions/name"},
-                "time_axis": {"$ref": "layer_rnn.schema#/definitions/time_axis"},
-                "direction": {"$ref": "layer_rnn.schema#/definitions/direction"},
-                "output": {"$ref": "layer_rnn.schema#/definitions/output"},
-                "sum": {"$ref": "layer_rnn.schema#/definitions/sum"}
+                "rnn": {
+                    "type": "object",
+                    "properties": {
+                        "time_axis": {"$ref": "layer_rnn.schema#/definitions/time_axis"},
+                        "direction": {"$ref": "layer_rnn.schema#/definitions/direction"},
+                        "output": {"$ref": "layer_rnn.schema#/definitions/output"},
+                        "sum": {"$ref": "layer_rnn.schema#/definitions/sum"}
+                    },
+                    "description": "RNN Layer",
+                    "additionalProperties": false
+                }
             },
             "description": "RNN Layer",
             "additionalProperties": false
@@ -27,11 +39,17 @@
         "cnn": {
             "type": "object",
             "properties": {
-                "name": {"$ref": "layer_cnn.schema#/definitions/name"},
-                "width": {"$ref": "layer_cnn.schema#/definitions/width"},
-                "height": {"$ref": "layer_cnn.schema#/definitions/height"},
-                "activation": {"$ref": "layer_cnn.schema#/definitions/activation"},
-                "output": {"$ref": "layer_cnn.schema#/definitions/output"}
+                "cnn": {
+                    "type": "object",
+                    "properties": {
+                        "width": {"$ref": "layer_cnn.schema#/definitions/width"},
+                        "height": {"$ref": "layer_cnn.schema#/definitions/height"},
+                        "activation": {"$ref": "layer_cnn.schema#/definitions/activation"},
+                        "output": {"$ref": "layer_cnn.schema#/definitions/output"}
+                    },
+                    "description": "CNN Layer",
+                    "additionalProperties": false
+                }
             },
             "description": "CNN Layer",
             "additionalProperties": false
@@ -39,9 +57,15 @@
         "pooling": {
             "type" : "object",
             "properties": {
-                "name": {"$ref": "layer_pooling.schema#/definitions/name"},
-                "width": {"$ref": "layer_pooling.schema#/definitions/width"},
-                "height": {"$ref": "layer_pooling.schema#/definitions/height"}
+                "pooling": {
+                    "type" : "object",
+                    "properties": {
+                        "width": {"$ref": "layer_pooling.schema#/definitions/width"},
+                        "height": {"$ref": "layer_pooling.schema#/definitions/height"}
+                    },
+                    "description": "Pooling Layer",
+                    "additionalProperties": false
+                }
             },
             "description": "Pooling Layer",
             "additionalProperties": false
@@ -49,10 +73,16 @@
         "output": {
             "type" : "object",
             "properties": {
-                "name": {"$ref": "layer_output.schema#/definitions/name"},
-                "type": {"$ref": "layer_output.schema#/definitions/type"},
-                "CTC": {"$ref": "layer_output.schema#/definitions/CTC"},
-                "size": {"$ref": "layer_output.schema#/definitions/size"}
+                "output": {
+                    "type" : "object",
+                    "properties": {
+                        "type": {"$ref": "layer_output.schema#/definitions/type"},
+                        "CTC": {"$ref": "layer_output.schema#/definitions/CTC"},
+                        "size": {"$ref": "layer_output.schema#/definitions/size"}
+                    },
+                    "description": "Output Layer",
+                    "additionalProperties": false
+                }
             },
             "description": "Output Layer",
             "additionalProperties": false
