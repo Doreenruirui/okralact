@@ -95,16 +95,20 @@ def read_model_info(engine):
     layers = model["items"]["oneOf"]
     model["layers"] = []
     help_info = []
-    help_info.append("model", model["type"], '', model["description"])
+    help_info.append(["model", '', '', model["type"], '', model["description"]])
     for layer in layers:
         layer_def = load_jsonref('models/' + layer["$ref"])
+        help_info.append(['', layer_def["description"], '', '', '', ''])
         for para in layer_def["properties"]:
             para_def = load_jsonref("models/" + layer_def["properties"][para]["$ref"])
             print(para_def)
             layer_def["properties"][para] = para_def
             model["layers"].append(layer_def)
-
-    return model
+            if "enum" in para_def:
+                help_info.append(['', '', para, para_def["type"], para_def["default"], 'Allowed values: ' + ', '.join(map(str, para_def["enum"])) + ' ' + para_def["description"]])
+            else:
+                help_info.append(['', '', para, para_def["type"], para_def["default"], para_def["description"]])
+    return help_info
 
 
 def read_help_information_html(engine):
@@ -114,7 +118,7 @@ def read_help_information_html(engine):
     for k in attrs:
         print(k, attrs[k])
         if k == "model":
-            read_model_info(engine)
+            help_info += read_model_info(engine)
             continue
         elif "$ref" in attrs[k]:
             ref_path = attrs[k]["$ref"]
@@ -124,14 +128,16 @@ def read_help_information_html(engine):
         else:
             cur_node = attrs[k]
         if cur_node["type"] == "number":
-            help_info.append([k, cur_node["format"], str(cur_node["default"]), cur_node["description"]])
+            help_info.append([k, '', '', cur_node["format"], str(cur_node["default"]), cur_node["description"]])
         else:
             if "enum" in cur_node:
-                help_info.append([k, cur_node["type"], str(cur_node["default"]), "Allowed Value: " + ', '.join(cur_node["enum"]) + '. ' + cur_node["description"]])
+                help_info.append([k,'', '', cur_node["type"], str(cur_node["default"]), "Allowed Value: " + ', '.join(cur_node["enum"]) + '. ' + cur_node["description"]])
             else:
-                help_info.append([k, cur_node["type"], str(cur_node["default"]), cur_node["description"]])
+                help_info.append([k, '', '', cur_node["type"], str(cur_node["default"]), cur_node["description"]])
     return help_info
 
 
-read_help_information_html("kraken")
+help_info = read_help_information_html("kraken")
+for ele in help_info:
+    print(ele)
 

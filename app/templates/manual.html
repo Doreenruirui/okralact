@@ -6,9 +6,11 @@
     {{ form.hidden_tag() }}
         {{ form.select_engine()}} {{ form.submit() }}<br>
     </form>
-    <table border=0>
+    <table border=1>
         <tr>
                <th  align="left" width="150"> Parameter </th>
+               <th  align="left" width="150"> SubParameter </th>
+               <th  align="left" width="150"> SubParameter </th>
                <th  align="left" width="150"> Type </th>
                <th  align="left" width="150"> Default </th>
                <th  align="left" width="150"> Description</th>
@@ -19,6 +21,8 @@
                 <td> {{ info[1] }} </td>
                 <td> {{ info[2] }}</td>
                 <td> {{ info[3] }}</td>
+                <td> {{ info[4] }}</td>
+                <td> {{ info[5] }}</td>
             </tr>
          {% endfor %}
       </table>
