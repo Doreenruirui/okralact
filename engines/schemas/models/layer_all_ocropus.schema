@@ -1,6 +1,21 @@
 {
     "type": "object",
     "definitions": {
+        "input": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "object",
+                    "properties": {
+                        "height": {"$ref": "layer_input.schema#/definitions/height"}
+                    },
+                    "description": "Input Layer",
+                    "additionalProperties": false
+                }
+            },
+            "description": "Input Layer",
+            "additionalProperties": false
+        },
         "rnn": {
             "type": "object",
             "properties": {

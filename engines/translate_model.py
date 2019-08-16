@@ -71,9 +71,13 @@ class ModelTranslator:
 
     def ocropus(self):      # ocoropus only allow user specific rnn layer
         if len(self.model) > 0:
-            rnn_layer = self.model[0]["rnn"]
-            values = read_layer_default("rnn")
             model_str = []
+            self.model = [{"input": read_layer_default("input")}] + self.model \
+                if "input" not in self.model[0] else self.model
+            input_layer = self.model[0]["input"]
+            model_str.append('--height %d' % input_layer["height"])
+            rnn_layer = self.model[1]["rnn"]
+            values = read_layer_default("rnn")
             output = rnn_layer["output"] if "output" in rnn_layer else values["output"]
             direct = rnn_layer["direction"] if "direction" in rnn_layer else values["direction"]
             if direct != "bidirectional":

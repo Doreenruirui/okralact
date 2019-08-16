@@ -5,6 +5,7 @@
             "type": "array",
             "items": {
                 "oneOf":[
+                    {"$ref": "layer_all_calamari.schema#/definitions/input"},
                     {"$ref": "layer_all_ocropus.schema#/definitions/rnn"}
                     ]
                 },

@@ -22,6 +22,25 @@ def validate(schema, config):
     return error_message
 
 
+def validate_model(config):
+    err_str = []
+    engine = config["engine"]
+    layers = read_json('engines/schemas/models/layer_all_%s.schema' % engine)["definitions"]
+    for ele in config["model"]:
+        for key in ele:
+            if key not in layers:
+                err_str.append('Layer %s is not defined in engine %s' % (key, engine))
+            else:
+                resolver = RefResolver('file://%s/engines/schemas/' % os.getcwd(), None)
+                validator = Draft4Validator(layers[key]["properties"], resolver=resolver)
+                for eno, error in enumerate(validator.iter_errors(ele)):
+                    if len(error.path) > 0:
+                        err_str.append('error %d:\tparameter %s, %s' % (eno, error.path[0], error.message))
+                    else:
+                        err_str.append('error %d:\t%s' % (eno, error.message))
+    return err_str
+
+
 def validate_file(config_file):
     common_schema = read_json('engines/schemas/common.schema')
     config = read_json(config_file)
@@ -34,6 +53,7 @@ def validate_file(config_file):
         # print('engines/schemas/%s.schema' % engine)
         engine_schema = read_json('engines/schemas/engine_%s.schema' % engine)
         errors = validate(engine_schema, config)
+        errors_model = validate_model(config)
         return errors
 
 
@@ -82,7 +102,7 @@ def read_parameters(config_file):
 
 
 
-# print(validate_file("static/configs/sample_calamari.json"))
+print(validate_file("static/configs/sample_calamari.json"))
 # read_parameters('engines/schemas/sample.json')
 # print(read_help_information('calamari'))
 # errors = valiadte_file('engines/schemas/sample.json')

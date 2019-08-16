@@ -245,7 +245,7 @@ class Translate:
         # model
         cmd += self.model_translator.calamari(learning_rate=self.values["learning_rate"]) + ' '
 
-        floats = ["batch_size", "stats_size", "seed",
+        floats = ["stats_size", "seed",
                   "bidi_dir", "text_normalization", "text_regularization"
                   "continue_from",
                   "no_skip_invalid_gt",
@@ -277,7 +277,7 @@ class Translate:
 
 
 def test():
-    translate = Translate('sample_tess.json', model_dir='static/model/tess_new')
+    translate = Translate('sample_ocropus.json', model_dir='static/model/ocropus')
     print(translate.cmd_list)
 
 
