@@ -5,14 +5,15 @@ from scipy.ndimage import filters
 import unicodedata
 
 
-def levenshtein(a, b):
+def levenshtein_word(a, b):
     """Calculates the Levenshtein distance between a and b.
     (Clever compact Pythonic implementation from hetland.org)"""
-    a = unicodedata.normalize('NFC', a)
-    b = unicodedata.normalize('NFC', b)
+    a = unicodedata.normalize('NFC', a).split(' ')
+    b = unicodedata.normalize('NFC', b).split(' ')
+    print(a,b)
     n, m = len(a), len(b)
     if n > m:
-        a, b = b, a;
+        a, b = b, a
         n, m = m, n
     current = range(n+1)
     for i in range(1, m+1):
