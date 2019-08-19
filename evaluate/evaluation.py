@@ -52,6 +52,8 @@ def process1(fname):
         txt = ""
     # Also the ground truth cannot be empty, it is possible that
     # after filtering (args.kind) the gt string is empty.
+    txt = unicodedata.normalize('NFC', txt)
+    gt = unicodedata.normalize('NFC', gt)
     if len(gt) == 0:
         err = len(txt)
         if len(txt) > 0:
@@ -76,12 +78,15 @@ def process2(fname):
     else:
         missing = len(gt)
         txt = ""
+
+    txt = unicodedata.normalize('NFC', txt).split(' ')
+    gt = unicodedata.normalize('NFC', gt).split(' ')
     # Also the ground truth cannot be empty, it is possible that
     # after filtering (args.kind) the gt string is empty.
     if len(gt) == 0:
         err = len(txt)
     else:
-        err, cs = edist.levenshtein_word(txt, gt)
+        err = edist.levenshtein_word(txt, gt)
     return fname, err, len(gt), missing
 
 
@@ -91,6 +96,7 @@ def evaluate(files):
     outputs = []
     outputs_wer = []
     if args.parallel < 2:
+        initializer(args)
         for e in args.files:
             result = process1(e)
             outputs.append(result)
