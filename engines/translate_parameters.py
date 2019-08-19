@@ -109,6 +109,13 @@ class Translate:
         save_freq = np.floor(self.values["savefreq"] * self.ntrain)
         cmd += '--save_freq %d ' % save_freq
 
+        # optimizer
+        optimizer = self.values["optimizer"]
+        if optimizer == 'Adam':
+            cmd += '--net_mode %d ' % 192
+        else:
+            cmd += '--net_mode %d' % 128
+
         # append
         flag_append = False if self.values["append"] == -1 and len(self.values["continue_from"]) == 0 else True
 
@@ -117,7 +124,7 @@ class Translate:
         cmd += '%s ' % self.model_translator.tesseract(self.values["batch_size"], flag_append)
 
         floats = ["append",  "continue_from",
-                  "optimizer", "momentum", "adam_beta",
+                   "momentum", "adam_beta",
                   "target_error_rate",
                   "perfect_sample_delay"]
         for para in self.configs:
@@ -281,4 +288,4 @@ def test():
     print(translate.cmd_list)
 
 
-test()
+# test()
