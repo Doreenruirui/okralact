@@ -1,0 +1,23 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+ <table border=0>
+        <tr>
+               <th  align="left" width="150"> Train </th>
+               <th  align="left" width="150"> Config </th>
+        </tr>
+        <tr>
+               <td> {{ trainset }} </td>
+               <td> {{ config }} </td>
+            </tr>
+      </table>
+<br><br>
+  <form method=post enctype=multipart/form-data>
+    {{ form.hidden_tag() }}
+        Testset: {{ form.select_test() }} <br>  <br>
+        Model: {{ form.select_model()}} <br> <br>
+        {{ form.submit() }}<br>
+    </form>
+
+{% endblock %}

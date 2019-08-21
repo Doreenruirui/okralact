@@ -9,6 +9,21 @@ def read_layer_default(layername):
         default_values[key] = layer_schema["definitions"][key]["default"]
     return default_values
 
+def get_old_input_size(old_model, append):
+    def get_pool_dim(input_size, kernel_size, stride_size):
+        return int(np.floor((input_size - (kernel_size - 1) - 1) / stride_size + 1))
+    old_model = [{"input": read_layer_default("input")}] + old_model \
+                if "input" not in old_model[0] else old_model
+    new_model = old_model[:append + 1]
+    input_size = new_model[0]["input"]["height"]
+    for cur_layer in new_model:
+        for layer_name in cur_layer:
+            values = read_layer_default(layer_name)                        # Get default value for each layer attribute
+            layer = cur_layer[layer_name]
+            values = {k: layer[k] if k in layer else values[k] for k in values} # Rewrite value according to user specific configuration
+            if layer_name == "pooling":
+                input_size = get_pool_dim(input_size, values["height"], values["y_stride"])
+    return input_size
 
 class ModelTranslator:
     def __init__(self, model, engine):
@@ -17,14 +32,15 @@ class ModelTranslator:
         self.translator = read_json("engines/schemas/models/translate_model.json")
         # self.model_str = self.translate()
 
-    def kraken(self, batch_size, flag_append=False):
+    def kraken(self, batch_size, flag_append=False, input_size=0):
         def get_pool_dim(input_size, kernel_size, stride_size):
             return int(np.floor((input_size - (kernel_size - 1) - 1) / stride_size + 1))
         model_str = []
         if not flag_append:
             self.model = [{"input": read_layer_default("input")}] + self.model \
                 if "input" not in self.model[0] else self.model
-        input_size = self.model[0]["input"]["height"]
+            input_size = self.model[0]["input"]["height"]
+        flag_reshape = 0
         for cur_layer in self.model:
             for layer_name in cur_layer:
                 values = read_layer_default(layer_name)                        # Get default value for each layer attribute
@@ -41,6 +57,9 @@ class ModelTranslator:
                                                  values["width"],
                                                  values["output"])
                 elif layer_name == "rnn":
+                    if not flag_reshape:
+                        flag_reshape =  1
+                        model_str.append('S1(1x%d)1,3' % input_size)
                     sum_str = 's' if values["sum"] else ''
                     layer_str = '%s%s%s%s%d' % (self.translator[values["cell"]],        # lstm or gru
                                                 self.translator[values["direction"]],   # forward, backward or bidirectional
@@ -50,9 +69,10 @@ class ModelTranslator:
                 elif layer_name == "reshape":
                     layer_str = 'S%d(%dx%d)%d,%d' % (values["dim"],
                                                      values["a"],
-                                                     input_size,
+                                                     values["b"],
                                                      values["dim_e"],
                                                      values["dim_f"])
+                    flag_reshape = 1
                 elif layer_name == "pooling":
                     layer_str = 'Mp%d,%d,%d,%d' % (values["height"],
                                                    values["width"],
@@ -119,7 +139,7 @@ class ModelTranslator:
         model_str.append('l_rate=%f' % learning_rate)
         return '%s --network=%s' % (model_str[0], ','.join(model_str[1:]))
 
-    def tesseract(self, batch_size, flag_append=False):
+    def tesseract(self, batch_size, flag_append=False, voc_size=100):
         model_str = []
         if not flag_append:
             self.model = [{"input": read_layer_default("input")}] + self.model \
@@ -156,9 +176,9 @@ class ModelTranslator:
                 model_str.append(layer_str)
         if "output" not in self.model[-1]:
             values = read_layer_default("output")
-            # print(values["type"], values["CTC"], voc_size)
-            layer_str = "O%d%s" % (values["type"], values["CTC"])
-            # layer_str = "O%d%s%d" % (values["type"], values["CTC"], voc_size)
+            print(values["type"], values["CTC"], voc_size)
+            # layer_str = "O%d%s" % (values["type"], values["CTC"])
+            layer_str = "O%d%s%d" % (values["type"], values["CTC"], voc_size)
             model_str.append(layer_str)
         return '--net_spec \'[' + ' '.join(model_str) + ']\''
 

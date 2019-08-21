@@ -23,10 +23,8 @@ class UploadConfigForm(FlaskForm):
 
 
 class SelectConfigForm(FlaskForm):
-    config_choices = get_options(get_configs())
-    select_config = SelectField(u'config', choices=config_choices)
-    data_choices = get_options(get_files())
-    select_data = SelectField(u'data', choices=data_choices)
+    select_config = SelectField(u'config')
+    select_data = SelectField(u'data')
     submit = SubmitField(u'run')
     submit_valid = SubmitField(u'valid')
 
@@ -39,9 +37,16 @@ class SelectEngineForm(FlaskForm):
 
 class SelectModelForm(FlaskForm):
     config_choices = get_options(get_configs())
-    select_config = SelectField(u'config', choices=config_choices)
+    select_config = SelectField(u'config', choices=config_choices, id='select_config')
     train_choices = get_options(get_files())
-    select_train = SelectField(u'data', choices=train_choices)
+    select_train = SelectField(u'train', choices=train_choices, id='select_train')
     test_choices = get_options(get_files())
-    select_test = SelectField(u'data', choices=test_choices)
+    select_test = SelectField(u'test', choices=test_choices, id='select_test')
+    submit = SubmitField(u'run')
+
+
+class SelectEvalForm(FlaskForm):
+    test_choices = get_options(get_files())
+    select_test = SelectField(u'test', choices=test_choices, id='select_test')
+    select_model = SelectField(u'model', id='select_model')
     submit = SubmitField(u'run')

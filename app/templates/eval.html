@@ -6,6 +6,7 @@
                <th  align="left" width="150"> Test </th>
                <th  align="left" width="150"> Train </th>
                <th  align="left" width="150"> Config </th>
+               <th  align="left" width="150"> model </th>
                <th  align="left" width="150"> Status</th>
         </tr>
          {% for data in dict_status %}
@@ -13,25 +14,32 @@
                <td> {{ data[0] }} </td>
                <td> {{ data[1] }} </td>
                <td> {{ data[2] }} </td>
-                {% if dict_status[data] == "finished" %}
-                    <td>
-                      <a href="{{ url_for('get_results', testname=data[0], trainname=data[1], configname=data[2]) }}">check</a>
+               <td> {{ data[3] }} </td>
+                {%if dict_status[data] == "finished" %}
+                        <td>
+                          <a href="{{ url_for('get_results', testname=data[0], trainname=data[1], configname=data[2], modelname=data[3]) }}">check</a>
+                        </td>
+                {%  else %}
+                        <td> {{ dict_status[data] }}</td>
+                {% endif %}
+            </tr>
+         {% endfor %}
+        {% for data in dict_res %}
+            <tr>
+               <td> {{ data[0] }} </td>
+               <td> {{ data[1] }} </td>
+               <td> {{ data[2] }} </td>
+               <td> {{ data[3] }} </td>
+                {% if data not in dict_status %}
+                     <td>
+                        <a href="{{ url_for('get_results', testname=data[0], trainname=data[1], configname=data[2], modelname=data[3]) }}">check</a>
                     </td>
-                  {%  else %}
-                    <td> {{ dict_status[data] }}</td>
-                  {% endif %}
+                {% endif %}
             </tr>
          {% endfor %}
       </table>
     <br>
     <br>
 
-    <form method=post enctype=multipart/form-data>
-    {{ form.hidden_tag() }}
-        {{ form.select_test() }}{{ form.select_train()}} {{ form.select_config()}} {{ form.submit() }}<br>
-
-    </form>
-    <!--{% for error in errors %}-->
-    <!--{{ error }} <br>-->
-    <!--{% endfor %}-->
 {% endblock %}
+

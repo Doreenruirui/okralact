@@ -6,6 +6,8 @@
                <th  align="left" width="150"> Dataset </th>
                <th  align="left" width="150"> Configuration </th>
                <th  align="left" width="150"> </th>
+               <th  align="left" width="150"> </th>
+               <th  align="left" width="150"> </th>
         </tr>
          {% for data in dict_model %}
             <tr>
@@ -13,6 +15,9 @@
                 <td> {{ data[1] }} </td>
                 <td>
                     <a href="{{ url_for('manage_model_list', model_dir=dict_model[data]) }}">download</a>
+                </td>
+                <td>
+                    <a href="{{ url_for('eval_model_list', trainset=data[0], config=data[1])}}">evaluate</a>
                 </td>
             </tr>
          {% endfor %}

@@ -1,0 +1,14 @@
+{"model":  [{"input": {"height":50}},
+            {"cnn": {"height":3, "width": 10, "output": 10}},
+            {"pooling": {"height":2, "width": 2, "x_stride": 1, "y_stride": 1}},
+            {"cnn": {"height":3, "width": 10, "output": 10}},
+            {"pooling": {"width": 2, "height": 2, "x_stride": 1, "y_stride": 1}},
+            {"dropout": {"prob":  0.9}},
+            {"rnn": {"output": 10}}
+            ],
+  "engine":  "calamari",
+  "nepoch": 2,
+  "continue_from": {"trainset":  "data_kraken.tar.gz",
+                    "config":"sample_calamari.json",
+                    "model": "valid_best.ckpt"}
+}

@@ -2,9 +2,9 @@
             {"pooling": {"height":2, "width": 2, "x_stride": 1, "y_stride": 1}},
             {"cnn": {"height":3, "width": 10, "output": 10, "activation": "sigmoid"}},
             {"pooling": {"width": 2, "height": 2, "x_stride": 1, "y_stride": 1}},
-            {"reshape":{"dim": 1, "a": 1, "b":  12, "dim_e": 1, "dim_f": 3}},
             {"rnn": {"direction": "forward", "output": 10}}
             ],
   "engine":  "kraken",
-  "early_stop": {"nbest": 1,"min_improve": 0.01}
+  "early_stop": {"nbest": 1,"min_improve": 0.01},
+  "nepoch": 10
 }

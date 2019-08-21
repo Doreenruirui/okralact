@@ -1,0 +1,6 @@
+{"engine": "ocropus",
+  "model": [{"rnn": {"direction": "bidirection", "output": 100}}],
+  "continue_from": {"trainset":  "data_kraken.tar.gz",
+                    "config":"sample_ocropus.json",
+                    "model": "valid_best.pyrnn.gz"}
+}

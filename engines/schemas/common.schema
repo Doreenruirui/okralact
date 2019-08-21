@@ -44,10 +44,28 @@
             "description" : "The frequency of how often to save the model paratmeters during training. The unit is in epoches."
         },
         "continue_from": {
-            "type": "string",
-            "default": "",
-            "description": "Loading existing file to continue training."
-        },
+            "type": "object",
+            "properties": {
+                "trainset" : {
+                    "type" : "string",
+                    "default" : "",
+                    "description" : "The dataset that the model to be fine tuned is trained on."
+                },
+                "config" : {
+                    "type" : "string",
+                    "default" : "",
+                    "description" : "The configuration that the model to be fine tuned is trained with."
+                },
+                "model":  {
+                    "type" : "string",
+                    "default" : "",
+                    "description" : "The model file to be fine tuned."
+                }
+             },
+             "default": {},
+             "additionalProperties": false,
+             "description": "Fine tune existing model with given information."
+         },
         "append" : {
             "type": "integer",
             "default" : -1,

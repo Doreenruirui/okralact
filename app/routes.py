@@ -1,17 +1,17 @@
 from flask import render_template, redirect, url_for, request, send_file
 from werkzeug.utils import secure_filename
 from app import app, model_root, config_root, eval_root
-from lib.file_operation import rename_file, get_model_dir
+from lib.file_operation import rename_file, get_model_dir, get_model_info
 from rq.job import Job
 import tarfile
 import shutil
 import os
 from engines.validate_parameters import validate_string
 import json
-from lib.file_operation import list_model_dir
+from lib.file_operation import list_model_dir, read_list
 from app.lib.forms import *
-from engines.common import read_help_information_html, read_model_param, read_list
-
+from engines.common import read_help_information_html, read_model_param
+from flask import jsonify, flash
 
 def get_file_status():
     dict_status = {}
@@ -29,15 +29,36 @@ def get_valid_status():
         dict_status[(filename, config)] = job.get_status()
     return dict_status
 
+def get_model_list(model_dir):
+    tess_path = os.path.join(model_root, model_dir, "checkpoint")
+    if os.path.exists(tess_path) and os.path.isdir(tess_path):
+        models = [ele for ele in os.listdir(tess_path)]
+    else:
+        models = [ele for ele in os.listdir(os.path.join(model_root, model_dir))]
+    print("models:\n", models)
+    file_list = []
+    for ele in models:
+        if ele.endswith('mlmodel') or ele.endswith('.pyrnn.gz') or ele.endswith("checkpoint"):
+            file_list.append(ele)
+        elif ".ckpt." in ele and ele != "checkpoint":
+            file_list.append(ele)
+    if os.path.exists(os.path.join(model_root, model_dir, "report")):
+        file_list.append("report")
+    return file_list
+
 
 def get_eval_status():
     dict_status = {}
     for job_id in app.eval_id2file:
         job = Job.fetch(job_id, app.redis)
-        trainname, testname, config = app.eval_id2file[job_id]
-        print({'job': job, 'trainname': trainname, 'testname': testname, 'config': config})
-        dict_status[(trainname, testname, config)] = job.get_status()
+        trainname, testname, config, modelname = app.eval_id2file[job_id]
+        print({'job': job, 'trainname': trainname, 'testname': testname, 'config': config, 'modelname': modelname})
+        dict_status[(trainname, testname, config, modelname)] = job.get_status()
     return dict_status
+
+def get_eval_report():
+    dict_res = read_list('static/eval/eval_list')
+    return dict_res
 
 
 # Manage Files
@@ -117,6 +138,8 @@ def manage_job(error_message):
     print(app.job_file2id)
     print(dict_status)
     form = SelectConfigForm()
+    form.select_config.choices = get_options(get_configs())
+    form.select_data.choices = get_options(get_files())
     if request.method == 'POST':
         print("form:", request.form)
         data_choices = dict(get_options(get_files()))
@@ -143,44 +166,40 @@ def manage_model():
 # Manage Model files
 @app.route('/models/<model_dir>', methods=['GET', 'POST'])
 def manage_model_list(model_dir):
-    tess_path = os.path.join(model_root, model_dir, "checkpoint")
-    if os.path.exists(tess_path) and os.path.isdir(tess_path):
-        models = [ele for ele in os.listdir(tess_path)]
-    else:
-        models = [ele for ele in os.listdir(os.path.join(model_root, model_dir))]
-    print("models:\n", models)
-    file_list = []
-    for ele in models:
-        if ele.endswith('mlmodel') or ele.endswith('.pyrnn.gz') or ele.endswith("checkpoint"):
-            file_list.append(ele)
-        elif ".ckpt." in ele and ele != "checkpoint":
-            file_list.append(ele)
-    if os.path.exists(os.path.join(model_root, model_dir, "report")):
-        file_list.append("report")
+    file_list = get_model_list(model_dir)
     print(file_list)
-    return render_template('model_list.html',  model_dir=model_dir, files_list=file_list)
+    return render_template('model_download.html',  model_dir=model_dir, files_list=file_list)
+
+# Choose a Model file to evaluate
+@app.route('/models/evaluation', methods=['GET', 'POST'])
+def eval_model_list():
+    trainset = request.args.get('trainset', None)
+    config = request.args.get('config', None)
+    model_dir = get_model_dir(trainset, config)
+    file_list = get_model_list(model_dir)
+    form = SelectEvalForm()
+    form.select_model.choices = get_options(file_list)
+    if request.method == 'POST':
+        print("form:", request.form)
+        data_choices = dict(get_options(get_files()))
+        model_choices = dict(get_options(file_list))
+        print(get_configs())
+        select_model = model_choices.get(form.select_model.data)
+        select_test = data_choices.get(form.select_test.data)
+        print('model', select_model)
+        print('test:', select_test)
+        return redirect(url_for('eval_model', trainname=trainset, config=config, testname=select_test,  modelname=select_model))
+    return render_template('model_eval.html', form=form, trainset=trainset, config=config)
 
 
 # Manage Evals
 @app.route('/evaluation', methods=['GET', 'POST'])
 def manage_eval():
     dict_status = get_eval_status()
+    dict_res = get_eval_report()
     print(app.eval_file2id)
     print(dict_status)
-    form = SelectModelForm()
-    if request.method == 'POST':
-        train_choices = dict(get_options(get_files()))
-        test_choices = dict(get_options(get_files()))
-        config_choices = dict(get_options(get_configs()))
-        print(get_configs())
-        select_config = config_choices.get(form.select_config.data)
-        select_test = test_choices.get(form.select_test.data)
-        select_train = train_choices.get(form.select_train.data)
-        print('train', select_train)
-        print('test', select_test)
-        print('config:', select_config)
-        return redirect(url_for('eval_model', testname=select_test, trainname=select_train, config=select_config))
-    return render_template('eval.html', form=form, dict_status=dict_status)
+    return render_template('eval.html', dict_status=dict_status,  dict_res=dict_res)
 
 
 # Run jobs
@@ -208,12 +227,13 @@ def eval_model():
     trainname = request.args.get('trainname', None)
     testname = request.args.get('testname', None)
     config = request.args.get('config', None)
-    print(trainname, testname, config)
-    if (testname, trainname, config) not in app.eval_file2id:
-        job = app.eval_queue.enqueue('engines.eval.eval_from_file', testname, trainname, config)
+    model_file = request.args.get('modelname', None)
+    print(trainname, testname, config, model_file)
+    if (testname, trainname, config,  model_file) not in app.eval_file2id:
+        job = app.eval_queue.enqueue('engines.eval.eval_from_file', testname, trainname, config, model_file)
         job_id = job.get_id()
-        app.eval_file2id[(testname, trainname, config)] = job_id
-        app.eval_id2file[job_id] = (testname, trainname, config)
+        app.eval_file2id[(testname, trainname, config,  model_file)] = job_id
+        app.eval_id2file[job_id] = (testname, trainname, config, model_file)
     print(app.eval_id2file)
     return redirect(url_for('manage_eval'))
 
@@ -337,7 +357,9 @@ def get_results():
     testname = request.args.get('testname', None)
     configname = request.args.get('configname', None)
     trainname = request.args.get('trainname', None)
+    modelname = request.args.get('modelname', None)
     dict_eval = read_list('static/eval/eval_list')
-    key = (testname, trainname, configname)
+    key = (testname, trainname, configname, modelname)
     res_file = dict_eval[key]
     return redirect(url_for('show_content', filename=res_file, file_dir='', type='eval'))
+

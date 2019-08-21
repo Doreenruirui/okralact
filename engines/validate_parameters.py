@@ -2,6 +2,8 @@ import json
 from jsonschema import Draft4Validator, RefResolver
 import os
 from engines.common import read_json
+from engines import model_root, config_root
+from lib.file_operation import get_model_dir
 
 
 class Config(object):
@@ -39,6 +41,17 @@ def validate_model(model, engine):
                         err_str.append('parameter model, layer %s, %s' % (key, error.message))
     return err_str
 
+def validate_path(continue_from, new_config):
+    err_str = []
+    model_dir =  get_model_dir(continue_from["trainset"], continue_from["config"])
+
+    if not os.path.exists(os.path.join(model_root,  model_dir, continue_from["model"])):
+        err_str.append('parameter continue_from, model %s does not exist')
+    old_config = read_json(os.path.join(config_root,  continue_from["config"]))
+    if old_config["engine"] != new_config["engine"]:
+        err_str.append('parameter engine, engines for old model and new model not match')
+    return err_str
+
 
 def validate_file(config_file):
     common_schema = read_json('engines/schemas/common.schema')
@@ -52,11 +65,16 @@ def validate_file(config_file):
         # print('engines/schemas/%s.schema' % engine)
         engine_schema = read_json('engines/schemas/engine_%s.schema' % engine)
         errors_model = []
+        if "continue_from" in config:
+            continue_from = config["continue_from"]
+            del config["continue_from"]
+            errors_continue = validate_path(continue_from, config)
+        errors +=  errors_continue
         if "model" in config:
             model = config["model"]
             del config["model"]
             errors_model = validate_model(model, engine)
-        errors = validate(engine_schema, config)
+        errors += validate(engine_schema, config)
         errors += errors_model
         nerr = len(errors)
         for i in range(nerr):
@@ -109,7 +127,7 @@ def read_parameters(config_file):
 
 
 
-# print(validate_file("static/configs/sample_calamari.json"))
+# print(validate_file("static/configs/sample_kraken_continue.json"))
 # read_parameters('engines/schemas/sample.json')
 # print(read_help_information('calamari'))
 # errors = valiadte_file('engines/schemas/sample.json')

@@ -6,6 +6,4 @@
             ],
   "engine":  "tesseract",
   "batch_size":  10,
-  "append": 2,
-  "continue_from":  "static/model/tess_new/checkpoint/tess_200.checkpoint",
   "model_prefix": "tess"}

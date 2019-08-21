@@ -9,21 +9,6 @@ import json
 from engines import valid_folder, data_folder, tmp_folder
 from shutil import move
 
-def read_list(filename):
-    dict_res = {}
-    if os.path.exists(filename):
-        with open(filename) as f_:
-            for line in f_:
-                items = line.strip().split('\t')
-                key = tuple(items[:-1])
-                dict_res[key] = items[-1]
-    return dict_res
-
-def write_list(filename, dict_res):
-    with open(filename, 'w') as f_:
-        for key in dict_res:
-            f_.write('\t'.join(key) + '\t' + dict_res[key] + '\n')
-
 def read_json(json_file):
     with open(json_file) as f_:
         data = json.loads(f_.read())
@@ -98,7 +83,7 @@ def split_train_test(data_folder, tmp_folder, train_ratio=0.9, engine='kraken'):
     if len(eval_files) > 0:
         with open(pjoin(tmp_folder, 'list.eval'), 'w') as f_:
             for fn in eval_files:
-                f_.write(pjoin(data_folder, fn + postfix) + '\n')
+                f_.write(pjoin(valid_folder, fn + postfix) + '\n')
     creat_valid()
     return ntrain, ntest
 
@@ -153,6 +138,20 @@ def read_model_info(engine):
             help_info.append(['', key, "dictionary", '', cur_layer["description"]])
     return help_info
 
+def read_object(k, cur_node):
+    help_info = [[k, '', '', "dictionary", '', cur_node["description"]]]
+    for key in cur_node["properties"]:
+        node = cur_node["properties"][key]
+        if node["type"] == "number":
+            help_info.append(['', key, node["format"], str(node["default"]), node["description"]])
+        else:
+            if "enum" in node:
+                help_info.append(['', key, node["type"], str(node["default"]),
+                                  "Allowed Value: " + ', '.join(node["enum"]) + '. ' + node[
+                                      "description"]])
+            else:
+                help_info.append(['', key, node["type"], str(node["default"]), node["description"]])
+    return help_info
 
 def read_help_information_html(engine):
     schema = read_json('engines/schemas/engine_%s.schema' % engine)
@@ -166,19 +165,12 @@ def read_help_information_html(engine):
         elif "$ref" in attrs[k]:
             ref_path = attrs[k]["$ref"]
             cur_node = load_jsonref(ref_path)
+            if cur_node["type"] == "object":
+                help_info += read_object(k, cur_node)
+                continue
         elif attrs[k]["type"] == "object":
-            help_info.append([k, '', '', "dictionary", '', attrs[k]["description"]])
-            for key in attrs[k]["properties"]:
-                cur_node = attrs[k]["properties"][key]
-                if cur_node["type"] == "number":
-                    help_info.append(['', key, cur_node["format"], str(cur_node["default"]), cur_node["description"]])
-                else:
-                    if "enum" in cur_node:
-                        help_info.append(['', key, cur_node["type"], str(cur_node["default"]),
-                                          "Allowed Value: " + ', '.join(cur_node["enum"]) + '. ' + cur_node[
-                                              "description"]])
-                    else:
-                        help_info.append(['', key, cur_node["type"], str(cur_node["default"]), cur_node["description"]])
+            cur_node =  attrs[k]
+            help_info += read_object(k, cur_node)
             continue
         else:
             cur_node = attrs[k]
