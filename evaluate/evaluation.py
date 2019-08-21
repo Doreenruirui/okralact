@@ -156,20 +156,20 @@ def evaluate(files):
         allconf.close()
 
     res = {}
-    res['errors'] = errs
-    res['missing'] = missing
-    res['total'] = total
-    res['errors_word'] = errs
-    res['missing_word'] = missing
-    res['total_word'] = total
+    res['errors'] = int(errs)
+    res['missing'] = int(missing)
+    res['total'] = int(total)
+    res['errors_word'] = int(errs)
+    res['missing_word'] = int(missing)
+    res['total_word'] = int(total)
     if total > 0:
         res['char_error_rate'] = "%.3f " % (errs * 1.0 / total)
         res['errnomiss'] = "%8.3f " % ((errs-missing) * 100.0 / total)
         res['word_error_rate'] = "%.3f " % (errs_w * 1.0 / total_w)
-    if args.confusion > 0:
-        res['confusion'] = []
-        for (a, b), v in counts.most_common(args.confusion):
-            print("%d\t%s\t%s" % (v, a, b))
-            res['confusion'].append((v, a, b))
+    # if args.confusion > 0:
+    #     res['confusion'] = []
+    #     for (a, b), v in counts.most_common(args.confusion):
+    #         print("%d\t%s\t%s" % (v, a, b))
+    #         res['confusion'].append((v, a, b))
     print(res)
     return res
