@@ -6,7 +6,23 @@ import random
 import numpy as np
 from shutil import rmtree
 import json
+from engines import valid_folder, data_folder, tmp_folder
+from shutil import move
 
+def read_list(filename):
+    dict_res = {}
+    if os.path.exists(filename):
+        with open(filename) as f_:
+            for line in f_:
+                items = line.strip().split('\t')
+                key = tuple(items[:-1])
+                dict_res[key] = items[-1]
+    return dict_res
+
+def write_list(filename, dict_res):
+    with open(filename, 'w') as f_:
+        for key in dict_res:
+            f_.write('\t'.join(key) + '\t' + dict_res[key] + '\n')
 
 def read_json(json_file):
     with open(json_file) as f_:
@@ -36,6 +52,20 @@ def clear_data(foldername):
     if os.path.exists(foldername):
         rmtree(foldername)
     os.makedirs(foldername)
+
+
+def creat_valid():
+    clear_data(valid_folder)
+    file_valid = pjoin(tmp_folder, 'list.eval')
+    with open(file_valid) as f_:
+        for line in f_:
+            file_folder, file_name = line.strip().rsplit('/', 1)
+            file_name = file_name.split('.')[0] + '.png'
+            src_file = pjoin(data_folder,  file_name)
+            dst_file = pjoin(valid_folder, file_name)
+            move(src_file, dst_file)
+            move(src_file.rsplit('.', 1)[0] + '.gt.txt',
+                     dst_file.rsplit('.', 1)[0] + '.gt.txt')
 
 
 def split_train_test(data_folder, tmp_folder, train_ratio=0.9, engine='kraken'):
@@ -69,6 +99,7 @@ def split_train_test(data_folder, tmp_folder, train_ratio=0.9, engine='kraken'):
         with open(pjoin(tmp_folder, 'list.eval'), 'w') as f_:
             for fn in eval_files:
                 f_.write(pjoin(data_folder, fn + postfix) + '\n')
+    creat_valid()
     return ntrain, ntest
 
 

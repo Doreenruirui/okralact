@@ -6,7 +6,7 @@ valid_folder = 'engines/valid'
 model_root = 'static/model'
 data_root = 'static/data'
 config_root = 'static/configs'
-
+eval_root = 'static/eval'
 
 def act_environ(engine):
     return {

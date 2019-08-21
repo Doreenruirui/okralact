@@ -28,6 +28,7 @@ class SelectConfigForm(FlaskForm):
     data_choices = get_options(get_files())
     select_data = SelectField(u'data', choices=data_choices)
     submit = SubmitField(u'run')
+    submit_valid = SubmitField(u'valid')
 
 
 class SelectEngineForm(FlaskForm):

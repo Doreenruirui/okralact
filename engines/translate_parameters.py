@@ -1,6 +1,6 @@
 from engines.common import read_json
 from engines.process_tesseract import *
-from engines import data_folder, tmp_folder, act_environ, deact_environ
+from engines import data_folder, tmp_folder, valid_folder, act_environ, deact_environ
 from engines.common import split_train_test
 import numpy as np
 from engines.translate_model import ModelTranslator
@@ -42,16 +42,6 @@ def read_value(configs, engine):
     #                self.default}  # Rewrite value according to user specific configuration
 
 
-def files2str(setname, catstr):
-    a = []
-    with open(pjoin(tmp_folder, 'list.%s' % setname)) as f_:
-        for line in f_:
-            a.append(line.strip())
-            # a.append(os.path.join(os.getcwd(), line.strip()))
-    res_str = catstr.join(a)
-    return res_str
-
-
 class Translate:
     def __init__(self, file_config, model_dir):
         self.configs = read_json(pjoin('static/configs', file_config))
@@ -90,7 +80,7 @@ class Translate:
         checkpoint_folder = pjoin(self.model_dir, 'checkpoint')
         preprocess(data_folder, tmp_folder, model_folder, checkpoint_folder, self.model_prefix)
         # partition
-        cmd = 'lstmtraining --traineddata %s --train_listfile %s ' %\
+        cmd = '/Users/doreen/Documents/Experiment/Package/tesseract/src/training/lstmtraining --traineddata %s --train_listfile %s ' %\
               (pjoin(model_folder, self.model_prefix, self.model_prefix + '.traineddata'),
                pjoin(tmp_folder, 'list.train'))
         if self.ntest > 0:
@@ -134,7 +124,8 @@ class Translate:
                 para_name = self.translator[para] if para in self.translator else para
                 cmd += '--%s %s ' % (para_name, str(self.values[para]))
         print(cmd)
-        self.cmd_list = [cmd]
+        self.cmd_list = ['export TESSDATA_PREFIX=/usr/local/share/tessdata',
+                         cmd]
 
     def kraken(self):
         print(self.configs)
@@ -190,10 +181,8 @@ class Translate:
 
     def ocropus(self):
         # partition
-        train_str = files2str('train', ' ')
         if self.ntest > 0:
-            test_str = files2str('eval', ':')
-            cmd = 'ocropus-rtrain %s -t %s ' % (train_str, test_str)
+            cmd = 'ocropus-rtrain %s/*.png -t %s/*.png ' % (data_folder, valid_folder)
         else:
             cmd = 'ocropus-rtrain %s/*.png ' % data_folder
 
@@ -228,10 +217,8 @@ class Translate:
 
     def calamari(self):
         # partition
-        train_str = files2str('train', ' ')
         if self.ntest > 0:
-            test_str = files2str('eval', ' ')
-            cmd = 'calamari-train --files %s --validation %s ' % (train_str, test_str)
+            cmd = 'calamari-train --files %s/*.png --validation %s/*.png ' % (data_folder, valid_folder)
         else:
             cmd = 'calamari-train --files %s/*.png ' % data_folder
 
@@ -280,12 +267,12 @@ class Translate:
                     else:
                         cmd += '--%s %s ' % (para_name, str(self.values[fullname]))
         print(cmd)
-        self.cmd_list = [cmd]
+        self.cmd_list = ['export KMP_DUPLICATE_LIB_OK=TRUE', cmd]
 
 
 def test():
-    translate = Translate('sample_ocropus.json', model_dir='static/model/ocropus')
-    print(translate.cmd_list)
+    translate = Translate('sample_calamari.json', model_dir='static/model/calamri')
+    print('\n'.join(translate.cmd_list))
 
 
-# test()
+test()

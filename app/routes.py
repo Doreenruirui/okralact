@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, send_file
 from werkzeug.utils import secure_filename
-from app import app, model_root, config_root
-from lib.file_operation import rename_file
+from app import app, model_root, config_root, eval_root
+from lib.file_operation import rename_file, get_model_dir
 from rq.job import Job
 import tarfile
 import shutil
@@ -10,7 +10,7 @@ from engines.validate_parameters import validate_string
 import json
 from lib.file_operation import list_model_dir
 from app.lib.forms import *
-from engines.common import read_help_information_html, read_model_param
+from engines.common import read_help_information_html, read_model_param, read_list
 
 
 def get_file_status():
@@ -18,6 +18,14 @@ def get_file_status():
     for job_id in app.job_id2file:
         job = Job.fetch(job_id, app.redis)
         filename, config = app.job_id2file[job_id]
+        dict_status[(filename, config)] = job.get_status()
+    return dict_status
+
+def get_valid_status():
+    dict_status = {}
+    for job_id in app.valid_id2file:
+        job = Job.fetch(job_id, app.redis)
+        filename, config = app.valid_id2file[job_id]
         dict_status[(filename, config)] = job.get_status()
     return dict_status
 
@@ -100,13 +108,17 @@ def delete_config(filename):
 
 
 # Manage jobs
-@app.route('/jobs', methods=['GET', 'POST'])
-def manage_job():
+@app.route('/jobs', methods=['GET', 'POST'], defaults={'error_message': ''})
+@app.route('/jobs/<error_message>', methods=['GET', 'POST'])
+def manage_job(error_message):
+    print('validation error', error_message)
     dict_status = get_file_status()
+    dict_valid_status = get_valid_status()
     print(app.job_file2id)
     print(dict_status)
     form = SelectConfigForm()
     if request.method == 'POST':
+        print("form:", request.form)
         data_choices = dict(get_options(get_files()))
         config_choices = dict(get_options(get_configs()))
         print(get_configs())
@@ -114,19 +126,17 @@ def manage_job():
         select_data = data_choices.get(form.select_data.data)
         print('data', select_data)
         print('config:', select_config)
-        return redirect(url_for('train_model', filename=select_data, config=select_config))
-    return render_template('jobs.html', form=form, dict_status=dict_status)
+        if form.submit.data:
+            return redirect(url_for('train_model', filename=select_data, config=select_config))
+        elif form.submit_valid.data:
+            return redirect(url_for('valid_model', filename=select_data, config=select_config))
+    return render_template('jobs.html', form=form, dict_status=dict_status, dict_valid_status=dict_valid_status, errors = error_message)
 
 
 # Manage Models
 @app.route('/models', methods=['GET', 'POST'])
 def manage_model():
     model_dict = list_model_dir()
-    print(model_dict)
-    for ele in model_dict:
-        if not os.listdir(os.path.join(os.getcwd(), model_root, model_dict[ele])):
-            del model_dict[ele]
-    print(model_dict)
     return render_template('models.html', dict_model=model_dict)
 
 
@@ -152,28 +162,25 @@ def manage_model_list(model_dir):
 
 
 # Manage Evals
-@app.route('/evaluation', methods=['GET', 'POST'], defaults={'error_message': ''})
-@app.route('/evaluation/<error_message>', methods=['GET', 'POST'])
-def manage_eval(error_message):
-    print('evaluation error', error_message)
+@app.route('/evaluation', methods=['GET', 'POST'])
+def manage_eval():
     dict_status = get_eval_status()
     print(app.eval_file2id)
     print(dict_status)
     form = SelectModelForm()
-    errors = error_message.split('\n')
     if request.method == 'POST':
         train_choices = dict(get_options(get_files()))
         test_choices = dict(get_options(get_files()))
         config_choices = dict(get_options(get_configs()))
         print(get_configs())
         select_config = config_choices.get(form.select_config.data)
-        select_test = train_choices.get(form.select_test.data)
-        select_train = test_choices.get(form.select_train.data)
+        select_test = test_choices.get(form.select_test.data)
+        select_train = train_choices.get(form.select_train.data)
         print('train', select_train)
         print('test', select_test)
         print('config:', select_config)
         return redirect(url_for('eval_model', testname=select_test, trainname=select_train, config=select_config))
-    return render_template('eval.html', errors=errors, form=form, dict_status=dict_status)
+    return render_template('eval.html', form=form, dict_status=dict_status)
 
 
 # Run jobs
@@ -202,14 +209,54 @@ def eval_model():
     testname = request.args.get('testname', None)
     config = request.args.get('config', None)
     print(trainname, testname, config)
-    if (trainname,  testname, config) not in app.eval_file2id:
-        job = app.eval_queue.enqueue('engines.eval.eval_from_file', trainname,  testname, config)
+    if (testname, trainname, config) not in app.eval_file2id:
+        job = app.eval_queue.enqueue('engines.eval.eval_from_file', testname, trainname, config)
         job_id = job.get_id()
-        app.eval_file2id[(trainname, testname, config)] = job_id
-        app.eval_id2file[job_id] = (trainname,  testname, config)
+        app.eval_file2id[(testname, trainname, config)] = job_id
+        app.eval_id2file[job_id] = (testname, trainname, config)
     print(app.eval_id2file)
     return redirect(url_for('manage_eval'))
 
+# # Run jobs
+@app.route('/valid', methods=['POST', 'GET'])
+def valid_model():
+    print('valid_model')
+    trainset = request.args.get('filename', None)
+    config = request.args.get('config', None)
+    print(trainset, config)
+    if (trainset, config) not in app.job_file2id:
+        return redirect(url_for('manage_job', error_message='Please train the model first.'))
+    else:
+        job_id = app.job_file2id[(trainset, config)]
+        job = Job.fetch(job_id, app.redis)
+        status = job.get_status()
+        print('status', status)
+        if status == 'queued':  # Not start training yet
+            return redirect(url_for('manage_job', error_message='Job has not started yet'))
+        elif status == 'failed': # Training job failed
+            return redirect(url_for('manage_job', error_message='Job Failed'))
+        else:
+            if (trainset, config) not in app.valid_file2id:
+                job = app.valid_queue.enqueue('engines.valid.valid_from_file', trainset, config)
+                job_id = job.get_id()
+                app.valid_file2id[(trainset, config)] = job_id
+                app.valid_id2file[job_id] = (trainset, config)
+                print(app.valid_id2file)
+                return redirect(url_for('manage_job'))
+            else:
+                job_id = app.valid_file2id[(trainset, config)]
+                job = Job.fetch(job_id, app.redis)
+                status = job.get_status()
+                print('valid_status', status)
+                if status == 'queued':
+                    return redirect(url_for('manage_job', error_message='Validation job already in queue'))
+                else:
+                    job = app.valid_queue.enqueue('engines.valid.valid_from_file', trainset, config)
+                    job_id = job.get_id()
+                    app.valid_file2id[(trainset, config)] = job_id
+                    app.valid_id2file[job_id] = (trainset, config)
+                    print(app.valid_id2file)
+                    return redirect(url_for('manage_job'))
 
 def tardir(path, tar_name):
     with tarfile.open(tar_name, "w:gz") as tar_handle:
@@ -218,7 +265,7 @@ def tardir(path, tar_name):
                 tar_handle.add(os.path.join(root, file))
 
 
-@app.route('/models/', methods=['GET', 'POST'])
+@app.route('/download/', methods=['GET', 'POST'])
 def download():
     model_dir = request.args.get('model_dir', None)
     file_name = request.args.get("filename", None)
@@ -233,35 +280,32 @@ def show_content():
     data_dir = request.args.get("file_dir", None)
     print(file_name, file_type, data_dir)
     if file_type == "config":
-        text = open(os.path.join(os.getcwd(), config_root, file_name), 'r', encoding="utf-8")
+        text = open(os.path.join(config_root, file_name), 'r', encoding="utf-8")
         content = text.read()
         text.close()
     elif file_type == "report":
-        text = open(os.path.join(os.getcwd(), model_root, data_dir, file_name), 'r', encoding="utf-8")
+        text = open(os.path.join(model_root, data_dir, file_name), 'r', encoding="utf-8")
         content = text.read()
         text.close()
+    elif file_type == 'eval':
+        with open(os.path.join(eval_root, file_name), 'r', encoding="utf-8") as f_:
+            res = json.loads(f_.read())
+        content = '\n'
+        for ele in res:
+            content += ele + '\t' + str(res[ele]) + '\n'
     return render_template('content.html', response=content)
 
-
-# # download model
-# @app.route('/download/<filename>', methods=['GET', 'POST'])
-# def download(filename):
-#     root_dir = os.getcwd()
-#     model_dir = model_root
-#     # model_files = os.listdir(os.path.join(model_dir, filename))
-#     # print(model_files)
-#     outfile = os.path.join(root_dir, model_dir, 'model_%s.tar.gz' % filename)
-#     if os.path.exists(outfile):
-#         os.remove(outfile)
-#     tardir(os.path.join(root_dir, model_dir, filename), outfile)
-#     # with tarfile.open(outfile, "w:gz") as _tar:
-#     #     for fn in model_files:
-#     #         new_fn = os.path.join(model_dir, filename, fn)
-#     #         print(new_fn)
-#     #         _tar.add('model/%s' % fn, new_fn)
-#     #         # _tar.add(tarfile.TarInfo('model/%s' % fn), open(new_fn))
-#     return send_file(outfile, mimetype='text/tar', attachment_filename='model.tar.gz', as_attachment=True)
-
+@app.route('/show_report', methods=['GET', 'POST'])
+def show_report():
+    trainset = request.args.get("filename", None)
+    config = request.args.get("config", None)
+    model_dir = get_model_dir(trainset, config)
+    filename = 'report'
+    print(trainset, config, model_dir)
+    text = open(os.path.join(os.getcwd(), model_root, model_dir, filename), 'r', encoding="utf-8")
+    content = text.read()
+    text.close()
+    return render_template('content.html', response=content)
 
 # Manual of Using OCR Engines
 @app.route('/', methods=['GET', 'POST'], defaults={'engine': 'kraken'})
@@ -293,14 +337,7 @@ def get_results():
     testname = request.args.get('testname', None)
     configname = request.args.get('configname', None)
     trainname = request.args.get('trainname', None)
-    print(testname,  trainname, configname)
-    print(app.eval_file2id)
-    job_id = app.eval_file2id[(trainname, testname, configname)]
-    print(job_id)
-    job = Job.fetch(job_id, connection=app.redis)
-    if job.is_finished:
-        errors = str(job.result)
-    else:
-        errors = 'Error'
-    # print(job.result.decode("utf-8"))
-    return redirect(url_for('manage_eval', error_message=errors))
+    dict_eval = read_list('static/eval/eval_list')
+    key = (testname, trainname, configname)
+    res_file = dict_eval[key]
+    return redirect(url_for('show_content', filename=res_file, file_dir='', type='eval'))

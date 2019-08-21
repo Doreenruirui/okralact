@@ -10,7 +10,7 @@
             <tr>
                 <td>
                 {% if (data == "report") %}
-                        <a href="{{ url_for('show_content', file_dir=model_dir, filename=data, type="report")}}">{{ data }}</a>
+                        <a href="{{ url_for('show_content', file_dir=model_dir, filename=data, type='report')}}">{{ data }}</a>
                 {% else %}
                     {{ data }}
                 {% endif %}

@@ -109,7 +109,7 @@ def read_parameters(config_file):
 
 
 
-print(validate_file("static/configs/sample_calamari.json"))
+# print(validate_file("static/configs/sample_calamari.json"))
 # read_parameters('engines/schemas/sample.json')
 # print(read_help_information('calamari'))
 # errors = valiadte_file('engines/schemas/sample.json')

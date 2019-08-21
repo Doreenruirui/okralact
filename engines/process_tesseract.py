@@ -48,7 +48,7 @@ def generate_box(data_folder, tmp_folder):
 
 
 def generate_unicharset(tmp_folder):
-    subprocess.run('unicharset_extractor --output_unicharset "%s" --norm_mode 1 "%s"'
+    subprocess.run('/Users/doreen/Documents/Experiment/Package/tesseract/src/training/unicharset_extractor --output_unicharset "%s" --norm_mode 1 "%s"'
                    % (pjoin(tmp_folder, "unicharset"), pjoin(tmp_folder, "all-boxes")),
                    shell=True)
 
@@ -70,7 +70,7 @@ def generate_protomodel(tmp_folder, model_folder, model_prefix):
     copyfile('static/docs/Latin.unicharset', pjoin(tmp_folder, 'Latin.unicharset'))
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
-    cmd = 'combine_lang_model --input_unicharset %s --script_dir %s --output_dir %s --lang %s' %\
+    cmd = '/Users/doreen/Documents/Experiment/Package/tesseract/src/training/combine_lang_model --input_unicharset %s --script_dir %s --output_dir %s --lang %s' %\
           (pjoin(tmp_folder, 'unicharset'), tmp_folder, model_folder, model_prefix)
     print(cmd)
     subprocess.run(cmd, shell=True)

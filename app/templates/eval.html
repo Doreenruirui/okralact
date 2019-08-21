@@ -15,7 +15,7 @@
                <td> {{ data[2] }} </td>
                 {% if dict_status[data] == "finished" %}
                     <td>
-                      <a href="{{ url_for('get_results', testname=data[0], trainname=data[1], configname=data[2]) }}">download</a>
+                      <a href="{{ url_for('get_results', testname=data[0], trainname=data[1], configname=data[2]) }}">check</a>
                     </td>
                   {%  else %}
                     <td> {{ dict_status[data] }}</td>
@@ -31,7 +31,7 @@
         {{ form.select_test() }}{{ form.select_train()}} {{ form.select_config()}} {{ form.submit() }}<br>
 
     </form>
-    {% for error in errors %}
-    {{ error }} <br>
-    {% endfor %}
+    <!--{% for error in errors %}-->
+    <!--{{ error }} <br>-->
+    <!--{% endfor %}-->
 {% endblock %}
