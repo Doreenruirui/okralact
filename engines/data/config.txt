@@ -1,1 +1,0 @@
-{"engine": "kraken", "data_dir": "data", "model_dir": "model", "prefix": "kraken_model", "nepoch":10}
