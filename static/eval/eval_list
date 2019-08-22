@@ -1,6 +1,0 @@
-eval.tar.gz	data_kraken.tar.gz	sample_kraken.json	best.mlmodel	ea5be52b13ed4a16a265d5b265551ff8
-eval.tar.gz	data_kraken.tar.gz	sample_kraken.json	model_79.mlmodel	10f7e984a30b446c9d83dadf116b4141
-data_kraken.tar.gz	data_kraken.tar.gz	sample_kraken.json	best.mlmodel	aec8641758f049dba4f6ddd133bf74ff
-eval.tar.gz	data_kraken.tar.gz	sample_calamari_continue.json	valid_best.ckpt.index	1ea1aafabb6f41028d98355a0109da76
-eval.tar.gz	data_kraken.tar.gz	sample_tess_continue.json	tess_225.checkpoint	75f94130c83d4369a69469c69c60c76e
-eval.tar.gz	data_kraken.tar.gz	sample_kraken_continue.json	model_134.mlmodel	6b34e379f4004b2dbe31d0d9ff588a77
