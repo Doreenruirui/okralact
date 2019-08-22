@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-rq worker ocr-tasks
+rq worker ocr-tasks-valids
