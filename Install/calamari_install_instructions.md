@@ -4,7 +4,7 @@ https://github.com/Calamari-OCR/calamari
 
 
 
-##Installation using pip
+## Installation using pip
 
 The suggested method is to install calamari into a virtual environment using pip:
 
@@ -40,7 +40,7 @@ $ python setup.py install
 
 
 
-##Installation using Conda
+## Installation using Conda
 
 Run
 
