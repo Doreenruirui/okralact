@@ -32,7 +32,7 @@ The folder *app* contains the code for the web-application and task queues. The 
 
  *	upload 
    	*	a dataset
-   *	a configuration file for training a specific engine
+   	*	a configuration file for training a specific engine
  *	submit 
    	*	a job for training or  fine tuning an OCR model by selecting a uploaded model and a configuration file
    	*	a job for generating the report of validating all the intermediately models saved during training (can be used to pick the best model)
