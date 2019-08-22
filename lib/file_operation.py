@@ -15,16 +15,23 @@ def list_model_dir():
         with open(model_file) as f_:
             for line in f_:
                 items = line.strip().split('\t')
-                model_dict[(items[0], items[1])] = items[2]
+                model_dict[tuple(items[:-1])] = items[-1]
     return model_dict
 
 def get_model_dir(file_data, file_config):
     model_dict = list_model_dir()
     key = (file_data, file_config)
     if key not in model_dict:
-        return 'model not found'
+        return ''
     else:
         return model_dict[key]
+
+def get_model_info(model_dir):
+    model_dict = list_model_dir()
+    for ele in model_dict:
+        if model_dict[ele] == model_dir:
+            return ele
+    raise 'model not found'
 
 def get_models():
     model_dict = list_model_dir()
@@ -56,3 +63,18 @@ def rename_file(filename, postfix, files_list):
         filename = filename + postfix
     return filename
 
+
+def read_list(filename):
+    dict_res = {}
+    if os.path.exists(filename):
+        with open(filename) as f_:
+            for line in f_:
+                items = line.strip().split('\t')
+                key = tuple(items[:-1])
+                dict_res[key] = items[-1]
+    return dict_res
+
+def write_list(filename, dict_res):
+    with open(filename, 'w') as f_:
+        for key in dict_res:
+            f_.write('\t'.join(key) + '\t' + dict_res[key] + '\n')

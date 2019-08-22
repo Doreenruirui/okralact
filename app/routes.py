@@ -332,7 +332,10 @@ def show_report():
 @app.route('/<engine>',  methods=['GET', 'POST'])
 def manual(engine):
     print(engine)
-    help_info = read_help_information_html(engine)
+    if engine not in ['kraken', 'tesseract', 'calamari', 'ocropus']:
+        help_info = ''
+    else:
+        help_info = read_help_information_html(engine)
     form = SelectEngineForm()
     if request.method == 'POST':
         engine_choices = dict(get_options(get_engines()))

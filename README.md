@@ -7,3 +7,13 @@ A repository for online OCRD training infrastructure.
 sudo apt-get install redis
 pip install -r requirements.txt
 ```
+
+##Install
+###Tesseract
+
+
+
+###Kraken
+
+###OCRopus
+###Calamari

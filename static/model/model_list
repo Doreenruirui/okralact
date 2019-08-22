@@ -1,3 +1,9 @@
-data_kraken.tar.gz	sample_1.json	calamari
-data_kraken.tar.gz	sample_0.json	2f5360ca3c84468abde59a8fd6a2d1d0
-data_kraken.tar.gz	sample.json	ee080a043bd74f538906dcef902e811e
+data_kraken.tar.gz	sample.json	456b88cd188348299c374bbb685dca6e
+data_kraken.tar.gz	sample_kraken.json	5efabed54a024634921e59acfdc8021f
+data_kraken.tar.gz	sample_ocropus.json	82447da7e2ec4a089919364342434fc1
+data_kraken.tar.gz	sample_ocropus_continue.json	c536c81b932f40bb9edc5e1fe1fc72f4
+data_kraken.tar.gz	sample_kraken_continue.json	23b56863a1dc49b1a5d2686d2d2cbc1b
+data_kraken.tar.gz	sample_calamari.json	3de59e5170ef4d828c88c2c786da3c42
+data_kraken.tar.gz	sample_calamari_continue.json	a90d0f5773c6432cb29f4db500ed13e9
+data_kraken.tar.gz	sample_tess.json	fe4e6f0db2f9472cb937d54a2d9eb0a2
+data_kraken.tar.gz	sample_tess_continue.json	3c549dbb7ad34b029766c2b8d15f5436
