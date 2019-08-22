@@ -13,7 +13,7 @@ $ mv en-default.pyrnn.gz models/
 $ sudo python setup.py install
 ```
 
-##Installtion using Python Virtual Environment
+## Installtion using Python Virtual Environment
 
 Alternatively, dependencies can be installed into a [Python Virtual Environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/):
 
@@ -26,7 +26,7 @@ $ mv en-default.pyrnn.gz models/
 $ python setup.py install
 ```
 
-##Installation using Conda
+## Installation using Conda
 
 An additional method using [Conda](http://conda.pydata.org/) is also possible:
 
