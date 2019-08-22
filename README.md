@@ -17,4 +17,13 @@ The instructions for installing the engines (Tesseract, kraken, OCRopus, Calamar
 $ wget https://github.com/Doreenruirui/okralact/archive/master.zip
 ```
 
+### Deploy the system on a server
+
+Coming soon.
+
+## System Structure
+
+<center>
+    <img src="docs/Framework.png" style="zoom:20%"/> 
+</center>
 
