@@ -1,8 +1,8 @@
-##Github Page
+## Github Page
 
 https://github.com/mittagessen/kraken
 
-##Installtion:
+## Installtion:
 
 
 
@@ -22,7 +22,7 @@ $ conda env create -f environment_cuda.yml
 ```
 for CUDA acceleration with the appropriate hardware.
 
-##Installation using Pip
+## Installation using Pip
 
 It is also possible to install the same version from pypi:
 

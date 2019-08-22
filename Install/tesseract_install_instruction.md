@@ -1,8 +1,8 @@
-##Github Page
+## Github Page
 
 https://github.com/tesseract-ocr/tesseract
 
-##Installation
+## Installation
 
 You can either [Install Tesseract via pre-built binary package](https://github.com/tesseract-ocr/tesseract/wiki) or [build it from source](https://github.com/tesseract-ocr/tesseract/wiki/Compiling).
 
