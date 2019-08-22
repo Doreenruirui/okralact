@@ -8,7 +8,6 @@ sudo apt-get install redis
 pip install -r requirements.txt
 ```
 
-## Install
 ### Installation of the Engines
 The instructions for installing the engines (Tesseract, kraken, OCRopus, Calamari) are in the folder [install](https://github.com/Doreenruirui/okralact/tree/master/install).
 
@@ -43,6 +42,31 @@ The file *app/route.py* contains the code for handling the users' HTTP requests 
 
 When a job gets opportunity to run, it will call the common API for training, validation or evaluation defined in the folder *engines*. The jobs in training task queue, validating task queue and evaluating task queue will call the API defined in the file *train.py*, *valid.py* and *eval.py* respectively. 
 
- The unifie specifications for all the OCR engines are defined in the folder *engines/schemas* with **jsonschema**. The file *engine/schemas/common.schema* defined a set of unifed parameters for each engine, the files *engine_[engine name].scheam* has defined the parameter set for each engine. The folder *engines/schemas/models* contains the schemas for the neural network structure for all the engines.  The files *model_[engine name].schema* are the defintion of the neural netwrk layers, e.g., input, cnn, pooling, dropout, rnn, output allowed by each engine. The files *layer_all_[engine name].schema* define the parameters allowed in each layer for each engine. The files *layer_[layer name].schema* define the set of parameters allowed by each neural network layer.
+ The unifie specifications for all the OCR engines are defined in the folder *engines/schemas* with **jsonschema**.  It contains  the following files:
 
-In the folder *engine*, we can also find the code *validating parameters.py*, which is used to validate whether the configuration file that the users uploaded are valid, and *translate_parameters.py*, which is used to translate the user-specific configuration files into the original set parameters that can recognized by each engine. 
+* *common.schema* , defines a set of unifed parameters for each engine. 
+
+*  *engine_[engine name].schema*, defines the parameter set for each engine. 
+
+*  *engines/schemas/models*, contains the schemas for the neural network structure for all the engines:
+
+  *  *model_[engine name].schema*,  define the neural network layers, e.g., input, cnn, pooling, dropout, rnn, output allowed by each engine.
+  *  *layer_all_[engine name].schema*, define the parameters allowed in each layer by each engine. 
+  * *layer_[layer name].schema*, defines the set of parameters allowed by each neural network layer. 
+
+* *translate.json*,  defines the mapping of the unified parameters to the engine-specific parameters.
+
+*  *validating parameters.py*,  validate whether the configuration file that the users uploaded are valid.
+
+*  *translate_parameters.py*,  translate the user-specific configuration files into the original set parameters that can recognized by each engine.  
+
+*  *translate_model.py*, translate the unified definition of neural network structures to the engine -specific model structure definition language.
+
+* *process_tesseract.py*, define the steps to  preprocess the data fo tesseract.
+
+  
+
+  
+
+  
+
