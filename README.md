@@ -35,12 +35,12 @@ The folder *app* contains the code for the web-application and task queues. The 
    *	a configuration file for training a specific engine
  *	submit 
    	*	a job for training or  fine tuning an OCR model by selecting a uploaded model and a configuration file
-   *	a job for generating the report of validating all the intermediately models saved during training (can be used to pick the best model)
-   *	a job for evaluating a trained model by selecting a evaluation dataset
-   *	download
-       *	trained model 
-       *	validation report, where the character error rate and word error rate for  each  itermediate  model could be found. The  frequency to save the intermediate is defined by the parameter  "save_frequency". User can use the report to decide which model to use and see the training curve.
-       *	evaluation report, contains the evaluation result for a user selected model on a user selected  dataset.
+   	*	a job for generating the report of validating all the intermediately models saved during training (can be used to pick the best model)
+   	*	a job for evaluating a trained model by selecting a evaluation dataset
+ *	download
+   	*	trained model 
+   	*	validation report, where the character error rate and word error rate for  each  itermediate  model could be found. The  frequency to save the intermediate is defined by the parameter  "save_frequency". User can use the report to decide which model to use and see the training curve.
+   	*	evaluation report, contains the evaluation result for a user selected model on a user selected  dataset.
 
 The file *app/route.py* contains the code for handling the users' HTTP requests and responses with Flask,  and the code for processing the users' jobs with Redis Queue. There are three task queues running in the backend,  i.e., the training queue, the validation queue and the evaluation queue. Each type of job submitted by the user would be put into its corresponding task queue, where it will wait to be excuted. 
 
@@ -56,7 +56,7 @@ When a job gets opportunity to run, it will call the common API for training, va
 
    	*	*model_[engine name].schema*,  define the neural network layers, e.g., input, cnn, pooling, dropout, rnn, output allowed by each engine.
    	
-   * *layer_all_[engine name].schema*, define the parameters allowed in each layer by each engine. 
+   	*   *layer_all_[engine name].schema*, define the parameters allowed in each layer by each engine. 
 
    	*	*layer_[layer name].schema*, defines the set of parameters allowed by each neural network layer. 
 
