@@ -52,7 +52,7 @@ When a job gets opportunity to run, it will call the common API for training, va
 
   *  *model_[engine name].schema*,  define the neural network layers, e.g., input, cnn, pooling, dropout, rnn, output allowed by each engine.
   *  *layer_all_[engine name].schema*, define the parameters allowed in each layer by each engine. 
-  * *layer_[layer name].schema*, defines the set of parameters allowed by each neural network layer. 
+  *  *layer_[layer name].schema*, defines the set of parameters allowed by each neural network layer. 
 
 * *translate.json*,  defines the mapping of the unified parameters to the engine-specific parameters.
 
