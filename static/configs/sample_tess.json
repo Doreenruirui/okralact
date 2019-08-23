@@ -6,4 +6,5 @@
             ],
   "engine":  "tesseract",
   "batch_size":  10,
-  "model_prefix": "tess"}
+  "model_prefix": "tess",
+  "nepoch": 10}

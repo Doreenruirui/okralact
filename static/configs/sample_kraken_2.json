@@ -3,7 +3,7 @@
             {"cnn": {"height":3, "width": 3, "output": 32, "activation": "sigmoid"}},
             {"pooling": {"width": 2, "height": 2, "x_stride": 1, "y_stride": 1}},
             {"rnn": {"direction": "forward", "output": 100}},
-            {"dropout": {"prob":  0.9}}
+            {"dropout": {"prob":  0.1}}
             ],
   "engine":  "kraken",
   "nepoch": 10
