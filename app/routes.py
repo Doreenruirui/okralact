@@ -168,27 +168,27 @@ def manage_job(error_message):
 
 
 # Manage Models
-@app.route('/models', methods=['GET', 'POST'], defaults={'error_message': ''})
-@app.route('/models/<error_message>', methods=['GET', 'POST'])
-def manage_model(error_message):
+@app.route('/models/', methods=['GET', 'POST'])
+def manage_model():
+    error_message = ''
     model_dict = list_model_dir()
     form = UploadModelForm()
     form.select_config.choices = get_options(get_configs())
-    print(model_dict)
-    if request.method == 'POST':
+    if form.validate_on_submit() and request.method == 'POST':
         f = form.archive.data
         filename = secure_filename(f.filename)
         config_choices = dict(get_options(get_configs()))
         select_config = config_choices.get(form.select_config.data)
-        print('upload model:', select_config, filename)
         trainset = 'Upload'
         model_dir = add_model(trainset, select_config)
+        print('upload model:', select_config, filename, model_dir)
         if model_dir is None:
             error_message = 'Model already exists.'
-            return redirect(url_for('manage_model', error_message=error_message))
+            return redirect(url_for('manage_model'))
         else:
             extract_path = os.path.join(app.config['TMP_FOLDER'], filename)
             f.save(extract_path)
+            print(extract_path, os.path.join(app.config['MODEL_FOLDER'], model_dir))
             extract_file(extract_path, os.path.join(app.config['MODEL_FOLDER'], model_dir))
             return redirect(url_for('manage_model'))
         # if (trainset, select_config) in model_dict:
@@ -197,7 +197,7 @@ def manage_model(error_message):
 
 
 # Manage Model files
-@app.route('/models/', methods=['GET', 'POST'])
+@app.route('/download_models/', methods=['GET', 'POST'])
 def manage_model_list():
     trainset = request.args.get('trainset', None)
     config = request.args.get('config', None)
