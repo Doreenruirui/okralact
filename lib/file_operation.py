@@ -128,9 +128,8 @@ def extract_file(filename, foldername):
             fn = tarinfo.name.split('/')[1]
             if fn.startswith('.'):
                 continue
-            if fn.endswith('.png') or tarinfo.name.endswith('.txt'):
-                tarinfo.name = fn
-                _tar.extract(tarinfo, foldername)
+            tarinfo.name = fn
+            _tar.extract(tarinfo, foldername)
 
 
 def clear_data(foldername):
@@ -138,3 +137,4 @@ def clear_data(foldername):
         rmtree(foldername)
     os.makedirs(foldername)
 
+# extract_file('/Users/ruidong/Documents/Experiment/okralact/static/tmp/148c0d837a2d40bab256a94d79cc83d2.tar.gz', '/Users/ruidong/Documents/Experiment/okralact/static/model/7fcb136c02074bd8b3a1edbd4aa6929d')
