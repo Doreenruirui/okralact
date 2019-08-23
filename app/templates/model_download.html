@@ -25,5 +25,8 @@
       </table>
     <br>
     <br>
-
+    <form method=post enctype=multipart/form-data>
+    {{ form.hidden_tag() }}
+         {{ form.select_test() }}   {{ form.select_model()}} {{ form.submit() }}<br>
+    </form>
 {% endblock %}

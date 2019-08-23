@@ -11,22 +11,29 @@ import json
 from lib.file_operation import list_model_dir, read_list
 from app.lib.forms import *
 from engines.common import read_help_information_html, read_model_param
-from flask import jsonify, flash
+
 
 def get_file_status():
     dict_status = {}
     for job_id in app.job_id2file:
-        job = Job.fetch(job_id, app.redis)
         filename, config = app.job_id2file[job_id]
-        dict_status[(filename, config)] = job.get_status()
+        try:
+            job = Job.fetch(job_id, app.redis)
+            dict_status[(filename, config)] = job.get_status()
+        except:
+            dict_status[(filename,  config)] = 'finished'
     return dict_status
 
 def get_valid_status():
     dict_status = {}
     for job_id in app.valid_id2file:
-        job = Job.fetch(job_id, app.redis)
+
         filename, config = app.valid_id2file[job_id]
-        dict_status[(filename, config)] = job.get_status()
+        try:
+            job = Job.fetch(job_id, app.redis)
+            dict_status[(filename, config)] = job.get_status()
+        except:
+            dict_status[(filename,  config)] = 'finished'
     return dict_status
 
 def get_model_list(model_dir):
@@ -50,10 +57,13 @@ def get_model_list(model_dir):
 def get_eval_status():
     dict_status = {}
     for job_id in app.eval_id2file:
-        job = Job.fetch(job_id, app.redis)
         trainname, testname, config, modelname = app.eval_id2file[job_id]
-        print({'job': job, 'trainname': trainname, 'testname': testname, 'config': config, 'modelname': modelname})
-        dict_status[(trainname, testname, config, modelname)] = job.get_status()
+        try:
+            job = Job.fetch(job_id, app.redis)
+            # print({'job': job, 'trainname': trainname, 'testname': testname, 'config': config, 'modelname': modelname})
+            dict_status[(trainname, testname, config, modelname)] = job.get_status()
+        except:
+            dict_status[(trainname, testname, config, modelname)] = 'finished'
     return dict_status
 
 def get_eval_report():
@@ -164,11 +174,27 @@ def manage_model():
 
 
 # Manage Model files
-@app.route('/models/<model_dir>', methods=['GET', 'POST'])
-def manage_model_list(model_dir):
+@app.route('/models/', methods=['GET', 'POST'])
+def manage_model_list():
+    trainset = request.args.get('trainset', None)
+    config = request.args.get('config', None)
+    model_dir = get_model_dir(trainset, config)
     file_list = get_model_list(model_dir)
     print(file_list)
-    return render_template('model_download.html',  model_dir=model_dir, files_list=file_list)
+    form = SelectEvalForm()
+    form.select_model.choices = get_options(file_list)
+    form.select_test.choices = get_options(get_files())
+    if request.method == 'POST':
+        print("form:", request.form)
+        data_choices = dict(get_options(get_files()))
+        model_choices = dict(get_options(file_list))
+        print(get_configs())
+        select_model = model_choices.get(form.select_model.data)
+        select_test = data_choices.get(form.select_test.data)
+        print('model', select_model)
+        print('test:', select_test)
+        return redirect(url_for('eval_model', trainname=trainset, config=config, testname=select_test,  modelname=select_model))
+    return render_template('model_download.html',  form=form, model_dir=model_dir, files_list=file_list)
 
 # Choose a Model file to evaluate
 @app.route('/models/evaluation', methods=['GET', 'POST'])
@@ -197,6 +223,7 @@ def eval_model_list():
 def manage_eval():
     dict_status = get_eval_status()
     dict_res = get_eval_report()
+    dict_res = {ele:  dict_res[ele] for ele in dict_res if ele not in dict_status}
     print(app.eval_file2id)
     print(dict_status)
     return render_template('eval.html', dict_status=dict_status,  dict_res=dict_res)

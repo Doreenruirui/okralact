@@ -22,8 +22,6 @@ def check_data(data_folder):
                 flag_empty = 0
     if flag_empty:
         return 2
-    if not os.path.exists(pjoin(data_folder, 'config.txt')):
-        return 3
     return 0
 
 
@@ -60,6 +58,7 @@ def add_model(file_data, file_config):
 
 
 def train_from_file(file_data, file_config):
+    print('begin to train',   file_data,  file_config)
     clear_data(data_folder)
     clear_data(tmp_folder)
     root_dir = os.getcwd()
@@ -76,7 +75,7 @@ def train_from_file(file_data, file_config):
         subprocess.run(cmd, shell=True)
     valid_from_file(file_data, file_config)
 
-# train_from_file('data_kraken.tar.gz', 'sample_tess_continue.json')
+# train_from_file('100.tar.gz', 'sample_kraken.json')
 
 
 

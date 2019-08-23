@@ -30,11 +30,8 @@
                <td> {{ data[1] }} </td>
                <td> {{ data[2] }} </td>
                <td> {{ data[3] }} </td>
-                {% if data not in dict_status %}
-                     <td>
-                        <a href="{{ url_for('get_results', testname=data[0], trainname=data[1], configname=data[2], modelname=data[3]) }}">check</a>
-                    </td>
-                {% endif %}
+               <td><a href="{{ url_for('get_results', testname=data[0], trainname=data[1], configname=data[2], modelname=data[3]) }}">check</a></td>
+
             </tr>
          {% endfor %}
       </table>

@@ -72,6 +72,7 @@ def eval_from_file(file_test, file_train, file_config,  model_file):
     if engine != 'tesseract':
         cmd_list.append(deact_environ)
     cmd = '\n'.join(cmd_list)
+    print(cmd_list)
     subprocess.run(cmd, shell=True)
     gt_files = [eval_folder + '/' + ele for ele in os.listdir(eval_folder) if ele.endswith('.gt.txt')]
     res = evaluate(gt_files)

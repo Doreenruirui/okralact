@@ -14,7 +14,7 @@
                 <td> {{ data[0] }} </td>
                 <td> {{ data[1] }} </td>
                 <td>
-                    <a href="{{ url_for('manage_model_list', model_dir=dict_model[data]) }}">download</a>
+                    <a href="{{ url_for('manage_model_list', trainset=data[0], config=data[1])}}">download</a>
                 </td>
                 <td>
                     <a href="{{ url_for('eval_model_list', trainset=data[0], config=data[1])}}">evaluate</a>

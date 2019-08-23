@@ -1,8 +1,9 @@
-{"model":  [{"cnn": {"height":3, "width": 10, "output": 10, "activation": "sigmoid"}},
+{"model":  [{"cnn": {"height":3, "width": 3, "output": 32, "activation": "relu"}},
             {"pooling": {"height":2, "width": 2, "x_stride": 1, "y_stride": 1}},
-            {"cnn": {"height":3, "width": 10, "output": 10, "activation": "sigmoid"}},
+            {"cnn": {"height":3, "width": 3, "output": 32, "activation": "relu"}},
             {"pooling": {"width": 2, "height": 2, "x_stride": 1, "y_stride": 1}},
-            {"rnn": {"direction": "forward", "output": 10}}
+            {"rnn": {"direction": "forward", "output": 100}},
+            {"dropout": {"prob":  0.1}}
             ],
   "engine":  "kraken",
   "early_stop": {"nbest": 1,"min_improve": 0.01},

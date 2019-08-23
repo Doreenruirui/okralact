@@ -47,6 +47,6 @@ class SelectModelForm(FlaskForm):
 
 class SelectEvalForm(FlaskForm):
     test_choices = get_options(get_files())
-    select_test = SelectField(u'test', choices=test_choices, id='select_test')
+    select_test = SelectField(u'test', id='select_test')
     select_model = SelectField(u'model', id='select_model')
-    submit = SubmitField(u'run')
+    submit = SubmitField(u'evaluate')
