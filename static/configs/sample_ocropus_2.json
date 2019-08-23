@@ -1,0 +1,4 @@
+{"engine": "ocropus",
+  "model": [{"rnn": {"direction": "forward", "output": 100}}],
+  "nepoch": 10
+}

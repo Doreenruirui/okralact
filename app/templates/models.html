@@ -16,9 +16,6 @@
                 <td>
                     <a href="{{ url_for('manage_model_list', trainset=data[0], config=data[1])}}">download</a>
                 </td>
-                <td>
-                    <a href="{{ url_for('eval_model_list', trainset=data[0], config=data[1])}}">evaluate</a>
-                </td>
             </tr>
          {% endfor %}
       </table>
