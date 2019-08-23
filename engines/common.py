@@ -8,35 +8,7 @@ from shutil import rmtree
 import json
 from engines import valid_folder, data_folder, tmp_folder
 from shutil import move
-
-def read_json(json_file):
-    with open(json_file) as f_:
-        data = json.loads(f_.read())
-    return data
-
-
-def write_json(dict_res, json_file):
-    with open(json_file, 'w') as f_:
-        json.dump(dict_res, f_)
-
-
-def extract_file(filename, foldername):
-    with tarfile.open(filename, 'r:gz') as _tar:
-        for tarinfo in _tar:
-            if tarinfo.isdir():
-                continue
-            fn = tarinfo.name.split('/')[1]
-            if fn.startswith('.'):
-                continue
-            if fn.endswith('.png') or tarinfo.name.endswith('.txt'):
-                tarinfo.name = fn
-                _tar.extract(tarinfo, foldername)
-
-
-def clear_data(foldername):
-    if os.path.exists(foldername):
-        rmtree(foldername)
-    os.makedirs(foldername)
+from lib.file_operation import clear_data, read_json
 
 
 def creat_valid():
@@ -138,6 +110,7 @@ def read_model_info(engine):
             help_info.append(['', key, "dictionary", '', cur_layer["description"]])
     return help_info
 
+
 def read_object(k, cur_node):
     help_info = [[k, '', '', "dictionary", '', cur_node["description"]]]
     for key in cur_node["properties"]:
@@ -152,6 +125,7 @@ def read_object(k, cur_node):
             else:
                 help_info.append(['', key, node["type"], str(node["default"]), node["description"]])
     return help_info
+
 
 def read_help_information_html(engine):
     schema = read_json('engines/schemas/engine_%s.schema' % engine)

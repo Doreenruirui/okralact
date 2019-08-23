@@ -22,6 +22,12 @@ class UploadConfigForm(FlaskForm):
     submit = SubmitField(u'upload')
 
 
+class UploadModelForm(FlaskForm):
+    archive = FileField(validators=[FileAllowed(set(['tar.gz'])), FileRequired(u'Choose a file!')])
+    select_config = SelectField(u'config')
+    submit = SubmitField(u'upload')
+
+
 class SelectConfigForm(FlaskForm):
     select_config = SelectField(u'config')
     select_data = SelectField(u'data')
@@ -33,16 +39,6 @@ class SelectEngineForm(FlaskForm):
     engine_choices = get_options(get_engines())
     select_engine = SelectField(u'engine', choices=engine_choices)
     submit = SubmitField(u'show')
-
-
-class SelectModelForm(FlaskForm):
-    config_choices = get_options(get_configs())
-    select_config = SelectField(u'config', choices=config_choices, id='select_config')
-    train_choices = get_options(get_files())
-    select_train = SelectField(u'train', choices=train_choices, id='select_train')
-    test_choices = get_options(get_files())
-    select_test = SelectField(u'test', choices=test_choices, id='select_test')
-    submit = SubmitField(u'run')
 
 
 class SelectEvalForm(FlaskForm):

@@ -1,13 +1,12 @@
 import subprocess
 from os.path import join as pjoin
 import os
-from engines.common import clear_data, read_json
+from lib.file_operation import read_json, get_model_dir
 from evaluate.evaluation import evaluate
 from shutil import copyfile, move
 from collections import OrderedDict
-from engines import act_environ, model_root, valid_folder, data_folder
+from engines import act_environ, model_root, valid_folder
 from engines.process_tesseract import convert_image, get_all_files
-from lib.file_operation import get_model_dir
 
 
 def read_report(model_dir):
@@ -68,7 +67,7 @@ def get_cmd(engine, model_file):
     if engine == 'kraken':
         cmd = 'kraken -I \'%s/*.png\' -o .txt ocr -m %s -s' % (valid_folder, model_file)
     elif engine == 'calamari':
-        cmd = 'calamari-predict --checkpoint %s --files %s/*.png' % (model_file, valid_folder)
+        cmd = 'calamari-predict --checkpoint %s --files %s/*.png' % (model_file, folder)
     elif engine == 'ocropus':
         cmd = 'ocropus-rpred -m %s \'%s/*.png\'' % (model_file, valid_folder)
     return cmd
@@ -87,12 +86,12 @@ def copy_best_model(engine, model_dir, model_prefix, best_model_index):
     abs_model_dir = pjoin(model_root, model_dir)
     if engine == 'kraken':
         best_model_file = '%s_%s.mlmodel' % (model_prefix, best_model_index)
-        dest_model_file = 'valid_best.mlmodel'
+        dest_model_file = 'best.mlmodel'
         copyfile(pjoin(abs_model_dir, best_model_file),
                  pjoin(abs_model_dir, dest_model_file))
     elif engine == 'calamari':
         best_model_file ='%s_%s.ckpt' % (model_prefix, best_model_index)
-        dest_model_file = 'valid_best.ckpt'
+        dest_model_file = 'best.ckpt'
         for ele in os.listdir(abs_model_dir):
             if ele.startswith(best_model_file):
                 postfix = '.' + ele.rsplit('.', 1)[1]
@@ -100,12 +99,12 @@ def copy_best_model(engine, model_dir, model_prefix, best_model_index):
                          pjoin(abs_model_dir, dest_model_file + postfix))
     elif engine == 'ocropus':
         best_model_file = '%s-%s.pyrnn.gz' % (model_prefix, best_model_index)
-        dest_model_file = 'valid_best.pyrnn.gz'
+        dest_model_file = 'best.pyrnn.gz'
         copyfile(pjoin(abs_model_dir, best_model_file),
                  pjoin(abs_model_dir, dest_model_file))
     else:
         best_model_file = '%s_%s.checkpoint' % (model_prefix, best_model_index)
-        dest_model_file = 'valid_best.checkpoint'
+        dest_model_file = 'best.checkpoint'
         copyfile(pjoin(abs_model_dir, 'checkpoint', best_model_file), pjoin(abs_model_dir, 'checkpoint', dest_model_file))
 
 
@@ -159,5 +158,5 @@ def valid_from_file(file_train, file_config):
             f_out.write('Iteration: %s, %s\n' % (res_str[1], res_str[0]))
     copy_best_model(engine, model_dir, model_prefix, best_model)
 
-valid_from_file('data_kraken.tar.gz', 'sample_calamari.json')
+# from_file('train_500.tar.gz', 'sample_calamari.json')
 # eval_from_file(model_dir='tess_new', engine='tesseract', model_prefix='tess')

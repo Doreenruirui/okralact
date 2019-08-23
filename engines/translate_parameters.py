@@ -1,6 +1,6 @@
-from engines.common import read_json
+from lib.file_operation import read_json
 from engines.process_tesseract import *
-from engines import data_folder, tmp_folder, valid_folder, data_root, model_root, config_root, act_environ, deact_environ
+from engines import data_folder, tmp_folder, valid_folder, model_root, config_root, act_environ, deact_environ
 from engines.common import split_train_test
 import numpy as np
 from engines.translate_model import ModelTranslator, get_old_input_size
@@ -107,7 +107,7 @@ class Translate:
         checkpoint_folder = pjoin(self.model_dir, 'checkpoint')
         preprocess(data_folder, tmp_folder, model_folder, checkpoint_folder, self.model_prefix)
         # partition
-        cmd = '/Users/doreen/Documents/Experiment/Package/tesseract/src/training/lstmtraining --traineddata %s --train_listfile %s ' %\
+        cmd = 'lstmtraining --traineddata %s --train_listfile %s ' %\
               (pjoin(model_folder, self.model_prefix, self.model_prefix + '.traineddata'),
                pjoin(tmp_folder, 'list.train'))
         if self.ntest > 0:

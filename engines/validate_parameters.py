@@ -1,7 +1,7 @@
 import json
 from jsonschema import Draft4Validator, RefResolver
 import os
-from engines.common import read_json
+from lib.file_operation import read_json
 from engines import model_root, config_root
 from lib.file_operation import get_model_dir
 
@@ -40,6 +40,7 @@ def validate_model(model, engine):
                     else:
                         err_str.append('parameter model, layer %s, %s' % (key, error.message))
     return err_str
+
 
 def validate_path(continue_from, new_config):
     err_str = []

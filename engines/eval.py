@@ -4,9 +4,7 @@ from os.path import join as pjoin
 import os
 import uuid
 import json
-from lib.file_operation import get_model_dir
-from engines.common import clear_data, extract_file
-from lib.file_operation import read_list, write_list
+from lib.file_operation import get_model_dir, clear_data, extract_file, read_list, write_list
 from engines.process_tesseract import convert_image, get_all_files
 from evaluate.evaluation import evaluate
 from engines import eval_folder, model_root, data_root, config_root, eval_root, act_environ, deact_environ
@@ -27,13 +25,13 @@ def add_eval_report(file_test, file_train, file_config, file_model):
 
 def get_best_model_path(engine, model_dir):
     if engine == 'kraken':
-        return pjoin(model_root, model_dir, 'valid_best.mlmodel')
+        return pjoin(model_root, model_dir, 'best.mlmodel')
     elif engine == 'calamari':
-        return pjoin(model_root, model_dir, 'valid_best.ckpt')
+        return pjoin(model_root, model_dir, 'best.ckpt')
     elif engine == 'ocropus':
-        return pjoin(model_root, model_dir, 'valid_best.pyrnn.gz')
+        return pjoin(model_root, model_dir, 'best.pyrnn.gz')
     else:
-        return pjoin(model_root, model_dir, 'checkpoint', 'valid_best.checkpoint')
+        return pjoin(model_root, model_dir, 'checkpoint', 'best.checkpoint')
 
 
 def eval_from_file(file_test, file_train, file_config,  model_file):

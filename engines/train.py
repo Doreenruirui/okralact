@@ -4,9 +4,8 @@ from os.path import join as pjoin
 import os
 import uuid
 import shutil
-from lib.file_operation import list_model_dir
-from engines.common import extract_file, clear_data
-from engines import data_folder, tmp_folder
+from lib.file_operation import list_model_dir, extract_file, clear_data
+from engines import data_folder, tmp_folder, valid_folder
 from engines.valid import valid_from_file
 
 
@@ -60,6 +59,7 @@ def add_model(file_data, file_config):
 def train_from_file(file_data, file_config):
     print('begin to train',   file_data,  file_config)
     clear_data(data_folder)
+    clear_data(valid_folder)
     clear_data(tmp_folder)
     root_dir = os.getcwd()
     print(root_dir)

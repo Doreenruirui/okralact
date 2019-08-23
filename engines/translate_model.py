@@ -1,4 +1,4 @@
-from engines.common import read_json
+from lib.file_operation import read_json
 import numpy as np
 
 
@@ -8,6 +8,7 @@ def read_layer_default(layername):
     for key in layer_schema["definitions"]:
         default_values[key] = layer_schema["definitions"][key]["default"]
     return default_values
+
 
 def get_old_input_size(old_model, append):
     def get_pool_dim(input_size, kernel_size, stride_size):
@@ -24,6 +25,7 @@ def get_old_input_size(old_model, append):
             if layer_name == "pooling":
                 input_size = get_pool_dim(input_size, values["height"], values["y_stride"])
     return input_size
+
 
 class ModelTranslator:
     def __init__(self, model, engine):

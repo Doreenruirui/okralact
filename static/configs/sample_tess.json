@@ -7,4 +7,4 @@
   "engine":  "tesseract",
   "batch_size":  10,
   "model_prefix": "tess",
-  "nepoch": 10}
+  "nepoch": 1000}
