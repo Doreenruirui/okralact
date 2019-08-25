@@ -45,6 +45,7 @@
         },
         "continue_from": {
             "type": "object",
+            "required":  ["trainset", "config", "model"],
             "properties": {
                 "trainset" : {
                     "type" : "string",

@@ -41,14 +41,14 @@ def get_model_postfixes(engine, model_dir, model_prefix):
         models = [ele.split('.')[0] for ele in os.listdir(pjoin(model_root, model_dir))
                   if ele.endswith(dict_postfix[engine])
                   and 'best' not in ele]
-    if engine == 'kraken':
-        return sorted([ele.split('_')[1] for ele in models])
-    elif engine == 'calamari':
+
+    if engine == 'calamari':
         return sorted([ele.split('_')[1] for ele in models])
     elif engine == 'ocropus':
         return sorted([ele.split('-')[1] for ele in models])
     else:
-        return sorted([ele.split('_')[1] for ele in models])
+        models = sorted([int(ele.split('_')[1]) for ele in models])
+        return list(map(str, models))
 
 
 def get_model_path(engine, model_prefix, index):
@@ -73,12 +73,12 @@ def get_cmd(engine, model_file):
     return cmd
 
 
-def rename_calamari_prediction():
-    for fn in os.listdir('engines/valid'):
-        if fn.endswith('.png'):
-            prefix = fn.split('.')[0]
-            move('engines/valid/%s.pred.txt' % prefix,
-                 'engines/valid/%s.txt' % prefix)
+# def rename_calamari_prediction():
+#     for fn in os.listdir('engines/valid'):
+#         if fn.endswith('.png'):
+#             prefix = fn.split('.')[0]
+#             move('engines/valid/%s.pred.txt' % prefix,
+#                  'engines/valid/%s.txt' % prefix)
 
 
 def copy_best_model(engine, model_dir, model_prefix, best_model_index):
@@ -144,15 +144,16 @@ def valid_from_file(file_train, file_config):
                 cmd_list.append('conda deactivate')
             cmd = '\n'.join(cmd_list)
             subprocess.run(cmd, shell=True)
-            if engine == 'calamari':
-                rename_calamari_prediction()
             gt_files = [valid_folder + '/' + ele for ele in os.listdir(valid_folder) if ele.endswith('.gt.txt')]
-            res_str = evaluate(gt_files)
+            if engine == 'calamari':
+                res_str = evaluate(gt_files, flag_confusion=0, extension='.pred.txt')
+            else:
+                res_str = evaluate(gt_files, flag_confusion=0)
             if float(res_str["char_error_rate"]) > best_perform:
                 best_perform = float(res_str["char_error_rate"])
                 best_model = index
-            f_out.write('Iteration: %s, errors: %d, missing: %d, total: %d, char error rate: %s\n'
-                        % (index, res_str["errors"], res_str["missing"], res_str["total"], res_str["char_error_rate"]))
+            f_out.write('Iteration: %s,  character  errors: %d, total characters: %d, char error rate: %s, word errors: %d, total words: %d, word error rate: %s\n'
+                        % (index, res_str["char_errs"], res_str["char_total"], res_str["char_error_rate"], res_str["word_errs"], res_str["word_total"], res_str["word_error_rate"]))
         else:
             res_str = dict_res[int(index)]
             f_out.write('Iteration: %s, %s\n' % (res_str[1], res_str[0]))

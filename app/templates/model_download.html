@@ -17,7 +17,11 @@
 
                 </td>
                 <td>
-                    <a href="{{ url_for('download', model_dir=model_dir, filename=data)}}">download</a>
+                    <a href="{{ url_for('download', trainname=trainname,  config=config, filename=data)}}">download</a>
+
+                </td>
+                <td>
+                    <a href="{{ url_for('delete', trainname=trainname,  config=config, filename=data)}}">delete</a>
 
                 </td>
             </tr>

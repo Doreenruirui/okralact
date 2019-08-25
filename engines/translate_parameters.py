@@ -41,11 +41,19 @@ def read_value(configs, engine):
     return values
 
 def translate_continue_path(engine, continue_from):
+    print(continue_from["trainset"], continue_from["config"])
     model_dir = get_model_dir(continue_from["trainset"], continue_from["config"])
     if engine ==  'tesseract':
-        return os.path.join(model_root,  model_dir, 'checkpoint', continue_from["model"])
+        continue_path = os.path.join(model_root,  model_dir, 'checkpoint', continue_from["model"])
+    elif engine == 'calamari':
+        continue_path = os.path.join(model_root,  model_dir, continue_from["model"] + '.json')
     else:
-        return os.path.join(model_root,  model_dir, continue_from["model"])
+        continue_path = os.path.join(model_root,  model_dir, continue_from["model"])
+
+    if not os.path.exists(continue_path):
+        return ''
+    else:
+        return continue_path
 
 def get_old_traineddata(config):
     old_config_file = config["continue_from"]["config"]
@@ -57,6 +65,7 @@ def get_old_traineddata(config):
         else common_schema["definitions"]["model_prefix"]["default"]
     old_traineddata = os.path.join(model_root,  old_model_dir, old_model_prefix, old_model_prefix + '.traineddata')
     return old_traineddata
+
 
 def process_kraken_reshape_size(config):
     old_model =  read_json(os.path.join(config_root, config["continue_from"]["config"]))["model"]
@@ -77,11 +86,16 @@ class Translate:
         # replace default values with user specified values
         self.values = read_value(self.configs, self.engine)
         if "continue_from" in self.configs:
+            print('transalte path')
             self.values["continue_from"] = translate_continue_path(self.configs["engine"], self.configs["continue_from"])
         else:
             self.values["continue_from"] = ''
-        self.model_translator = ModelTranslator(self.configs["model"], self.engine)
 
+        if  "model" in self.configs:
+            self.model_translator = ModelTranslator(self.configs["model"], self.engine)
+        elif "continue_from" not in self.configs:
+            self.configs["model"] = read_json('engines/schemas/models/default_model_%s.schema' % self.engine)
+            self.model_translator = ModelTranslator(self.configs["model"], self.engine)
         self.model_prefix = self.values["model_prefix"]
         self.nepoch = self.values['nepoch']
         partition = self.values['partition']
@@ -107,7 +121,7 @@ class Translate:
         checkpoint_folder = pjoin(self.model_dir, 'checkpoint')
         preprocess(data_folder, tmp_folder, model_folder, checkpoint_folder, self.model_prefix)
         # partition
-        cmd = 'lstmtraining --traineddata %s --train_listfile %s ' %\
+        cmd = train_folder + 'lstmtraining --traineddata %s --train_listfile %s ' %\
               (pjoin(model_folder, self.model_prefix, self.model_prefix + '.traineddata'),
                pjoin(tmp_folder, 'list.train'))
         if self.ntest > 0:
@@ -140,7 +154,8 @@ class Translate:
 
         # model
         voc_size = get_numofchar(tmp_folder)
-        cmd += '%s ' % self.model_translator.tesseract(self.values["batch_size"], flag_append, voc_size)
+        if  "model" in self.configs:
+            cmd += '%s ' % self.model_translator.tesseract(self.values["batch_size"], flag_append, voc_size)
         floats = ["append", "continue_from",
                    "momentum", "adam_beta",
                   "target_error_rate",
@@ -149,10 +164,10 @@ class Translate:
         for para in self.configs:
             if para not in floats:
                 continue
-            # elif para ==  'continue_from':
-            #     old_trained_data = get_old_traineddata(self.configs)
-            #     para_name = self.translator[para] if para in self.translator else para
-            #     cmd  +=  '--%s %s --old_traineddata %s ' % (para_name, str(self.values[para]), old_trained_data)
+            elif para ==  'continue_from':
+                old_trained_data = get_old_traineddata(self.configs)
+                para_name = self.translator[para] if para in self.translator else para
+                cmd  +=  '--%s %s --old_traineddata %s ' % (para_name, str(self.values[para]), old_trained_data)
             else:
                 para_name = self.translator[para] if para in self.translator else para
                 cmd += '--%s %s ' % (para_name, str(self.values[para]))
@@ -182,7 +197,8 @@ class Translate:
             input_size = process_kraken_reshape_size(self.configs)
         else:
             input_size = 0
-        cmd += '%s ' % self.model_translator.kraken(self.values["batch_size"], flag_append, input_size=input_size)  # model specification
+        if  "model" in self.configs:
+            cmd += '%s ' % self.model_translator.kraken(self.values["batch_size"], flag_append, input_size=input_size)  # model specification
 
         # early stop
         if 'early_stop' in self.configs:
@@ -235,7 +251,8 @@ class Translate:
         cmd += '--savefreq %d ' % save_freq
 
         # model
-        cmd += '%s ' % self.model_translator.ocropus()
+        if  "model" in self.configs:
+            cmd += '%s ' % self.model_translator.ocropus()
 
         # learning_rate
         cmd += '--%s %f ' % (self.translator['learning_rate'], self.values['learning_rate'])
@@ -274,7 +291,8 @@ class Translate:
         cmd += '--output_dir %s ' % self.model_dir
 
         # model
-        cmd += self.model_translator.calamari(learning_rate=self.values["learning_rate"]) + ' '
+        if  "model" in self.configs:
+            cmd += self.model_translator.calamari(learning_rate=self.values["learning_rate"]) + ' '
 
         floats = ["continue_from", "stats_size", "seed",
                   "bidi_dir", "text_normalization", "text_regularization"

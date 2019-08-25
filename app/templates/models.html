@@ -16,6 +16,9 @@
                 <td>
                     <a href="{{ url_for('manage_model_list', trainset=data[0], config=data[1])}}">download</a>
                 </td>
+                <td>
+                    <a href="{{ url_for('delete_model', trainset=data[0], config=data[1])}}">del</a>
+                </td>
             </tr>
          {% endfor %}
       </table>

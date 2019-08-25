@@ -75,7 +75,7 @@ def train_from_file(file_data, file_config):
         subprocess.run(cmd, shell=True)
     valid_from_file(file_data, file_config)
 
-# train_from_file('100.tar.gz', 'sample_kraken.json')
+# train_from_file('train_100.tar.gz', 'sample_kraken_continue_data.json')
 
 
 

@@ -7,4 +7,5 @@ class Config(object):
     CONFIG_FOLDER = os.getcwd() + '/static/configs'
     MODEL_FOLDER = os.getcwd() + '/static/model'
     TMP_FOLDER = os.getcwd() + '/static/tmp'
+    EVAL_FOLDER = os.getcwd() + '/static/eval'
 

@@ -1,0 +1,11 @@
+{"model":  [{"input": {"height": 48}},
+            {"cnn": {"height":3, "width": 3, "output": 32}},
+            {"dropout": {"prob":  0.1}},
+            {"pooling": {"height":2, "width": 2, "x_stride": 2, "y_stride": 2}},
+            {"cnn": {"height":3, "width": 3, "output": 32}},
+            {"dropout": {"prob":  0.1}},
+            {"pooling": {"width": 2, "height": 2, "x_stride": 2, "y_stride": 2}},
+            {"rnn": {"output": 100}},
+            {"dropout": {"prob":  0.1}}
+            ]
+}

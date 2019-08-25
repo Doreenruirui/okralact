@@ -8,6 +8,8 @@
                <th  align="left" width="150"> Config </th>
                <th  align="left" width="150"> model </th>
                <th  align="left" width="150"> Status</th>
+               <th  align="left" width="150"> </th>
+               <th  align="left" width="150"> </th>
         </tr>
          {% for data in dict_status %}
             <tr>
@@ -18,6 +20,12 @@
                 {%if dict_status[data] == "finished" %}
                         <td>
                           <a href="{{ url_for('get_results', testname=data[0], trainname=data[1], configname=data[2], modelname=data[3]) }}">check</a>
+                        </td>
+                        <td>
+                          <a href="{{ url_for('download_results', testname=data[0], trainname=data[1], configname=data[2], modelname=data[3]) }}">download</a>
+                        </td>
+                         <td>
+                          <a href="{{ url_for('delete_results', testname=data[0], trainname=data[1], configname=data[2], modelname=data[3]) }}">del</a>
                         </td>
                 {%  else %}
                         <td> {{ dict_status[data] }}</td>
@@ -31,7 +39,12 @@
                <td> {{ data[2] }} </td>
                <td> {{ data[3] }} </td>
                <td><a href="{{ url_for('get_results', testname=data[0], trainname=data[1], configname=data[2], modelname=data[3]) }}">check</a></td>
-
+                <td>
+                    <a href="{{ url_for('download_results', testname=data[0], trainname=data[1], configname=data[2], modelname=data[3]) }}">download</a>
+                </td>
+                 <td>
+                     <a href="{{ url_for('delete_results', testname=data[0], trainname=data[1], configname=data[2], modelname=data[3]) }}">delete</a>
+                 </td>
             </tr>
          {% endfor %}
       </table>

@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, send_file
 from werkzeug.utils import secure_filename
 from app import app, model_root, config_root, eval_root
-from lib.file_operation import extract_file, rename_file, add_model, get_model_dir, list_model_dir, read_list
+from lib.file_operation import read_json, compress_file,  extract_file, rename_file, add_model, get_model_dir, list_model_dir, read_list, del_model_dir
 from rq.job import Job
 import tarfile
 import shutil
@@ -44,11 +44,15 @@ def get_model_list(model_dir):
         models = [ele for ele in os.listdir(os.path.join(model_root, model_dir))]
     print("models:\n", models)
     file_list = []
+    prefix_camalari = {}
     for ele in models:
         if ele.endswith('mlmodel') or ele.endswith('.pyrnn.gz') or ele.endswith("checkpoint"):
             file_list.append(ele)
-        elif ".ckpt." in ele and ele != "checkpoint":
-            file_list.append(ele)
+        elif ".ckpt." in ele and ele != "checkpoint" and '.tar.gz' not in ele:
+            prefix = ele.rsplit('.', 1)[0]
+            if prefix  not in prefix_camalari:
+                prefix_camalari[prefix] = 1
+                file_list.append(prefix)
     if os.path.exists(os.path.join(model_root, model_dir, "report")):
         file_list.append("report")
     return file_list
@@ -91,6 +95,7 @@ def manage_data():
 @app.route('/configs', methods=['GET', 'POST'], defaults={'error_message': ''})
 @app.route('/configs/<error_message>', methods=['GET', 'POST'])
 def manage_configs(error_message):
+    print('errors:  %s' %  error_message)
     configs_list = get_configs()
     form = UploadConfigForm()
     f = form.archive.data
@@ -120,15 +125,14 @@ def delete_data(filename):
         app.job_file2id.pop(filename, None)
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     os.remove(file_path)
-    prefix = filename.rsplit('.', 2)[0]
-    model_file = os.path.join(os.getcwd(), 'engines/model', 'model_%s' % filename)
-    if os.path.exists(model_file):
-        os.remove(model_file)
-    model_folder = os.path.join(os.getcwd(), 'engines/model', prefix)
-    if os.path.exists(model_folder):
-        shutil.rmtree(model_folder, ignore_errors=True)
     return redirect(url_for('manage_data'))
 
+@app.route('/delete_model/')
+def delete_model():
+    trainset = request.args.get('trainset', None)
+    config = request.args.get('config', None)
+    del_model_dir(trainset,  config)
+    return redirect(url_for('manage_model'))
 
 @app.route('/delete_config/<filename>')
 def delete_config(filename):
@@ -213,11 +217,12 @@ def manage_model_list():
         model_choices = dict(get_options(file_list))
         print(get_configs())
         select_model = model_choices.get(form.select_model.data)
+
         select_test = data_choices.get(form.select_test.data)
         print('model', select_model)
         print('test:', select_test)
         return redirect(url_for('eval_model', trainname=trainset, config=config, testname=select_test,  modelname=select_model))
-    return render_template('model_download.html',  form=form, model_dir=model_dir, files_list=file_list)
+    return render_template('model_download.html',  form=form, trainname=trainset,  config=config, files_list=file_list)
 
 
 # Manage Evals
@@ -275,7 +280,7 @@ def valid_model():
     config = request.args.get('config', None)
     print(trainset, config)
     if (trainset, config) not in app.job_file2id:
-        return redirect(url_for('manage_job', error_message='Please train the model first.'))
+        return redirect(url_for('manage_job', error_message='Job is not running.'))
     else:
         job_id = app.job_file2id[(trainset, config)]
         job = Job.fetch(job_id, app.redis)
@@ -318,10 +323,48 @@ def tardir(path, tar_name):
 
 @app.route('/download/', methods=['GET', 'POST'])
 def download():
-    model_dir = request.args.get('model_dir', None)
+    trainset = request.args.get('trainname', None)
+    config = request.args.get('config', None)
+    model_dir = get_model_dir(trainset, config)
     file_name = request.args.get("filename", None)
-    out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name)
+    config_content = read_json(os.path.join(config_root, config))
+    print(config_content["engine"])
+    if config_content["engine"] == 'tesseract':
+        out_file = os.path.join(os.getcwd(), model_root, model_dir, "checkpoin", file_name)
+    elif config_content["engine"] == "calamari":
+        if file_name != 'report':
+            out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name + '.tar.gz')
+            if os.path.exists(out_file):
+                os.remove(out_file)
+            files = os.listdir(os.path.join(model_root,  model_dir))
+            files = [os.path.join(model_root, model_dir, ele) for ele in files if ele.startswith(file_name)]
+            compress_file(files, out_file)
+            file_name += '.tar.gz'
+        else:
+            out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name)
+    else:
+        out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name)
     return send_file(out_file, attachment_filename=file_name, as_attachment=True)
+
+@app.route('/delete/', methods=['GET', 'POST'])
+def delete():
+    trainset = request.args.get('trainname', None)
+    config = request.args.get('config', None)
+    model_dir = get_model_dir(trainset, config)
+    file_name = request.args.get("filename", None)
+    config_content = read_json(os.path.join(config_root, config))
+    if config_content["engine"] == 'tesseract':
+        out_file = os.path.join(os.getcwd(), model_root, model_dir, "checkpoin", file_name)
+        os.remove(out_file)
+    elif config_content["engine"] == 'calamari':
+        files = os.listdir(os.path.join(os.getcwd(), model_root,  model_dir))
+        files = [os.path.join(model_root, model_dir, ele) for ele in files if ele.startswith(file_name)]
+        for out_file in files:
+            os.remove(out_file)
+    else:
+        out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name)
+        os.remove(out_file)
+    return redirect(url_for('manage_model_list', trainset=trainset,  config=config))
 
 
 @app.route('/show_file', methods=['GET', 'POST'])
@@ -340,10 +383,7 @@ def show_content():
         text.close()
     elif file_type == 'eval':
         with open(os.path.join(eval_root, file_name), 'r', encoding="utf-8") as f_:
-            res = json.loads(f_.read())
-        content = '\n'
-        for ele in res:
-            content += ele + '\t' + str(res[ele]) + '\n'
+            content = f_.read()
     return render_template('content.html', response=content)
 
 
@@ -399,3 +439,28 @@ def get_results():
     res_file = dict_eval[key]
     return redirect(url_for('show_content', filename=res_file, file_dir='', type='eval'))
 
+@app.route("/download_evaluation", methods=['GET'])
+def download_results():
+    testname = request.args.get('testname', None)
+    configname = request.args.get('configname', None)
+    trainname = request.args.get('trainname', None)
+    modelname = request.args.get('modelname', None)
+    dict_eval = read_list('static/eval/eval_list')
+    key = (testname, trainname, configname, modelname)
+    res_file = dict_eval[key]
+    out_file = os.path.join(eval_root,  res_file + 'tar.gz')
+    return send_file(out_file, attachment_filename=res_file  +  'tar.gz', as_attachment=True)
+
+@app.route("/delete_evaluation", methods=['GET'])
+def delete_results():
+    testname = request.args.get('testname', None)
+    configname = request.args.get('configname', None)
+    trainname = request.args.get('trainname', None)
+    modelname = request.args.get('modelname', None)
+    dict_eval = read_list('static/eval/eval_list')
+    key = (testname, trainname, configname, modelname)
+    res_file = dict_eval[key]
+    out_file = os.path.join(eval_root,  res_file + 'tar.gz')
+    os.remove(out_file)
+    os.remove(os.path.join(eval_root,  res_file))
+    return redirect(url_for('manage_eval'))
