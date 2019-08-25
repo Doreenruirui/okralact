@@ -5,7 +5,7 @@ from scipy.ndimage import filters
 import unicodedata
 
 
-def levenshtein_word(a, b):
+def levenshtein(a, b):
     """Calculates the Levenshtein distance between a and b.
     (Clever compact Pythonic implementation from hetland.org)"""
     n, m = len(a), len(b)

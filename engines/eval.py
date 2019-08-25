@@ -7,7 +7,6 @@ from lib.file_operation import compress_file, get_model_dir, clear_data, extract
 from engines.process_tesseract import convert_image, get_all_files
 from evaluate.evaluation import evaluate
 from engines import eval_folder, model_root, data_root, config_root, eval_root, act_environ, deact_environ
-from  shutil import rmtree
 
 def add_eval_report(file_test, file_train, file_config, file_model):
     eval_file = pjoin(eval_root, 'eval_list')
@@ -16,7 +15,12 @@ def add_eval_report(file_test, file_train, file_config, file_model):
     uni_model_dir = uuid.uuid4().hex
     if key in dict_eval:
         old_eval_file = dict_eval[key]
-        os.remove(pjoin(eval_root, old_eval_file))
+        report_file = pjoin(eval_root, old_eval_file)
+        if os.path.exists(report_file):
+            os.remove(report_file)
+        if os.path.exists(report_file  +  '.tar.gz'):
+            os.remove(report_file + '.tar.gz')
+
     dict_eval[key] = uni_model_dir
     write_list(eval_file, dict_eval)
     return dict_eval[key]
@@ -66,12 +70,12 @@ def eval_from_file(file_test, file_train, file_config,  model_file):
     gt_files = [eval_folder + '/' + ele for ele in os.listdir(eval_folder) if ele.endswith('.gt.txt')]
     if engine == 'calamari':
         res = evaluate(gt_files,  flag_confusion=1, extension='.pred.txt')
-        res_files = [ele[:-len(".gt.txt")] +  '.pred.txt' for ele in gt_files]
+        res_files = [os.getcwd()  +  '/' +  ele[:-len(".gt.txt")] +  '.pred.txt' for ele in gt_files]
     else:
         res = evaluate(gt_files, flag_confusion=1)
-        res_files = [ele[:-len(".gt.txt")] +  '.txt' for ele in gt_files]
+        res_files = [os.getcwd()  +  '/' + ele[:-len(".gt.txt")] +  '.txt' for ele in gt_files]
     report_file = add_eval_report(file_test, file_train, file_config, model_file)
-    out_file =  pjoin(eval_root, report_file  +  '.tar.gz')
+    out_file =  pjoin(os.getcwd(), eval_root, report_file  +  '.tar.gz')
     compress_file(res_files,  out_file)
     with open(pjoin(eval_root, report_file), 'w') as f_:
         f_.write('\nTotal characters:\t%d\n' % res["char_total"])
@@ -86,6 +90,6 @@ def eval_from_file(file_test, file_train, file_config,  model_file):
     return report_file
 
 
-
-
+# eval_from_file(file_test='test_10.tar.gz', file_train='train_500.tar.gz', file_config='sample_calamari.json', model_file='model_00004500.ckpt')
+# compress_file(res_files,  out_file)
 

@@ -7,9 +7,11 @@ import uuid
 
 
 model_root = os.getcwd() + '/static/model'
-data_dir = os.getcwd() + '/static/data'
-config_dir = os.getcwd() + '/static/configs'
+data_root = os.getcwd() + '/static/data'
+config_root = os.getcwd() + '/static/configs'
+eval_root = os.getcwd()  + '/static/eval'
 train_dir = os.getcwd() + '/engines/data'
+
 
 
 def add_model(file_data, file_config):
@@ -43,8 +45,24 @@ def list_model_dir():
     return model_dict
 
 
+def del_model_dir(trainset, config):
+    model_file = pjoin(model_root, 'model_list')
+    model_dir = get_model_dir(trainset, config)
+    model_folder = os.path.join(model_root, model_dir)
+    if os.path.exists(model_folder):
+        rmtree(model_folder, ignore_errors=True)
+    if os.path.exists(model_file):
+        with open(model_file) as f_:
+            out_lines = f_.readlines()
+        with open(model_file, 'w') as f_:
+            for line in out_lines:
+                items = line.strip().split('\t')
+                if items[-1] != model_dir:
+                    f_.write(line)
+
 def get_model_dir(file_data, file_config):
     model_dict = list_model_dir()
+    print(model_dict)
     key = (file_data, file_config)
     if key not in model_dict:
         return ''
@@ -66,12 +84,12 @@ def get_models():
 
 
 def get_files():
-    files_list = os.listdir(data_dir)
+    files_list = os.listdir(data_root)
     return files_list
 
 
 def get_configs():
-    configs_list = os.listdir(config_dir)
+    configs_list = os.listdir(config_root)
     return configs_list
 
 
@@ -102,6 +120,18 @@ def read_list(filename):
                 dict_res[key] = items[-1]
     return dict_res
 
+def update_list(filename, to_del):
+    if os.path.exists(filename):
+        with open(filename) as f_:
+            content = f_.readlines()
+        with open(filename, 'w')  as f_:
+            for line in content:
+                items = line.strip().split('\t')
+                if items[-1] != to_del:
+                    f_.write(line)
+                else:
+                    print('file  find', filename)
+
 
 def write_list(filename, dict_res):
     with open(filename, 'w') as f_:
@@ -111,9 +141,22 @@ def write_list(filename, dict_res):
 
 def read_json(json_file):
     with open(json_file) as f_:
-        data = json.loads(f_.read())
-    return data
+        content = f_.read()
+        return json.loads(content)
 
+def read_config(json_file):
+    with open(json_file) as f_:
+        content = f_.read()
+        try:
+            return json.loads(content),  ''
+        except ValueError as e:
+            return {}, e.args
+
+def read_config_str(json_str):
+    try:
+        return json.loads(json_str),  ''
+    except ValueError as e:
+        return {}, e.args
 
 def write_json(dict_res, json_file):
     with open(json_file, 'w') as f_:
@@ -131,6 +174,15 @@ def extract_file(filename, foldername):
             tarinfo.name = fn
             _tar.extract(tarinfo, foldername)
 
+def compress_file(files, dest_name):
+    print(dest_name)
+    print(files)
+    with tarfile.open(dest_name, "w:gz") as tar:
+        for fn in files:
+            path, filename  =  fn.rsplit('/', 1)
+            # print(filename)
+            tar.add(fn, arcname=filename)
+            # tar.add(fn)
 
 def clear_data(foldername):
     if os.path.exists(foldername):

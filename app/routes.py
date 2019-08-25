@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, send_file
 from werkzeug.utils import secure_filename
 from app import app, model_root, config_root, eval_root
-from lib.file_operation import read_json, compress_file,  extract_file, rename_file, add_model, get_model_dir, list_model_dir, read_list, del_model_dir
+from lib.file_operation import read_json, compress_file,  extract_file, rename_file, add_model, get_model_dir, list_model_dir, read_list, update_list,del_model_dir
 from rq.job import Job
 import tarfile
 import shutil
@@ -441,6 +441,7 @@ def get_results():
 
 @app.route("/download_evaluation", methods=['GET'])
 def download_results():
+    print('begin to download')
     testname = request.args.get('testname', None)
     configname = request.args.get('configname', None)
     trainname = request.args.get('trainname', None)
@@ -448,7 +449,8 @@ def download_results():
     dict_eval = read_list('static/eval/eval_list')
     key = (testname, trainname, configname, modelname)
     res_file = dict_eval[key]
-    out_file = os.path.join(eval_root,  res_file + 'tar.gz')
+    print('download',   res_file)
+    out_file = os.path.join(os.getcwd(), eval_root,  res_file + '.tar.gz')
     return send_file(out_file, attachment_filename=res_file  +  'tar.gz', as_attachment=True)
 
 @app.route("/delete_evaluation", methods=['GET'])
@@ -459,8 +461,15 @@ def delete_results():
     modelname = request.args.get('modelname', None)
     dict_eval = read_list('static/eval/eval_list')
     key = (testname, trainname, configname, modelname)
-    res_file = dict_eval[key]
-    out_file = os.path.join(eval_root,  res_file + 'tar.gz')
-    os.remove(out_file)
-    os.remove(os.path.join(eval_root,  res_file))
+    if key in dict_eval:
+        res_file = dict_eval[key]
+        report_file = os.path.join(eval_root,  res_file)
+        print('delete_results', report_file)
+        if os.path.exists(report_file):
+            os.remove(report_file)
+
+        out_file = report_file + '.tar.gz'
+        if os.path.exists(out_file):
+            os.remove(out_file)
+        update_list('static/eval/eval_list', res_file)
     return redirect(url_for('manage_eval'))
