@@ -1,10 +1,9 @@
 from flask import render_template, redirect, url_for, request, send_file
 from werkzeug.utils import secure_filename
 from app import app, model_root, config_root, eval_root
-from lib.file_operation import read_json, compress_file,  extract_file, rename_file, add_model, get_model_dir, list_model_dir, read_list, update_list,del_model_dir
+from lib.file_operation import get_files, get_configs, get_models, read_json, compress_file,  extract_file, rename_file, add_model, get_model_dir, list_model_dir, read_list, update_list,del_model_dir
 from rq.job import Job
 import tarfile
-import shutil
 import os
 from engines.validate_parameters import validate_string
 import json
@@ -53,6 +52,8 @@ def get_model_list(model_dir):
             if prefix  not in prefix_camalari:
                 prefix_camalari[prefix] = 1
                 file_list.append(prefix)
+        elif ele.endswith('.traineddata'):
+            file_list.append(ele)
     if os.path.exists(os.path.join(model_root, model_dir, "report")):
         file_list.append("report")
     return file_list
@@ -147,7 +148,8 @@ def delete_config(filename):
 @app.route('/jobs', methods=['GET', 'POST'], defaults={'error_message': ''})
 @app.route('/jobs/<error_message>', methods=['GET', 'POST'])
 def manage_job(error_message):
-    print('validation error', error_message)
+    print('jobs')
+    print(app.task_queue.job_ids)
     dict_status = get_file_status()
     dict_valid_status = get_valid_status()
     print(app.job_file2id)
@@ -244,14 +246,26 @@ def train_model():
     config = request.args.get('config', None)
     print(filename, config)
     # form = SelectConfigForm()
+    flag_new = 0
+    err_msg = ''
     if (filename, config) not in app.job_file2id:
+        flag_new = 1
+    else:
+        job_id = app.job_file2id[(filename,config)]
+        job = Job.fetch(job_id, app.redis)
+        status = job.get_status()
+        if status != 'queued' and status != 'started':
+            flag_new = 1
+        else:
+            err_msg = 'Job already %s.' % status
+    if flag_new:
         job = app.task_queue.enqueue('engines.train.train_from_file', filename, config)
         job_id = job.get_id()
         app.job_file2id[(filename, config)] = job_id
         app.job_id2file[job_id] = (filename, config)
     print(app.job_id2file)
     # files_list = os.listdir(app.config['UPLOAD_FOLDER'])
-    return redirect(url_for('manage_job'))
+    return redirect(url_for('manage_job', error_message=err_msg))
 
 
 # Run jobs
@@ -330,7 +344,10 @@ def download():
     config_content = read_json(os.path.join(config_root, config))
     print(config_content["engine"])
     if config_content["engine"] == 'tesseract':
-        out_file = os.path.join(os.getcwd(), model_root, model_dir, "checkpoin", file_name)
+        if '.traineddata' in file_name:
+            out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name)
+        else:
+            out_file = os.path.join(os.getcwd(), model_root, model_dir, "checkpoint", file_name)
     elif config_content["engine"] == "calamari":
         if file_name != 'report':
             out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name + '.tar.gz')
@@ -354,7 +371,10 @@ def delete():
     file_name = request.args.get("filename", None)
     config_content = read_json(os.path.join(config_root, config))
     if config_content["engine"] == 'tesseract':
-        out_file = os.path.join(os.getcwd(), model_root, model_dir, "checkpoin", file_name)
+        if file_name.endswith('.traineddata'):
+            out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name)
+        else:
+            out_file = os.path.join(os.getcwd(), model_root, model_dir, "checkpoint", file_name)
         os.remove(out_file)
     elif config_content["engine"] == 'calamari':
         files = os.listdir(os.path.join(os.getcwd(), model_root,  model_dir))

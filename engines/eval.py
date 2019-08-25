@@ -31,13 +31,17 @@ def eval_from_file(file_test, file_train, file_config,  model_file):
     extract_file(pjoin(data_root, file_test), eval_folder)
     configs = read_json(pjoin(config_root, file_config))
     model_dir = get_model_dir(file_train, file_config)
+
     engine = configs["engine"]
     common_schema = read_json("engines/schemas/common.schema")
     model_prefix = configs["model_prefix"] if "model_prefix" in configs \
         else common_schema["definitions"]["model_prefix"]["default"]
     cmd_list = [act_environ(engine)] if engine != 'tesseract' else []
     if engine == 'tesseract':
-        best_model = pjoin(model_root, model_dir, 'checkpoint', model_file)
+        if model_file.endswith('.traineddata'):
+            best_model = pjoin(model_root, model_dir, model_file)
+        else:
+            best_model = pjoin(model_root, model_dir, 'checkpoint', model_file)
     else:
         best_model = pjoin(model_root, model_dir, model_file)
     if engine == 'kraken':
@@ -50,10 +54,11 @@ def eval_from_file(file_test, file_train, file_config,  model_file):
         cmd_list.append('ocropus-rpred -m %s \'%s/*.png\'' % (best_model, eval_folder))
     elif engine == 'tesseract':
         cmd_list.append('export TESSDATA_PREFIX=%s' % pjoin(model_root, model_dir))
-        cmd_list.append('/Users/doreen/Documents/Experiment/Package/tesseract/src/training/lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
-                        (best_model,
-                         pjoin(model_root, model_dir, model_prefix, '%s.traineddata' % model_prefix),
-                         pjoin(model_root, model_dir, model_prefix + '.traineddata')))
+        if not os.path.exists(pjoin(model_root, model_dir, 'checkpoint')):
+            cmd_list.append('/Users/doreen/Documents/Experiment/Package/tesseract/src/training/lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
+                            (best_model,
+                             pjoin(model_root, model_dir, model_prefix, '%s.traineddata' % model_prefix),
+                             pjoin(model_root, model_dir, model_prefix + '.traineddata')))
         convert_image('engines/eval')
         image_files = get_all_files(data_folder=eval_folder, postfix='.tif')
         for imf in image_files:

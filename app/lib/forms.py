@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import SubmitField, SelectField, StringField, validators
-from lib.file_operation import get_files, get_configs, get_engines, get_models
+from wtforms import SubmitField, SelectField
+from lib.file_operation import get_engines
 
 
 def get_options(file_list):
@@ -42,7 +42,6 @@ class SelectEngineForm(FlaskForm):
 
 
 class SelectEvalForm(FlaskForm):
-    test_choices = get_options(get_files())
     select_test = SelectField(u'test', id='select_test')
     select_model = SelectField(u'model', id='select_model')
     submit = SubmitField(u'evaluate')

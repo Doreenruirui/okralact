@@ -72,6 +72,7 @@ def validate_continue_from(continue_from_schema, new_config):
         model_path = os.path.join(model_root,  model_dir, 'checkpoint', continue_from["model"])
     else:
         model_path = os.path.join(model_root,  model_dir, continue_from["model"])
+
     if engine == 'calamari':
         model_path += '.json'
     if not os.path.exists(model_path):
@@ -85,17 +86,18 @@ def validate_continue_from(continue_from_schema, new_config):
         elif engine == 'ocropus':
             err_str.append('parameters model, ocropus does not support new model structure for fine tuning.')
             return err_str
-        append_index = new_config["append"]
-        if "append" not in new_config or append_index < 1:
-            err_str.append('parameter append, please assign a valid append')
-        new_model = new_config["model"]
-        old_model = old_config["model"]
-        len_old_model = len(old_model) if "input" in old_model[0] else len(old_model) + 1
-        len_old_model = len_old_model - 1 if "output" in old_model[-1] else len_old_model
-        if append_index >= len_old_model:
-            err_str.append('parameter append, append_index must be less than the number of layers (excluding output layer, including input layer).')
-        concat_model = old_model[:append_index] if "input" in old_model[0] else old_model[:append_index - 1]
-        concat_model += new_model
+        if "append" in new_config:
+            append_index = new_config["append"]
+            if "append" not in new_config or append_index < 1:
+                err_str.append('parameter append, please assign a valid append')
+            new_model = new_config["model"]
+            old_model = old_config["model"]
+            len_old_model = len(old_model) if "input" in old_model[0] else len(old_model) + 1
+            len_old_model = len_old_model - 1 if "output" in old_model[-1] else len_old_model
+            if append_index >= len_old_model:
+                err_str.append('parameter append, append_index must be less than the number of layers (excluding output layer, including input layer).')
+            concat_model = old_model[:append_index] if "input" in old_model[0] else old_model[:append_index - 1]
+            concat_model += new_model
     else:
         if "append" in new_config:
             err_str.append('parameter append, please specify the model structure to append.')
@@ -124,7 +126,7 @@ def validate_string(config_str):
         model = config["model"]
         errors_model = validate_model(model, engine)
     errors += errors_model
-    if "continue_from" in config:                               # valid whether the continue from path exists
+    if "continue_from" in config:
         errors += validate_continue_from(engine_schema["properties"]["continue_from"], config)
         del config["continue_from"]
     elif "append"  in config:

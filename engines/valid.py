@@ -67,7 +67,7 @@ def get_cmd(engine, model_file):
     if engine == 'kraken':
         cmd = 'kraken -I \'%s/*.png\' -o .txt ocr -m %s -s' % (valid_folder, model_file)
     elif engine == 'calamari':
-        cmd = 'calamari-predict --checkpoint %s --files %s/*.png' % (model_file, folder)
+        cmd = 'calamari-predict --checkpoint %s --files %s/*.png' % (model_file, valid_folder)
     elif engine == 'ocropus':
         cmd = 'ocropus-rpred -m %s \'%s/*.png\'' % (model_file, valid_folder)
     return cmd

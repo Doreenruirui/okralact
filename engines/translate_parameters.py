@@ -178,7 +178,7 @@ class Translate:
     def kraken(self):
         print(self.configs)
         # Partition
-        cmd = 'ketos train -t %s -e %s ' % (pjoin(tmp_folder, 'list.train'),
+        cmd = 'ketos -v train -t %s -e %s ' % (pjoin(tmp_folder, 'list.train'),
                                                  pjoin(tmp_folder, 'list.eval'))
         # model_prefix
         cmd += '--%s %s ' % (self.translator['model_prefix'],

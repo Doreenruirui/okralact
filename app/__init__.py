@@ -2,8 +2,8 @@ from flask import Flask
 import rq
 from redis import Redis
 from app.lib.job import Job
-
 from app.config import Config
+
 
 app = Flask(__name__)
 app.config.from_object(Config)

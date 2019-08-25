@@ -84,7 +84,7 @@ def get_models():
 
 
 def get_files():
-    files_list = os.listdir(data_root)
+    files_list = [ele for ele in os.listdir(data_root) if ele.endswith('.tar.gz')]
     return files_list
 
 
@@ -168,10 +168,13 @@ def extract_file(filename, foldername):
         for tarinfo in _tar:
             if tarinfo.isdir():
                 continue
-            fn = tarinfo.name.split('/')[1]
-            if fn.startswith('.'):
-                continue
-            tarinfo.name = fn
+            # print('name', tarinfo.name)
+            if '/' in tarinfo.name:
+                fn = tarinfo.name.split('/', 1)[1]
+                if fn.startswith('.'):
+                    continue
+                tarinfo.name = fn
+
             _tar.extract(tarinfo, foldername)
 
 def compress_file(files, dest_name):
