@@ -54,7 +54,8 @@ def eval_from_file(file_test, file_train, file_config,  model_file):
         cmd_list.append('ocropus-rpred -m %s \'%s/*.png\'' % (best_model, eval_folder))
     elif engine == 'tesseract':
         cmd_list.append('export TESSDATA_PREFIX=%s' % pjoin(model_root, model_dir))
-        if not os.path.exists(pjoin(model_root, model_dir, 'checkpoint')):
+        print('model_dir', pjoin(model_root, model_dir, 'checkpoint'))
+        if os.path.exists(pjoin(model_root, model_dir, 'checkpoint')):
             cmd_list.append('/Users/doreen/Documents/Experiment/Package/tesseract/src/training/lstmtraining --stop_training --continue_from %s --traineddata %s --model_output %s' %
                             (best_model,
                              pjoin(model_root, model_dir, model_prefix, '%s.traineddata' % model_prefix),
@@ -89,7 +90,7 @@ def eval_from_file(file_test, file_train, file_config,  model_file):
         f_.write('Total words:\t%d\n' % res["word_total"])
         f_.write('Word errors:\t%d\n' % res["word_errs"])
         f_.write('Word error rate:\t%.3f\n\n\n' % res["word_error_rate"])
-        f_.write('count\tcorrect\tgenerated\n')
+        f_.write('count\tgenerated\tcorrect\n')
         for v, a, b  in res["confusion"]:
             f_.write("%d\t%s\t%s\n" % (v, a, b))
     return report_file

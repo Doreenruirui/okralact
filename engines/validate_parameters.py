@@ -62,6 +62,9 @@ def validate_continue_from(continue_from_schema, new_config):
     if len(err_str) > 0:
         return err_str
     # check whether engine matches
+    if not os.path.exists(os.path.join(config_root,  continue_from["config"])):
+        err_str.append('parameter continue_from, configuration for the old model does not exists')
+        return err_str
     old_config = read_json(os.path.join(config_root,  continue_from["config"]))
     if old_config["engine"] != new_config["engine"]:
         err_str.append('parameter engine, engines for old model and new model not match')

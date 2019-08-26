@@ -277,7 +277,16 @@ def eval_model():
     config = request.args.get('config', None)
     model_file = request.args.get('modelname', None)
     print(trainname, testname, config, model_file)
+    flag_new = 0
     if (testname, trainname, config,  model_file) not in app.eval_file2id:
+        flag_new = 1
+    else:
+        job_id = app.eval_file2id[(testname, trainname, config,  model_file)]
+        job = Job.fetch(job_id, app.redis)
+        status = job.get_status()
+        if status != 'queued' and status != 'started':
+            flag_new = 1
+    if flag_new == 1:
         job = app.eval_queue.enqueue('engines.eval.eval_from_file', testname, trainname, config, model_file)
         job_id = job.get_id()
         app.eval_file2id[(testname, trainname, config,  model_file)] = job_id
