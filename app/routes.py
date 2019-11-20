@@ -9,6 +9,7 @@ from engines.validate_parameters import validate_string
 import json
 from app.lib.forms import *
 from engines.common import read_help_information_html, read_model_param
+from app.modup import publish_model
 
 
 def get_file_status():
@@ -395,6 +396,51 @@ def delete():
         os.remove(out_file)
     return redirect(url_for('manage_model_list', trainset=trainset,  config=config))
 
+@app.route('/upload/', methods=['GET', 'POST'])
+def upload():
+    trainset = request.args.get('trainname', None)
+    config = request.args.get('config', None)
+    model_dir = get_model_dir(trainset, config)
+    file_name = request.args.get("filename", None)
+    config_content = read_json(os.path.join(config_root, config))
+    print(config_content["engine"])
+    if config_content["engine"] == 'tesseract':
+        if '.traineddata' in file_name:
+            out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name)
+        else:
+            out_file = os.path.join(os.getcwd(), model_root, model_dir, "checkpoint", file_name)
+    elif config_content["engine"] == "calamari":
+        if file_name != 'report':
+            out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name + '.tar.gz')
+            if os.path.exists(out_file):
+                os.remove(out_file)
+            files = os.listdir(os.path.join(model_root,  model_dir))
+            files = [os.path.join(model_root, model_dir, ele) for ele in files if ele.startswith(file_name)]
+            compress_file(files, out_file)
+            file_name += '.tar.gz'
+        else:
+            out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name)
+    else:
+        out_file = os.path.join(os.getcwd(), model_root, model_dir, file_name)
+    print('uploading...')
+    publish_model(
+        access_token=app.token,
+        model_file=out_file, # local path
+        remote_file='my_image.jpg', # remote name (no path)
+        ocr_engine=config_content["engine"], # OCR engine which can run the model
+        license_name='WTFPL', # it seems that Zenodo recognizes acronyms, such as this one
+        metadata={ # insert whatever you want in this map
+            'info': 'this map can contain anything; if you do not want it, set it to none',
+            'content': 'ideally it should contain all information about the training data, the parameters, the result accuracy, ...',
+            'usage': 'this gets uploaded as metadata.json along with the model'
+        },
+        related_DOI=[('cites', '123')], # should other DOI be refered to, add them here as pairs (link, doi), otherwise set this to None
+        is_draft=True # if true, then the publish request will not be sent and the upload will stay as a draft
+    )
+    print('uploaded!')
+    return redirect(url_for('manage_model_list', trainset=trainset,  config=config))
+
+    # return send_file(out_file, attachment_filename=file_name, as_attachment=True)
 
 @app.route('/show_file', methods=['GET', 'POST'])
 def show_content():
