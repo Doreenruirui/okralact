@@ -1,0 +1,20 @@
+
+Total characters:	381
+Character errors:	36
+Character error rate:	0.094
+Total words:	62
+Word errors:	24
+Word error rate:	0.387
+
+
+count	generated	correct
+6	n	m
+2	n	u
+1	t_	ra
+1	t	n
+1	_	v
+1	lͤ	G_
+1	nn	mm
+1	.	_
+1	_	p
+1	_	i
