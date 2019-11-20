@@ -1,0 +1,10 @@
+Iteration: 449, errors: 1834, missing: 0, total: 1834, char error rate: 1.000
+Iteration: 899, errors: 1454, missing: 0, total: 1834, char error rate: 0.793
+Iteration: 1349, errors: 665, missing: 0, total: 1834, char error rate: 0.363
+Iteration: 1799, errors: 471, missing: 0, total: 1834, char error rate: 0.257 
+Iteration: 2249, errors: 381, missing: 0, total: 1834, char error rate: 0.208 
+Iteration: 2699, errors: 308, missing: 0, total: 1834, char error rate: 0.168 
+Iteration: 3149, errors: 266, missing: 0, total: 1834, char error rate: 0.145 
+Iteration: 3599, errors: 223, missing: 0, total: 1834, char error rate: 0.122 
+Iteration: 4049, errors: 197, missing: 0, total: 1834, char error rate: 0.107 
+Iteration: 4499, errors: 171, missing: 0, total: 1834, char error rate: 0.093
