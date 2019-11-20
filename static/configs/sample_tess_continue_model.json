@@ -1,0 +1,18 @@
+{
+	"model":[
+		{"cnn": {"height": 3, "width": 3, "output": 32, "activation": "sigmoid"}}, 
+		{"pooling": {"height": 2, "width": 2}},
+	 	{"cnn": {"height": 3, "width": 3, "output": 32, "activation": "sigmoid"}}, 
+	 	{"pooling": {"width": 2, "height": 2}},
+	  	{"rnn": {"direction": "forward", "output": 100}}], 
+	"engine": "tesseract", 
+	"batch_size": 10,
+	"model_prefix": "tess", 
+	"continue_from": {
+		"trainset": "train_500.tar.gz", 
+		"config": "sample_tess.json", 
+		"model": "tess_3150.checkpoint"
+		}, 
+	"nepoch": 1,
+	"append": 2
+}

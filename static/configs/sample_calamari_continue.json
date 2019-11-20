@@ -1,14 +1,16 @@
-{"model":  [{"input": {"height":50}},
+{"model":  [{"input": {"height": 48}},
             {"cnn": {"height":3, "width": 3, "output": 32}},
-            {"pooling": {"height":2, "width": 2, "x_stride": 1, "y_stride": 1}},
-            {"cnn": {"height":3, "width": 3, "output": 32}},
-            {"pooling": {"width": 2, "height": 2, "x_stride": 1, "y_stride": 1}},
             {"dropout": {"prob":  0.1}},
-            {"rnn": {"output": 100}}
+            {"pooling": {"height":2, "width": 2, "x_stride": 2, "y_stride": 2}},
+            {"cnn": {"height":3, "width": 3, "output": 32}},
+            {"dropout": {"prob":  0.1}},
+            {"pooling": {"width": 2, "height": 2, "x_stride": 2, "y_stride": 2}},
+            {"rnn": {"output": 100}},
+            {"dropout": {"prob":  0.1}}
             ],
   "engine":  "calamari",
   "nepoch": 2,
-  "continue_from": {"trainset":  "data_kraken.tar.gz",
+  "continue_from": {"trainset":  "train_500.tar.gz",
                     "config":"sample_calamari.json",
                     "model": "valid_best.ckpt"}
 }

@@ -1,0 +1,8 @@
+{"engine":  "tesseract",
+  "batch_size":  10,
+  "model_prefix": "tess",
+  "continue_from": {"trainset":  "train_500.tar.gz",
+                    "config":"sample_tess.json",
+                    "model": "tess_3150.checkpoint"},
+  "nepoch": 1
+}

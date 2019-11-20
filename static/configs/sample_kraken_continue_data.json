@@ -1,7 +1,6 @@
-{"engine":  "kraken",
-  "nepoch": 2,
+{ "engine":  "kraken",
+  "nepoch": 1,
   "continue_from": {"trainset":  "train_500.tar.gz",
                     "config":"sample_kraken.json",
-                    "model": "valid_best.mlmodel"},
-  "append": 2
+                    "model": "valid_best.mlmodel"}
 }

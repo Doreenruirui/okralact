@@ -1,12 +1,18 @@
-{"model":  [{"cnn": {"height":3, "width": 3, "output": 32, "activation": "relu"}},
-            {"dropout": {"prob":  0.1, "dim": 2}},
-            {"pooling": {"height":2, "width": 2, "x_stride": 2, "y_stride": 2}},
-            {"cnn": {"height":3, "width": 3, "output": 32, "activation": "relu"}},
-            {"dropout": {"prob":  0.1, "dim": 2}},
-            {"pooling": {"width": 2, "height": 2, "x_stride": 2, "y_stride": 2}},
-            {"rnn": {"direction": "forward", "output": 100}},
-            {"dropout": {"prob":  0.1, "dim": 1}}
-            ],
-  "engine":  "kraken",
-  "nepoch": 10
+{"model": [{"cnn": {"height": 3, "width": 3, "output": 32, "activation": "relu"}},
+ {"dropout": {"prob": 0.1, "dim": 2}},
+  {"pooling": {"height": 2, "width": 2, "x_stride": 2, "y_stride": 2}}, 
+  {"cnn": {"height": 3, "width": 3, "output": 32, "activation": "relu"}}, 
+  {"dropout": {"prob": 0.1, "dim": 2}}, 
+  {"pooling": {"width": 2, "height": 2, "x_stride": 2, "y_stride": 2}}, 
+  {"rnn": {"direction": "forward", "output": 100}}, 
+  {"dropout": {"prob": 0.1, "dim": 1}}],
+   "engine": "kraken", 
+   "nepoch": 1, 
+   "append": 2, 
+   "continue_from":
+   	{	
+   		"trainset": "train_500.tar.gz", 
+   		"config": "sample_kraken.json",
+    	"model": "model_4049.mlmodel"
+    }
 }
