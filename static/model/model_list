@@ -1,12 +1,5 @@
-data_kraken_0.tar.gz	sample_kraken.json	a05bb1363bbf452790bcda060404ebe0
-100.tar.gz	sample_kraken_2.json	cdbefb3d25444174a75c490d24e4051c
-train_100.tar.gz	sample_kraken.json	94cb22429a594350913caeed7ade2457
-test_sub.tar.gz	sample_kraken_2.json	be811a9d54fe4ab1803cd3bc4c56ef3a
-train_100.tar.gz	sample_kraken_2.json	9e073e8f74ff42faa0068e738ce7b1b5
 train_500.tar.gz	sample_kraken.json	9f43b70826db4f7386fe89c7334ec5d7
-train_500.tar.gz	sample_calamari.json	b43446e10ae0417d8a71c32cb8bfd112
-train_500.tar.gz	sample_ocropus.json	148c0d837a2d40bab256a94d79cc83d2
 train_500.tar.gz	sample_ocropus_2.json	3f871da6513f4081a363622c20638db6
-test_sub.tar.gz	sample_tess.json	283c7f76c25a403383db565491269959
+train_500.tar.gz	sample_calamari.json	b43446e10ae0417d8a71c32cb8bfd112
 train_500.tar.gz	sample_tess.json	dd8612684edb4cf1962d909681e90930
-train_100.tar.gz	sample_tess.json	76e72e311feb40f1b0c0633e4cfe786f
+train_500.tar.gz	sample_ocropus_continue.json	ff1fd66a700b4ea6b572d02fe644bd2c
